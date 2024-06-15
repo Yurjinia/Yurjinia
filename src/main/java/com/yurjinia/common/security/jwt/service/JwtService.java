@@ -10,6 +10,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -83,7 +84,7 @@ public class JwtService {
                 .getRequestAttributes();
 
         if (Objects.isNull(requestAttributes)) {
-            throw new CommonException(ErrorCode.JWT_INVALID);
+            throw new CommonException(ErrorCode.JWT_INVALID, HttpStatus.BAD_REQUEST);
         }
         String authorization = requestAttributes.getRequest().getHeader(JwtConstants.AUTHORIZATION_HEADER);
         return getUserToken(authorization);
@@ -96,7 +97,7 @@ public class JwtService {
 
             JwtToken userInfo = JwtToken.builder().userName(getValue(claims)).build();
             if (isTokenExpired(token)) {
-                throw new CommonException(ErrorCode.JWT_EXPIRED);
+                throw new CommonException(ErrorCode.JWT_EXPIRED, HttpStatus.BAD_REQUEST);
             }
             return userInfo;
 
@@ -105,13 +106,13 @@ public class JwtService {
                 throw exception;
             }
 
-            throw new CommonException(ErrorCode.JWT_INVALID, List.of(exception.getMessage()));
+            throw new CommonException(ErrorCode.JWT_INVALID, HttpStatus.BAD_REQUEST, List.of(exception.getMessage()));
         }
     }
 
     private String processBearerToken(String token) {
         if (!StringUtils.startsWith(token, JwtConstants.TOKEN_PREFIX)) {
-            throw new CommonException(ErrorCode.JWT_INVALID);
+            throw new CommonException(ErrorCode.JWT_INVALID, HttpStatus.BAD_REQUEST);
         }
         return StringUtils.substringAfter(token, JwtConstants.TOKEN_PREFIX);
     }

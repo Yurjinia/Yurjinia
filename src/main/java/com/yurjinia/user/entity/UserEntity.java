@@ -49,6 +49,9 @@ public class UserEntity implements UserDetails {
     private String avatarId;
 
     @Column(unique = true)
+    private String username;
+
+    @Column(unique = true)
     private String email;
 
     @Column(nullable = false)

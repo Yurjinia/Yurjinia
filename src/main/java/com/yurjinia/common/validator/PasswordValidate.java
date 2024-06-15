@@ -7,6 +7,7 @@ import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Payload;
+import org.springframework.http.HttpStatus;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -33,7 +34,7 @@ public @interface PasswordValidate {
                                ConstraintValidatorContext constraintValidatorContext) {
 
             if (StringUtils.isEmpty(password)) {
-                throw new CommonException(ErrorCode.INVALID_PASSWORD, List.of("Password cannot be empty"));
+                throw new CommonException(ErrorCode.INVALID_PASSWORD, HttpStatus.BAD_REQUEST, List.of("Password cannot be empty"));
             }
 
             String check = "^(?=.*[A-Z])(?=.*[0-9]).{8,}$";

@@ -7,6 +7,7 @@ import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Payload;
+import org.springframework.http.HttpStatus;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -34,7 +35,7 @@ public @interface EmailValidate {
                                ConstraintValidatorContext constraintValidatorContext) {
 
             if (StringUtils.isEmpty(email)) {
-                throw new CommonException(ErrorCode.INVALID_EMAIL, List.of("Email address cannot be empty"));
+                throw new CommonException(ErrorCode.INVALID_EMAIL, HttpStatus.BAD_REQUEST, List.of("Email address cannot be empty"));
             }
 
             String check = "^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";

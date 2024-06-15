@@ -1,6 +1,5 @@
 package com.yurjinia.user.service.mapper;
 
-import com.yurjinia.project_structure.project.dto.ProjectInvitationDTO;
 import com.yurjinia.user.dto.UserDTO;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.enums.UserRole;
@@ -18,6 +17,7 @@ public class UserMapper {
         return UserEntity.builder()
                 .firstName(userDTO.getFirstName())
                 .lastName(userDTO.getLastName())
+                .username(userDTO.getUsername())
                 .email(userDTO.getEmail())
                 .avatarId(userDTO.getAvatarId())
                 .password(passwordEncoder.encode(userDTO.getPassword()))

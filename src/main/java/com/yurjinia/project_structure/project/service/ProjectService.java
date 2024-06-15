@@ -3,9 +3,9 @@ package com.yurjinia.project_structure.project.service;
 import com.yurjinia.common.emailSender.EmailSender;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
+import com.yurjinia.common.security.jwt.service.JwtService;
 import com.yurjinia.project_structure.project.confirmationToken.entity.ConfirmationTokenEntity;
 import com.yurjinia.project_structure.project.confirmationToken.service.ConfirmationTokenService;
-import com.yurjinia.common.security.jwt.service.JwtService;
 import com.yurjinia.project_structure.project.dto.ProjectDTO;
 import com.yurjinia.project_structure.project.dto.ProjectInvitationDTO;
 import com.yurjinia.project_structure.project.entity.ProjectEntity;
@@ -15,10 +15,12 @@ import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +36,7 @@ public class ProjectService {
     @Transactional
     public ProjectDTO createProject(ProjectDTO projectDTO) {
         validateIfProjectExists(projectDTO);
+        userService.validateIfUsersExists(projectDTO.getUsers().stream().toList());
 
         //todo: try to use authService for getting current user
         String currentUserName = jwtService.getCurrentUserToken().getUserName();
@@ -45,10 +48,24 @@ public class ProjectService {
 
         userService.addProject(projectEntity);
 
+        inviteUsers(projectDTO);
+
         return projectDTO;
     }
 
+    private void inviteUsers(ProjectDTO projectDTO) {
+        Set<String> users = projectDTO.getUsers();
+        String projectName = projectDTO.getName();
+
+        users.forEach(user -> {
+            inviteUserToTheProject(projectName, ProjectInvitationDTO.builder().email(user).build());
+        });
+    }
+
     public void inviteUserToTheProject(String projectName, ProjectInvitationDTO projectInvitationDTO) {
+        validateIfProjectNotExists(projectName);
+        validateIfUserExistsInProject(projectInvitationDTO.getEmail(), projectName);
+
         String token = confirmationTokenService.createToken(projectInvitationDTO.getEmail(), projectName);
         String link = "http://localhost:9000/api/v1/projects/confirm?token=" + token;//ToDo: Resolve the security breach (MVP 1.2)
         emailSender.send(projectInvitationDTO.getEmail(), buildInvitationMessage(link));
@@ -57,7 +74,7 @@ public class ProjectService {
     @Transactional
     public void addUserToProject(String email, String projectName) {
         ProjectEntity projectEntity = projectRepository.findProjectEntityByName(projectName)
-                .orElseThrow(() -> new CommonException(ErrorCode.PROJECT_NOT_FOUND));
+                .orElseThrow(() -> new CommonException(ErrorCode.PROJECT_NOT_FOUND, HttpStatus.NOT_FOUND));
         UserEntity userEntity = userService.getByEmail(email);
 
         projectEntity.getUsers().add(userEntity);
@@ -81,8 +98,25 @@ public class ProjectService {
 
     private void validateIfProjectExists(ProjectDTO projectDTO) {
         if (projectRepository.existsByName(projectDTO.getName())) {
-            throw new CommonException(ErrorCode.PROJECT_ALREADY_EXISTS, List.of("Project by name " + projectDTO.getName() + " already exists"));
+            throw new CommonException(ErrorCode.PROJECT_ALREADY_EXISTS, HttpStatus.CONFLICT, List.of("Project by name " + projectDTO.getName() + " already exists"));
         }
+    }
+
+    private void validateIfProjectNotExists(String projectName) {
+        if (!projectRepository.existsByName(projectName)) {
+            throw new CommonException(ErrorCode.PROJECT_NOT_FOUND, HttpStatus.NOT_FOUND, List.of("Project by name " + projectName + " already exists"));
+        }
+    }
+
+    private void validateIfUserExistsInProject(String email, String projectName) {
+        ProjectEntity projectEntity = projectRepository.findProjectEntityByName(projectName).
+                orElseThrow(() -> new CommonException(ErrorCode.PROJECT_NOT_FOUND, HttpStatus.NOT_FOUND));
+
+        List<String> emails = projectEntity.getUsers().stream().map(UserEntity::getEmail).toList();
+        if (emails.contains(email)) {
+            throw new CommonException(ErrorCode.USER_ALREADY_IN_PROJECT, HttpStatus.CONFLICT);
+        }
+
     }
 
     private String buildInvitationMessage(String link) {

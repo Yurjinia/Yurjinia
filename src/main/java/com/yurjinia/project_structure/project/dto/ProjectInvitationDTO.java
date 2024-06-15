@@ -1,10 +1,12 @@
 package com.yurjinia.project_structure.project.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import com.yurjinia.common.validator.EmailValidate;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class ProjectInvitationDTO {
-    @NotBlank
+    @EmailValidate
     private String email;
 }

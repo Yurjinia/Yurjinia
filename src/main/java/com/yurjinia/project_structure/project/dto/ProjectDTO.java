@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @Builder
@@ -15,4 +17,5 @@ import lombok.Setter;
 public class ProjectDTO {
     @NotBlank
     private String name;
+    private Set<String> users;
 }

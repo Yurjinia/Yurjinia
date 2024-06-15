@@ -1,0 +1,2 @@
+ALTER TABLE "user"
+    ALTER COLUMN avatar_id DROP NOT NULL;

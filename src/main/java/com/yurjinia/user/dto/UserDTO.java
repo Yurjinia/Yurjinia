@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 
 @Getter
 @Setter
@@ -17,6 +18,9 @@ public class UserDTO {
     private String firstName;
     private String lastName;
     private String avatarId;
+
+    @Length(min = 4, max = 16)
+    private String username;
 
     @EmailValidate
     private String email;
