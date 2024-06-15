@@ -1,0 +1,61 @@
+server:
+  port: 9000
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/yurjinia
+    username: postgres
+    password: 2617
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            clientId: 91165201794-3p5cukhiasac3he490khe4vgrrfqb7s1.apps.googleusercontent.com
+            clientSecret: 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
+            redirectUri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - email
+              - profile
+              - openid
+  mail:
+    host: localhost
+    port: 1025
+    username: hello
+    password: hello
+    properties:
+      mail:
+        smtp:
+          ssl:
+            trust: "*"
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+
+jwt:
+  token:
+    key: HvkjjOh2pmc28YGIQzCTFXCfGT6JLBhcwmx1oSJyeXE=
+    expiration: 36000
+    user-expiration: 604800
+    validateTimeout: true
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+        security.oauth2: DEBUG
+
