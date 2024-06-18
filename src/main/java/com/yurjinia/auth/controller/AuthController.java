@@ -1,6 +1,8 @@
 package com.yurjinia.auth.controller;
 
 import com.yurjinia.auth.controller.request.LoginRequest;
+import com.yurjinia.auth.dto.PasswordResetDTO;
+import com.yurjinia.auth.dto.PasswordResetRequest;
 import com.yurjinia.auth.service.AuthService;
 import com.yurjinia.common.security.jwt.dto.JwtAuthenticationResponse;
 import com.yurjinia.user.dto.UserDTO;
@@ -10,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +43,16 @@ public class AuthController {
     @GetMapping("/login/google")
     public JwtAuthenticationResponse getLoginInfo(@AuthenticationPrincipal OAuth2User user) {
         return authService.handleOAuthUser(user);
+    }
+
+    @PostMapping("/request-password-reset")
+    public void requestPasswordReset(@RequestBody PasswordResetRequest passwordResetRequest) {
+        authService.requestPasswordReset(passwordResetRequest);
+    }
+
+    @GetMapping("/password-reset/{token}")
+    public void resetPassword(@PathVariable String token, @RequestBody PasswordResetDTO passwordResetDTO) {
+        authService.resetPassword(token, passwordResetDTO);
     }
 
 }

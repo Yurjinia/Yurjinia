@@ -31,6 +31,19 @@ public class ConfirmationTokenService {
         return token;
     }
 
+    public String createToken(String email) {
+        String token = UUID.randomUUID().toString();
+        ConfirmationTokenEntity confirmationToken = new ConfirmationTokenEntity(
+                token,
+                LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(15),
+                email
+        );
+
+        confirmationTokenRepository.save(confirmationToken);
+        return token;
+    }
+
     public ConfirmationTokenEntity getToken(String token) {
         return confirmationTokenRepository.findByToken(token)
                 .orElseThrow(() -> new CommonException(ErrorCode.TOKEN_NOT_FOUND, HttpStatus.NOT_FOUND));

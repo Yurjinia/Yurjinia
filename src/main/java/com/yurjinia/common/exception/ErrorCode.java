@@ -19,7 +19,8 @@ public enum ErrorCode {
     USER_ALREADY_IN_PROJECT("User already in project"),
     TOKEN_NOT_FOUND("Token not found"),
     UPLOAD_FILE_ERROR("Failed to upload file"),
-    FILE_TYPE_ERROR("File type error");
+    FILE_TYPE_ERROR("File type error"),
+    TOKEN_EXPIRED("Token expired");
 
     private final String description;
 

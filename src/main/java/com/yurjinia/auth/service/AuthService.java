@@ -2,11 +2,16 @@ package com.yurjinia.auth.service;
 
 import com.yurjinia.auth.constants.LoginConstants;
 import com.yurjinia.auth.controller.request.LoginRequest;
+import com.yurjinia.auth.dto.PasswordResetDTO;
+import com.yurjinia.auth.dto.PasswordResetRequest;
+import com.yurjinia.common.emailSender.service.EmailService;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
 import com.yurjinia.common.s3.service.AWSS3Service;
 import com.yurjinia.common.security.jwt.dto.JwtAuthenticationResponse;
 import com.yurjinia.common.security.jwt.service.JwtService;
+import com.yurjinia.project_structure.project.confirmationToken.entity.ConfirmationTokenEntity;
+import com.yurjinia.project_structure.project.confirmationToken.service.ConfirmationTokenService;
 import com.yurjinia.user.dto.UserDTO;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.UserService;
@@ -14,10 +19,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,10 +33,12 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final AWSS3Service awsS3Service;
     private final JwtService jwtService;
     private final UserService userService;
+    private final AWSS3Service awsS3Service;
+    private final EmailService emailService;
     private final AuthenticationManager authenticationManager;
+    private final ConfirmationTokenService confirmationTokenService;
 
     public JwtAuthenticationResponse signUp(UserDTO userDTO, MultipartFile image) {
         userService.isAuthenticated(userDTO);
@@ -63,6 +73,30 @@ public class AuthService {
         } else {
             return loginByEmail(request);
         }
+    }
+
+    public void requestPasswordReset(PasswordResetRequest passwordResetRequest) {
+        isEmailNotExist(passwordResetRequest.getEmail());
+
+        String token = confirmationTokenService.createToken(passwordResetRequest.getEmail());
+        String link = "http://localhost:9000/api/v1/auth/password-reset?token=" + token;//ToDo: Resolve the security breach
+
+        emailService.send(passwordResetRequest.getEmail(), emailService.buildForgotPasswordMessage(link));
+    }
+
+    @Transactional
+    public void resetPassword(String token, PasswordResetDTO passwordResetDTO) {
+        ConfirmationTokenEntity confirmationToken = confirmationTokenService.getToken(token);
+        UserEntity userEntity = userService.getByEmail(confirmationToken.getUserEmail());
+
+        if (confirmationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new CommonException(ErrorCode.TOKEN_EXPIRED, HttpStatus.GATEWAY_TIMEOUT);
+        }
+
+        userEntity.setPassword(new BCryptPasswordEncoder().encode(passwordResetDTO.getPassword()));
+
+        userService.save(userEntity);
+        confirmationTokenService.deleteToken(token);
     }
 
     private JwtAuthenticationResponse loginByEmail(LoginRequest request) {
