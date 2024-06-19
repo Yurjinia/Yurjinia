@@ -14,14 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/projects")
+@RequestMapping("api/v1/projects/{userEmail}")
 public class ProjectController {
 
     private final ProjectService projectService;
 
     @PostMapping
-    public ProjectDTO createProject(@RequestBody ProjectDTO projectDTO) {
-        return projectService.createProject(projectDTO);
+    public ProjectDTO createProject(@PathVariable String userEmail, @RequestBody ProjectDTO projectDTO) {
+        return projectService.createProject(userEmail, projectDTO);
     }
 
     @PostMapping("{projectName}/invite")

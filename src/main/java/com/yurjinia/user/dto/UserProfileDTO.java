@@ -11,7 +11,9 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDTO {
-    private String email;
-    private UserProfileDTO profileDTO;
+public class UserProfileDTO {
+    private String firstName;
+    private String lastName;
+    private String avatarId;
+    private String username;
 }

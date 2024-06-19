@@ -2,12 +2,11 @@ package com.yurjinia.auth.service;
 
 import com.yurjinia.auth.constants.LoginConstants;
 import com.yurjinia.auth.controller.request.LoginRequest;
+import com.yurjinia.auth.controller.request.RegistrationRequest;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
-import com.yurjinia.common.s3.service.AWSS3Service;
 import com.yurjinia.common.security.jwt.dto.JwtAuthenticationResponse;
 import com.yurjinia.common.security.jwt.service.JwtService;
-import com.yurjinia.user.dto.UserDTO;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -19,31 +18,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final AWSS3Service awsS3Service;
     private final JwtService jwtService;
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
 
-    public JwtAuthenticationResponse signUp(UserDTO userDTO, MultipartFile image) {
-        userService.isAuthenticated(userDTO);
+    public JwtAuthenticationResponse signUp(RegistrationRequest registrationRequest, MultipartFile image) {
+        userService.createUser(registrationRequest, image);
 
-        userService.save(userDTO);
-
-        UserEntity userEntity = userService.getByEmail(userDTO.getEmail());
-        Optional<String> urlOpt = awsS3Service.uploadAvatar(userEntity, image);
-
-        if (urlOpt.isPresent()) {
-            userEntity.setAvatarId(urlOpt.get());
-            userService.save(userEntity);
-        }
-
-        final var jwt = jwtService.generateToken(userDTO.getEmail());
+        final var jwt = jwtService.generateToken(registrationRequest.getEmail());
         return new JwtAuthenticationResponse(jwt);
     }
 
@@ -99,29 +86,25 @@ public class AuthService {
                     .build();
             return loginOAuth(loginRequest);
         } else {
-            UserDTO userDTO = payloadOAuthUser(email, firstname, lastName, avatarId);
-            return signUp(userDTO);
+            RegistrationRequest registrationRequest = payloadOAuthUser(email, firstname, lastName);
+            return signUp(registrationRequest, avatarId);
         }
 
     }
 
-    private JwtAuthenticationResponse signUp(UserDTO userDTO) {
-        userService.isAuthenticated(userDTO);
+    private JwtAuthenticationResponse signUp(RegistrationRequest registrationRequest, String avatarId) {
+        userService.createUser(registrationRequest, avatarId);
 
-        userService.save(userDTO);
-
-        var jwt = jwtService.generateToken(userDTO.getEmail());
-
+        final var jwt = jwtService.generateToken(registrationRequest.getEmail());
         return new JwtAuthenticationResponse(jwt);
     }
 
-    private UserDTO payloadOAuthUser(String email, String firstname, String lastName, String avatarId) {
-        return UserDTO.builder()
+    private RegistrationRequest payloadOAuthUser(String email, String firstname, String lastName) {
+        return RegistrationRequest.builder()
                 .firstName(firstname)
                 .lastName(lastName)
                 .email(email)
                 .password("")
-                .avatarId(avatarId)
                 .build();
     }
 

@@ -3,6 +3,7 @@ package com.yurjinia.user.entity;
 import com.yurjinia.project_structure.board.entity.BoardEntity;
 import com.yurjinia.project_structure.project.entity.ProjectEntity;
 import com.yurjinia.user.enums.UserRole;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,18 +41,6 @@ public class UserEntity implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String firstName;
-
-    @Column(nullable = false)
-    private String lastName;
-
-    @Column
-    private String avatarId;
-
-    @Column(unique = true)
-    private String username;
-
     @Column(unique = true)
     private String email;
 
@@ -60,6 +50,10 @@ public class UserEntity implements UserDetails {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private UserRole role;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "profile_id", referencedColumnName = "id")
+    private UserProfileEntity userProfile;
 
     @ManyToMany
     @JoinTable(
