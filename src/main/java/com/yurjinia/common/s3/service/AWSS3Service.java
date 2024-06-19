@@ -2,9 +2,8 @@ package com.yurjinia.common.s3.service;
 
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
-import com.yurjinia.common.security.jwt.service.JwtService;
 import com.yurjinia.user.entity.UserEntity;
-import com.yurjinia.user.repository.UserRepository;
+import com.yurjinia.user.entity.UserProfileEntity;
 import lombok.RequiredArgsConstructor;
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,8 +28,6 @@ public class AWSS3Service {
 
     private final Tika tika;
     private final S3Client s3Client;
-    private final JwtService jwtService;
-    private final UserRepository userRepository;
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
@@ -58,23 +55,18 @@ public class AWSS3Service {
         }
     }
 
-    public void changeAvatar(MultipartFile image) {
-        String currentUserEmail = jwtService.getCurrentUserToken().getUserName();
-        Optional<UserEntity> userEntityOpt = userRepository.findByEmail(currentUserEmail);
-
-        if (userEntityOpt.isEmpty()) {
-            throw new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
-        }
-
-        UserEntity userEntity = userEntityOpt.get();
+    /* ToDo: changeAvatar() must appear only in UserProfileService;
+         if we want to do the update of image, here we want to have a method updateImage() and do the actual update.*/
+    public void changeAvatar(MultipartFile image, UserProfileEntity userProfileEntity) {
+        UserEntity userEntity = userProfileEntity.getUser();
         String key = MAIN_PACKAGE + userEntity.getEmail() + FORWARD_SLASH + image.getOriginalFilename();
         String fileURL = uploadFile(image, key);
 
-        userEntity.setAvatarId(fileURL);
-
-        userRepository.save(userEntity);
+        userProfileEntity.setAvatarId(fileURL);
     }
 
+    /*ToDo: uploadAvatar() must appear only in UserProfileService;
+        if we want to do the upload of image, here we want to have a method uploadImage() and do the actual upload.*/
     public Optional<String> uploadAvatar(UserEntity userEntity, MultipartFile image) {
         if (image == null || image.isEmpty()) {
             return Optional.empty();
@@ -85,19 +77,11 @@ public class AWSS3Service {
         }
     }
 
-    public void deleteAvatar() {
-        String currentUserEmail = jwtService.getCurrentUserToken().getUserName();
-        Optional<UserEntity> userEntityOpt = userRepository.findByEmail(currentUserEmail);
-
-        if (userEntityOpt.isEmpty()) {
-            throw new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
-        }
-
-        UserEntity userEntity = userEntityOpt.get();
-
-        userEntity.setAvatarId(null);
-
-        userRepository.save(userEntity);
+    /*ToDo: this method must set avatar id in UserProfileService;
+        here we want to have the method deleteImage(String bucketName, String key) or deleteImage(String url);
+        this method must delete an image from AWS S3, name deleteAvatar() must appear only in UserProfileService.*/
+    public void deleteAvatar(UserProfileEntity userProfileEntity) {
+        userProfileEntity.setAvatarId(null);
     }
 
 }
