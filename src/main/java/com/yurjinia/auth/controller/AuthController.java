@@ -45,14 +45,25 @@ public class AuthController {
         return authService.handleOAuthUser(user);
     }
 
+    // ToDo: /password-reset/request, rename method appropriately
     @PostMapping("/request-password-reset")
     public void requestPasswordReset(@RequestBody PasswordResetRequest passwordResetRequest) {
         authService.requestPasswordReset(passwordResetRequest);
     }
 
+    // ToDo: you use here a path variable - '/password-reset/{token}', but when you send the link to user, you send
+    //  a request param - '/password-reset?token'.
+    //  You must receive a request param.
+    // ToDo: also you accept '@RequestBody PasswordResetDTO passwordResetDTO', you need to reset password
+    // ToDo: /password-reset/validate, rename method appropriately
     @GetMapping("/password-reset/{token}")
     public void resetPassword(@PathVariable String token, @RequestBody PasswordResetDTO passwordResetDTO) {
         authService.resetPassword(token, passwordResetDTO);
     }
+
+    // ToDo: add endpoint that accepts new password, validates newPassword == confirmNewPassword,
+    //  validates newPassword != oldPassword,
+    //  and after saving new password we send an email to the user that they
+    //  can login.
 
 }

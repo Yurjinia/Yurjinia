@@ -79,6 +79,7 @@ public class AuthService {
         isEmailNotExist(passwordResetRequest.getEmail());
 
         String token = confirmationTokenService.createToken(passwordResetRequest.getEmail());
+        // ToDo: compare this link and your endpoint you want to use
         String link = "http://localhost:9000/api/v1/auth/password-reset?token=" + token;//ToDo: Resolve the security breach
 
         emailService.send(passwordResetRequest.getEmail(), emailService.buildForgotPasswordMessage(link));

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 public class EmailService implements EmailSender {
 
     @Autowired
-    private JavaMailSender javaMailSender;
+    private JavaMailSender javaMailSender; // ToDo: try again with using @RequiredArgsConstructor instead of @Autowired
 
     @Value("${spring.mail.username}")
     private String emailOfSender;
@@ -37,7 +37,7 @@ public class EmailService implements EmailSender {
         }
     }
 
-
+    // ToDo: move the template to resources folder, in this method fetch the template and paste the link
     public String buildInvitationMessage(String link) {
         return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +
                 "\n" +
@@ -107,6 +107,7 @@ public class EmailService implements EmailSender {
                 "</div></div>";
     }
 
+    // ToDo: move the template to resources folder, in this method fetch the template and paste the link
     public String buildForgotPasswordMessage(String link) {
         return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +
                 "\n" +
