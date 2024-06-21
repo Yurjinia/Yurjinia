@@ -1,11 +1,11 @@
 package com.yurjinia.auth.controller;
 
 import com.yurjinia.auth.controller.request.LoginRequest;
+import com.yurjinia.auth.controller.request.RegistrationRequest;
 import com.yurjinia.auth.dto.PasswordResetDTO;
 import com.yurjinia.auth.dto.PasswordResetRequest;
 import com.yurjinia.auth.service.AuthService;
 import com.yurjinia.common.security.jwt.dto.JwtAuthenticationResponse;
-import com.yurjinia.user.dto.UserDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -29,9 +29,9 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping(value = "/sign-up", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public JwtAuthenticationResponse signUp(@RequestPart("userDTO") UserDTO userDTO,
+    public JwtAuthenticationResponse signUp(@RequestPart("registrationRequest") RegistrationRequest registrationRequest,
                                             @RequestPart(value = "image", required = false) MultipartFile image) {
-        return authService.signUp(userDTO, image);
+        return authService.signUp(registrationRequest, image);
     }
 
     @PostMapping("/login")

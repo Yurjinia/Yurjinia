@@ -5,13 +5,16 @@ import lombok.Getter;
 @Getter
 public enum ErrorCode {
     EMAIL_ALREADY_EXISTS("Email already exists"),
+    USERNAME_ALREADY_EXISTS("Username already exists"),
     EMAIL_NOT_EXISTS("Email not exists"),
     INVALID_EMAIL("Invalid email"),
+    INVALID_USERNAME("Invalid username"),
     INVALID_PASSWORD("Invalid password"),
     INVALID_SIGN_UP_REQUEST("Invalid sign up request"),
     INVALID_LOGIN_REQUEST("Invalid login request"),
     USER_NAME_ALREADY_EXISTS("Username already exists"),
     USER_NOT_FOUND("User not found"),
+    USERNAME_CANNOT_BE_EMPTY("Username cannot be empty"),
     JWT_INVALID("Invalid JWT token"),
     JWT_EXPIRED("JWT token expired"),
     PROJECT_ALREADY_EXISTS("Project already exists"),
@@ -21,6 +24,9 @@ public enum ErrorCode {
     UPLOAD_FILE_ERROR("Failed to upload file"),
     FILE_TYPE_ERROR("File type error"),
     TOKEN_EXPIRED("Token expired");
+    DELETE_FILE_ERROR("Failed to delete file"),
+    FILE_TYPE_ERROR("File type error"),
+    BAD_REQUEST("Bad request");
 
     private final String description;
 

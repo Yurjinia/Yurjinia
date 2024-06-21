@@ -19,9 +19,9 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    @PostMapping
-    public ProjectDTO createProject(@RequestBody ProjectDTO projectDTO) {
-        return projectService.createProject(projectDTO);
+    @PostMapping("/{userEmail}")
+    public ProjectDTO createProject(@PathVariable String userEmail, @RequestBody ProjectDTO projectDTO) {
+        return projectService.createProject(userEmail, projectDTO);
     }
 
     @PostMapping("{projectName}/invite")

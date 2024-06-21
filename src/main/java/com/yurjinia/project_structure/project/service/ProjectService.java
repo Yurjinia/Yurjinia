@@ -4,7 +4,6 @@ import com.yurjinia.common.emailSender.EmailSender;
 import com.yurjinia.common.emailSender.service.EmailService;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
-import com.yurjinia.common.security.jwt.service.JwtService;
 import com.yurjinia.project_structure.project.confirmationToken.entity.ConfirmationTokenEntity;
 import com.yurjinia.project_structure.project.confirmationToken.service.ConfirmationTokenService;
 import com.yurjinia.project_structure.project.dto.ProjectDTO;
@@ -29,23 +28,19 @@ public class ProjectService {
 
     private final EmailSender emailSender;
     private final UserService userService;
-    private final JwtService jwtService;
     private final ProjectMapper projectMapper;
     private final ProjectRepository projectRepository;
     private final ConfirmationTokenService confirmationTokenService;
     private final EmailService emailService;
 
     @Transactional
-    public ProjectDTO createProject(ProjectDTO projectDTO) {
+    public ProjectDTO createProject(String userEmail, ProjectDTO projectDTO) {
         validateIfProjectExists(projectDTO);
         userService.validateIfUsersExists(projectDTO.getUsers().stream().toList());
 
-        //todo: try to use authService for getting current user
-        String currentUserName = jwtService.getCurrentUserToken().getUserName();
-
         ProjectEntity projectEntity = projectMapper.toEntity(projectDTO);
-        List<UserEntity> userEntityList = userService.getAllByEmails(List.of(currentUserName));
-        projectEntity.setUsers(userEntityList);
+        UserEntity userEntityList = userService.getByEmail(userEmail);
+        projectEntity.setUsers(List.of(userEntityList));
         projectRepository.save(projectEntity);
 
         userService.addProject(projectEntity);
