@@ -9,13 +9,14 @@ import com.yurjinia.common.security.jwt.dto.JwtAuthenticationResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,25 +46,20 @@ public class AuthController {
         return authService.handleOAuthUser(user);
     }
 
-    // ToDo: /password-reset/request, rename method appropriately
-    @PostMapping("/request-password-reset")
-    public void requestPasswordReset(@RequestBody PasswordResetRequest passwordResetRequest) {
-        authService.requestPasswordReset(passwordResetRequest);
+    @PostMapping("/password-reset/request")
+    public void passwordResetRequest(@RequestBody PasswordResetRequest passwordResetRequest) {
+        authService.passwordResetRequest(passwordResetRequest);
     }
 
-    // ToDo: you use here a path variable - '/password-reset/{token}', but when you send the link to user, you send
-    //  a request param - '/password-reset?token'.
-    //  You must receive a request param.
-    // ToDo: also you accept '@RequestBody PasswordResetDTO passwordResetDTO', you need to reset password
-    // ToDo: /password-reset/validate, rename method appropriately
-    @GetMapping("/password-reset/{token}")
-    public void resetPassword(@PathVariable String token, @RequestBody PasswordResetDTO passwordResetDTO) {
+    @GetMapping("/password-reset/validate")
+    public ResponseEntity<String> validateResetPassword(@RequestParam("token") String token) {
+        authService.validateResetPassword(token);
+        return ResponseEntity.ok("You can enter new password");
+    }
+
+    @PostMapping("/password-reset")
+    public void resetPassword(@RequestParam("token") String token, @RequestBody PasswordResetDTO passwordResetDTO) {
         authService.resetPassword(token, passwordResetDTO);
     }
-
-    // ToDo: add endpoint that accepts new password, validates newPassword == confirmNewPassword,
-    //  validates newPassword != oldPassword,
-    //  and after saving new password we send an email to the user that they
-    //  can login.
 
 }

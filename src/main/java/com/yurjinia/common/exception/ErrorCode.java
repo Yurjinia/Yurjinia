@@ -23,10 +23,12 @@ public enum ErrorCode {
     TOKEN_NOT_FOUND("Token not found"),
     UPLOAD_FILE_ERROR("Failed to upload file"),
     FILE_TYPE_ERROR("File type error"),
-    TOKEN_EXPIRED("Token expired");
+    TOKEN_EXPIRED("Token expired"),
     DELETE_FILE_ERROR("Failed to delete file"),
-    FILE_TYPE_ERROR("File type error"),
-    BAD_REQUEST("Bad request");
+    BAD_REQUEST("Bad request"),
+    MATCHES_OLD_PASSWORD("Password matches old password"),
+    BUILD_EMAIL_ERROR("Failed to build email"),
+    TEMPLATE_FILE_NOT_FOUND("Template file not found");
 
     private final String description;
 

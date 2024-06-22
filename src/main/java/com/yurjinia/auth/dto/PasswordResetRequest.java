@@ -5,6 +5,8 @@ import lombok.Data;
 
 @Data
 public class PasswordResetRequest {
-    @EmailValidate // ToDo: do indent from the top and below
+
+    @EmailValidate
     private String email;
+
 }

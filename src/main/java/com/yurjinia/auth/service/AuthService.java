@@ -12,7 +12,6 @@ import com.yurjinia.common.security.jwt.dto.JwtAuthenticationResponse;
 import com.yurjinia.common.security.jwt.service.JwtService;
 import com.yurjinia.project_structure.project.confirmationToken.entity.ConfirmationTokenEntity;
 import com.yurjinia.project_structure.project.confirmationToken.service.ConfirmationTokenService;
-import com.yurjinia.user.dto.UserDTO;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,14 +28,16 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.yurjinia.common.emailSender.constants.EmailSenderConstants.LOGIN_LINK;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final JwtService jwtService;
     private final UserService userService;
-    private final AWSS3Service awsS3Service;
     private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final ConfirmationTokenService confirmationTokenService;
 
@@ -64,50 +66,46 @@ public class AuthService {
         }
     }
 
-    public void requestPasswordReset(PasswordResetRequest passwordResetRequest) {
+    public void passwordResetRequest(PasswordResetRequest passwordResetRequest) {
         isEmailNotExist(passwordResetRequest.getEmail());
 
         String token = confirmationTokenService.createToken(passwordResetRequest.getEmail());
-        // ToDo: compare this link and your endpoint you want to use
-        String link = "http://localhost:9000/api/v1/auth/password-reset?token=" + token;//ToDo: Resolve the security breach
+        String link = "http://localhost:9000/api/v1/auth/password-reset/validate?token=" + token;//ToDo: Resolve the security breach
 
         emailService.send(passwordResetRequest.getEmail(), emailService.buildForgotPasswordMessage(link));
     }
 
-    @Transactional
-    public void resetPassword(String token, PasswordResetDTO passwordResetDTO) {
+    public void validateResetPassword(String token) {
         ConfirmationTokenEntity confirmationToken = confirmationTokenService.getToken(token);
-        UserEntity userEntity = userService.getByEmail(confirmationToken.getUserEmail());
 
         if (confirmationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
             throw new CommonException(ErrorCode.TOKEN_EXPIRED, HttpStatus.GATEWAY_TIMEOUT);
         }
+    }
 
-        userEntity.setPassword(new BCryptPasswordEncoder().encode(passwordResetDTO.getPassword()));
+    @Transactional
+    public void resetPassword(String token, PasswordResetDTO passwordResetDTO) {
+        ConfirmationTokenEntity tokenEntity = confirmationTokenService.getToken(token);
+        UserEntity userEntity = userService.getByEmail(tokenEntity.getUserEmail());
+
+        if (!passwordResetDTO.getNewPassword().equals(passwordResetDTO.getConfirmPassword())) {
+            throw new CommonException(ErrorCode.INVALID_PASSWORD, HttpStatus.BAD_REQUEST);
+        }
+
+        if (passwordEncoder.matches(passwordResetDTO.getNewPassword(), userEntity.getPassword())) {
+            throw new CommonException(ErrorCode.MATCHES_OLD_PASSWORD, HttpStatus.BAD_REQUEST);
+        }
+
+        userEntity.setPassword(new BCryptPasswordEncoder().encode(passwordResetDTO.getNewPassword()));
 
         userService.save(userEntity);
         confirmationTokenService.deleteToken(token);
-    }
 
-    private JwtAuthenticationResponse loginByEmail(LoginRequest request) {
-        isEmailNotExist(request.getEmail());
-        return authenticate(request.getEmail(), request.getPassword());
-    }
-
-    private JwtAuthenticationResponse loginByUsername(LoginRequest request) {
-        UserEntity userEntity = userService.getByUsername(request.getUsername());
-        return authenticate(userEntity.getEmail(), request.getPassword());
+        emailService.send(userEntity.getEmail(), emailService.buildForgotPasswordSuccessMessage(LOGIN_LINK));
     }
 
     public JwtAuthenticationResponse loginOAuth(LoginRequest request) {
         final var jwt = jwtService.generateToken(request.getEmail());
-        return new JwtAuthenticationResponse(jwt);
-    }
-
-    private JwtAuthenticationResponse authenticate(String email, String password) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-
-        final var jwt = jwtService.generateToken(email);
         return new JwtAuthenticationResponse(jwt);
     }
 
@@ -127,6 +125,23 @@ public class AuthService {
             return signUp(registrationRequest, avatarId);
         }
 
+    }
+
+    private JwtAuthenticationResponse loginByEmail(LoginRequest request) {
+        isEmailNotExist(request.getEmail());
+        return authenticate(request.getEmail(), request.getPassword());
+    }
+
+    private JwtAuthenticationResponse loginByUsername(LoginRequest request) {
+        UserEntity userEntity = userService.getByUsername(request.getUsername());
+        return authenticate(userEntity.getEmail(), request.getPassword());
+    }
+
+    private JwtAuthenticationResponse authenticate(String email, String password) {
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+
+        final var jwt = jwtService.generateToken(email);
+        return new JwtAuthenticationResponse(jwt);
     }
 
     private JwtAuthenticationResponse signUp(RegistrationRequest registrationRequest, String avatarId) {
