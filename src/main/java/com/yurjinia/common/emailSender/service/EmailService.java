@@ -64,7 +64,7 @@ public class EmailService implements EmailSender {
     }
 
     private String getString(String link, String fileTemplate) {
-        String template = "";
+        String template;
 
         try {
             URL resource = getClass().getClassLoader().getResource(fileTemplate);
