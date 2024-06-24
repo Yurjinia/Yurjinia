@@ -9,7 +9,6 @@ public class PasswordResetDTO {
     @PasswordValidate
     private String newPassword;
 
-    @PasswordValidate
     private String confirmPassword;
 
 }

@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.yurjinia.common.emailSender.constants.EmailSenderConstants.LOGIN_LINK;
+import static com.yurjinia.common.application.constants.ApplicationConstants.LOGIN_LINK;
 
 @Service
 @RequiredArgsConstructor
@@ -85,18 +84,18 @@ public class AuthService {
 
     @Transactional
     public void resetPassword(String token, PasswordResetDTO passwordResetDTO) {
-        ConfirmationTokenEntity tokenEntity = confirmationTokenService.getToken(token);
-        UserEntity userEntity = userService.getByEmail(tokenEntity.getUserEmail());
-
         if (!passwordResetDTO.getNewPassword().equals(passwordResetDTO.getConfirmPassword())) {
             throw new CommonException(ErrorCode.INVALID_PASSWORD, HttpStatus.BAD_REQUEST);
         }
+
+        ConfirmationTokenEntity tokenEntity = confirmationTokenService.getToken(token);
+        UserEntity userEntity = userService.getByEmail(tokenEntity.getUserEmail());
 
         if (passwordEncoder.matches(passwordResetDTO.getNewPassword(), userEntity.getPassword())) {
             throw new CommonException(ErrorCode.MATCHES_OLD_PASSWORD, HttpStatus.BAD_REQUEST);
         }
 
-        userEntity.setPassword(new BCryptPasswordEncoder().encode(passwordResetDTO.getNewPassword()));
+        userEntity.setPassword(passwordEncoder.encode(passwordResetDTO.getNewPassword()));
 
         userService.save(userEntity);
         confirmationTokenService.deleteToken(token);

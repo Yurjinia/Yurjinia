@@ -52,9 +52,9 @@ public class AuthController {
     }
 
     @GetMapping("/password-reset/validate")
-    public ResponseEntity<String> validateResetPassword(@RequestParam("token") String token) {
+    public ResponseEntity<Void> validateResetPassword(@RequestParam("token") String token) {
         authService.validateResetPassword(token);
-        return ResponseEntity.ok("You can enter new password");
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/password-reset")
