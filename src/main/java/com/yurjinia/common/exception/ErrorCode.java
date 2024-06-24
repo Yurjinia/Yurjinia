@@ -22,9 +22,13 @@ public enum ErrorCode {
     USER_ALREADY_IN_PROJECT("User already in project"),
     TOKEN_NOT_FOUND("Token not found"),
     UPLOAD_FILE_ERROR("Failed to upload file"),
-    DELETE_FILE_ERROR("Failed to delete file"),
     FILE_TYPE_ERROR("File type error"),
-    BAD_REQUEST("Bad request");
+    TOKEN_EXPIRED("Token expired"),
+    DELETE_FILE_ERROR("Failed to delete file"),
+    BAD_REQUEST("Bad request"),
+    MATCHES_OLD_PASSWORD("Password matches old password"),
+    BUILD_EMAIL_ERROR("Failed to build email"),
+    TEMPLATE_FILE_NOT_FOUND("Template file not found");
 
     private final String description;
 
