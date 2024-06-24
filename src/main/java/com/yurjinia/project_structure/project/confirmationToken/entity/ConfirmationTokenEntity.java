@@ -45,5 +45,12 @@ public class ConfirmationTokenEntity {
         this.projectName = projectName;
     }
 
+    public ConfirmationTokenEntity(String token, LocalDateTime createdAt, LocalDateTime expiresAt, String userEmail) {
+        this.token = token;
+        this.createdAt = createdAt;
+        this.expiresAt = expiresAt;
+        this.userEmail = userEmail;
+    }
+
 }
 
