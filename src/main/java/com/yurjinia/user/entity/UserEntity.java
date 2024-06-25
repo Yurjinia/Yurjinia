@@ -55,6 +55,8 @@ public class UserEntity implements UserDetails {
     @JoinColumn(name = "profile_id", referencedColumnName = "id")
     private UserProfileEntity userProfile;
 
+    private boolean enabled;
+
     @ManyToMany
     @JoinTable(
             name = "project_user",
@@ -99,6 +101,10 @@ public class UserEntity implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
 }

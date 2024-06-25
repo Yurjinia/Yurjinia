@@ -109,4 +109,12 @@ public class UserService {
         }
     }
 
+    public void activateUser(String email) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
+
+        user.setEnabled(true);
+        userRepository.save(user);
+    }
+
 }

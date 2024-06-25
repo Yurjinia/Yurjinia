@@ -1,4 +1,4 @@
-package com.yurjinia.project_structure.project.confirmationToken.entity;
+package com.yurjinia.common.confirmationToken.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -43,6 +43,14 @@ public class ConfirmationTokenEntity {
         this.expiresAt = expiresAt;
         this.userEmail = userEmail;
         this.projectName = projectName;
+    }
+
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(expiresAt);
+    }
+
+    public String getEmail() {
+        return userEmail;
     }
 
     public ConfirmationTokenEntity(String token, LocalDateTime createdAt, LocalDateTime expiresAt, String userEmail) {

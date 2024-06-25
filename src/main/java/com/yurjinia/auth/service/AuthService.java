@@ -10,8 +10,8 @@ import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
 import com.yurjinia.common.security.jwt.dto.JwtAuthenticationResponse;
 import com.yurjinia.common.security.jwt.service.JwtService;
-import com.yurjinia.project_structure.project.confirmationToken.entity.ConfirmationTokenEntity;
-import com.yurjinia.project_structure.project.confirmationToken.service.ConfirmationTokenService;
+import com.yurjinia.common.confirmationToken.entity.ConfirmationTokenEntity;
+import com.yurjinia.common.confirmationToken.service.ConfirmationTokenService;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +43,33 @@ public class AuthService {
     public JwtAuthenticationResponse signUp(RegistrationRequest registrationRequest, MultipartFile image) {
         userService.createUser(registrationRequest, image);
 
+        String token = confirmationTokenService.createToken(registrationRequest.getEmail());
+
+        String confirmationLink = "http://localhost:9000/api/v1/auth/sign-up/confirm?token=" + token;
+
+        sendConfirmationEmail(registrationRequest.getEmail(), confirmationLink);
+
         final var jwt = jwtService.generateToken(registrationRequest.getEmail());
         return new JwtAuthenticationResponse(jwt);
+    }
+
+    private void sendConfirmationEmail(String email, String confirmationLink) {
+        String emailBody = "Для підтвердження вашої реєстрації перейдіть за посиланням: " + confirmationLink;
+        emailService.send(email, emailBody);
+    }
+
+    @Transactional
+    public void confirmSignUp(String token) {
+        ConfirmationTokenEntity confirmationToken = confirmationTokenService.getToken(token);
+
+        if (confirmationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Token expired");
+        }
+
+        UserEntity user = userService.getByEmail(confirmationToken.getUserEmail());
+        user.setEnabled(true);
+        userService.save(user);
+        confirmationTokenService.deleteToken(token);
     }
 
     /**

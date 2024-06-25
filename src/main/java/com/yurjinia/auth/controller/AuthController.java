@@ -62,4 +62,10 @@ public class AuthController {
         authService.resetPassword(token, passwordResetDTO);
     }
 
+    @GetMapping("/sign-up/confirm")
+    public String confirmSignUp(@RequestParam("token") String token) {
+        authService.confirmSignUp(token);
+        return "Sign-up confirmed successfully!";
+    }
+
 }
