@@ -32,6 +32,7 @@ public enum ErrorCode {
     FORBIDDEN("Forbidden"),
     UNAUTHORIZED("Unauthorized");
 
+    //TODO: Add HttpStatus to the error code
     private final String description;
 
     ErrorCode(String description) {

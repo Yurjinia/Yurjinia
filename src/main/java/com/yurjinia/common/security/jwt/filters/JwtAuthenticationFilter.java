@@ -57,21 +57,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void validateTokenAndSetAuthentication(String token, HttpServletRequest request) throws CommonException {
-        if (StringUtils.hasText(token) && JwtValidator.isValidateFormat(token)) {
-            final String userEmail = jwtService.extractUsername(token);
-            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
-                if (jwtService.isTokenValid(token, userDetails)) {
-                    setAuthentication(userDetails, request);
-                } else {
-                    throw new CommonException(ErrorCode.FORBIDDEN, HttpStatus.FORBIDDEN);
-                }
-            } else {
-                throw new CommonException(ErrorCode.UNAUTHORIZED, HttpStatus.UNAUTHORIZED);
-            }
-        } else {
+        if (!StringUtils.hasText(token) || !JwtValidator.isValidateFormat(token)) {
             throw new CommonException(ErrorCode.JWT_INVALID, HttpStatus.UNAUTHORIZED);
         }
+
+        String userEmail = jwtService.extractUsername(token);
+        if (isAlreadyAuthenticated()) {
+            return;
+        }
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+        validateAndAuthenticateToken(token, userDetails, request);
+    }
+
+    private boolean isAlreadyAuthenticated() {
+        return SecurityContextHolder.getContext().getAuthentication() != null;
+    }
+
+    private void validateAndAuthenticateToken(String token, UserDetails userDetails, HttpServletRequest request) throws CommonException {
+        if (!jwtService.isTokenValid(token, userDetails)) {
+            throw new CommonException(ErrorCode.FORBIDDEN, HttpStatus.FORBIDDEN);
+        }
+        setAuthentication(userDetails, request);
     }
 
     private void setAuthentication(UserDetails userDetails, HttpServletRequest request) {

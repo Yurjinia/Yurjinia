@@ -1,10 +1,10 @@
 package com.yurjinia.common.validator;
 
-import org.springframework.stereotype.Component;
+import lombok.experimental.UtilityClass;
 
 import java.util.regex.Pattern;
 
-@Component
+@UtilityClass
 public class JwtValidator {
 
     private static final Pattern JWT_PATTERN;
