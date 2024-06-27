@@ -37,8 +37,8 @@ public class UserProfileController {
     }
 
     @PutMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public UserProfileDTO changeAvatar(@PathVariable String userEmail, @RequestPart(value = "image") MultipartFile image) {
-        return userProfileService.changeAvatar(userEmail, image);
+    public UserProfileDTO updateAvatar(@PathVariable String userEmail, @RequestPart(value = "image") MultipartFile image) {
+        return userProfileService.updateAvatar(userEmail, image);
     }
 
     @DeleteMapping("/avatar")
