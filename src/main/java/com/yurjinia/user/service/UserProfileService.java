@@ -17,6 +17,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
+import static com.yurjinia.common.s3.constants.AWSS3Constants.DEFAULT_AVATAR_NAME;
+import static com.yurjinia.common.s3.constants.AWSS3Constants.FORWARD_SLASH;
+import static com.yurjinia.common.s3.constants.AWSS3Constants.MAIN_PACKAGE;
+
 @Service
 @RequiredArgsConstructor
 public class UserProfileService {
@@ -36,7 +40,9 @@ public class UserProfileService {
     }
 
     public Optional<String> uploadAvatar(UserEntity userEntity, MultipartFile image) {
-        return awss3Service.uploadAvatar(userEntity, image);
+        String key = MAIN_PACKAGE + userEntity.getEmail() + FORWARD_SLASH + DEFAULT_AVATAR_NAME;
+
+        return awss3Service.uploadImage(image, key);
     }
 
     public void validateIfUsernameExists(String username) {
@@ -53,9 +59,14 @@ public class UserProfileService {
         return userProfileMapper.toDto(getUserProfileByEmail(userEmail));
     }
 
-    public UserProfileDTO changeAvatar(String userEmail, MultipartFile image) {
+    public UserProfileDTO updateAvatar(String userEmail, MultipartFile image) {
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
-        awss3Service.changeAvatar(image, userProfileEntity);
+        UserEntity userEntity = userProfileEntity.getUser();
+        String key = MAIN_PACKAGE + userEntity.getEmail() + FORWARD_SLASH + DEFAULT_AVATAR_NAME;
+
+        String imageURL = awss3Service.uploadFile(image, key);
+        userProfileEntity.setAvatarId(imageURL);
+
         userProfileRepository.save(userProfileEntity);
 
         return userProfileMapper.toDto(userProfileEntity);
@@ -63,7 +74,10 @@ public class UserProfileService {
 
     public UserProfileDTO deleteAvatar(String userEmail) {
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
-        awss3Service.deleteAvatar(userProfileEntity);
+
+        awss3Service.deleteImage(userProfileEntity.getAvatarId());
+        userProfileEntity.setAvatarId(null);
+
         userProfileRepository.save(userProfileEntity);
 
         return userProfileMapper.toDto(userProfileEntity);
