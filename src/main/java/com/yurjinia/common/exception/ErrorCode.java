@@ -29,6 +29,9 @@ public enum ErrorCode {
     MATCHES_OLD_PASSWORD("Password matches old password"),
     BUILD_EMAIL_ERROR("Failed to build email"),
     TEMPLATE_FILE_NOT_FOUND("Template file not found"),
+    USER_ALREADY_EXISTS("User already exists"),
+    USER_ALREADY_ACTIVE("User already active");
+    TEMPLATE_FILE_NOT_FOUND("Template file not found"),
     FORBIDDEN("Forbidden"),
     UNAUTHORIZED("Unauthorized");
 

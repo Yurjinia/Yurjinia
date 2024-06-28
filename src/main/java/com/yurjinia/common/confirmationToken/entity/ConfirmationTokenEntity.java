@@ -1,4 +1,4 @@
-package com.yurjinia.project_structure.project.confirmationToken.entity;
+package com.yurjinia.common.confirmationToken.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
