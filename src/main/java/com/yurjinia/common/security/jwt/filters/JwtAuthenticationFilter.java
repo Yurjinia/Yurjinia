@@ -35,23 +35,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws IOException {
         try {
-            if (checkAuthUrl(request, response, filterChain)) {
+            if (shouldSkipFilter(request, response, filterChain)) {
                 return;
             }
 
-            String token = getJwtFromRequest(request);
-            validateTokenAndSetAuthentication(token, request);
+            String token = extractJwtFromRequest(request);
+            UserDetails userDetails = authenticateToken(token, request, response, filterChain);
+            setAuthentication(userDetails, request);
 
             filterChain.doFilter(request, response);
         } catch (CommonException ex) {
             handleCommonException(response, ex);
-
         } catch (Exception ex) {
-            handleException(response, ex);
+            handleGeneralException(response, ex);
         }
     }
 
-    private boolean checkAuthUrl(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+    private boolean shouldSkipFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         String path = request.getRequestURI();
         if (isAuthUrl(path)) {
             filterChain.doFilter(request, response);
@@ -64,33 +64,40 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return path.startsWith(JwtConstants.AUTH_URL);
     }
 
-    private void validateTokenAndSetAuthentication(String token, HttpServletRequest request) throws CommonException {
-        if (!isTokenValid(token)) {
+    private String extractJwtFromRequest(HttpServletRequest request) {
+        String requestHeader = request.getHeader(JwtConstants.AUTHORIZATION_HEADER);
+        if (StringUtils.hasText(requestHeader) && requestHeader.startsWith(JwtConstants.TOKEN_PREFIX)) {
+            return requestHeader.substring(JwtConstants.TOKEN_PREFIX.length());
+        }
+        return null;
+    }
+
+    private UserDetails authenticateToken(String token,
+                                          HttpServletRequest request,
+                                          HttpServletResponse response,
+                                          FilterChain filterChain) throws CommonException, ServletException, IOException {
+        if (!isValidToken(token)) {
             throw new CommonException(ErrorCode.JWT_INVALID, HttpStatus.UNAUTHORIZED);
         }
 
         String userEmail = jwtService.extractUsername(token);
         if (isAlreadyAuthenticated()) {
-            return;
+            filterChain.doFilter(request, response);
         }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
-        validateAndAuthenticateToken(token, userDetails, request);
+        if (!jwtService.isTokenValid(token, userDetails)) {
+            throw new CommonException(ErrorCode.FORBIDDEN, HttpStatus.FORBIDDEN);
+        }
+        return userDetails;
     }
 
-    private boolean isTokenValid(String token) {
+    private boolean isValidToken(String token) {
         return StringUtils.hasText(token) && JwtValidator.isValidateFormat(token);
     }
 
     private boolean isAlreadyAuthenticated() {
         return SecurityContextHolder.getContext().getAuthentication() != null;
-    }
-
-    private void validateAndAuthenticateToken(String token, UserDetails userDetails, HttpServletRequest request) throws CommonException {
-        if (!jwtService.isTokenValid(token, userDetails)) {
-            throw new CommonException(ErrorCode.FORBIDDEN, HttpStatus.FORBIDDEN);
-        }
-        setAuthentication(userDetails, request);
     }
 
     private void setAuthentication(UserDetails userDetails, HttpServletRequest request) {
@@ -107,21 +114,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 
-    private String getJwtFromRequest(HttpServletRequest request) {
-        String requestHeader = request.getHeader(JwtConstants.AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(requestHeader) && requestHeader.startsWith(JwtConstants.TOKEN_PREFIX)) {
-            return requestHeader.substring(JwtConstants.TOKEN_PREFIX.length());
-        }
-        return null;
-    }
-
     private void handleCommonException(HttpServletResponse response, CommonException ex) throws IOException {
         response.setStatus(ex.getStatus().value());
         response.setContentType("application/json");
-        response.getWriter().write(String.format("{\"errorCode\": \"%s\",\"status\": \"%s\", \"message\": \"%s\"}", ex.getErrorCode(), ex.getStatus().name(), ex.getParams().toString()));
+        response.getWriter().write(String.format("{\"errorCode\": \"%s\",\"status\": \"%s\", \"message\": \"%s\"}",
+                ex.getErrorCode(), ex.getStatus().name(), ex.getParams().toString()));
     }
 
-    private void handleException(HttpServletResponse response, Exception ex) throws IOException {
+    private void handleGeneralException(HttpServletResponse response, Exception ex) throws IOException {
         response.setStatus(HttpStatus.FORBIDDEN.value());
         response.setContentType("application/json");
         response.getWriter().write(String.format("{\"errorCode\": \"%s\", \"message\": \"%s\"}",
@@ -129,4 +129,3 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
 }
-
