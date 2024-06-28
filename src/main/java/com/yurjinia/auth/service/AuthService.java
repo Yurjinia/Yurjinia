@@ -128,7 +128,7 @@ public class AuthService {
         ConfirmationTokenEntity confirmationToken = confirmationTokenService.getToken(token);
 
         if (confirmationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new CommonException(ErrorCode.TOKEN_EXPIRED, HttpStatus.BAD_REQUEST);
+            throw new CommonException(ErrorCode.TOKEN_EXPIRED, HttpStatus.GATEWAY_TIMEOUT);
         }
     }
 
