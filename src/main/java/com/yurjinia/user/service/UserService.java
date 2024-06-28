@@ -44,8 +44,8 @@ public class UserService {
                 .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
 
-    public List<UserEntity> getAllByEmails(List<String> emails) {
-        return userRepository.findAllByEmailIn(emails);
+    public Optional<UserEntity> findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     public void addProject(ProjectEntity projectEntity) {
@@ -107,6 +107,14 @@ public class UserService {
                         List.of("Users by emails: " + missingUsers + " does not found."));
             }
         }
+    }
+
+    public void activateUser(String email) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
+
+        user.setActive(true);
+        userRepository.save(user);
     }
 
 }

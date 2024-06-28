@@ -1,6 +1,6 @@
-package com.yurjinia.project_structure.project.confirmationToken.repository;
+package com.yurjinia.common.confirmationToken.repository;
 
-import com.yurjinia.project_structure.project.confirmationToken.entity.ConfirmationTokenEntity;
+import com.yurjinia.common.confirmationToken.entity.ConfirmationTokenEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

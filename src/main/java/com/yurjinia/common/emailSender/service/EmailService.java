@@ -19,6 +19,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import static com.yurjinia.common.emailSender.constants.EmailSenderConstants.CONFIRMATION_EMAIL_TEMPLATE;
 import static com.yurjinia.common.emailSender.constants.EmailSenderConstants.FORGOT_PASSWORD_SUCCESS_TEMPLATE;
 import static com.yurjinia.common.emailSender.constants.EmailSenderConstants.FORGOT_PASSWORD_TEMPLATE;
 import static com.yurjinia.common.emailSender.constants.EmailSenderConstants.INVITATION_TEMPLATE;
@@ -26,7 +27,6 @@ import static com.yurjinia.common.emailSender.constants.EmailSenderConstants.INV
 @Service
 @RequiredArgsConstructor
 public class EmailService implements EmailSender {
-
 
     private final JavaMailSender javaMailSender;
 
@@ -52,18 +52,22 @@ public class EmailService implements EmailSender {
     }
 
     public String buildInvitationMessage(String link) {
-        return getString(link, INVITATION_TEMPLATE);
+        return loadHtmlTemplate(link, INVITATION_TEMPLATE);
     }
 
     public String buildForgotPasswordSuccessMessage(String link) {
-        return getString(link, FORGOT_PASSWORD_SUCCESS_TEMPLATE);
+        return loadHtmlTemplate(link, FORGOT_PASSWORD_SUCCESS_TEMPLATE);
     }
 
     public String buildForgotPasswordMessage(String link) {
-        return getString(link, FORGOT_PASSWORD_TEMPLATE);
+        return loadHtmlTemplate(link, FORGOT_PASSWORD_TEMPLATE);
     }
 
-    private String getString(String link, String fileTemplate) {
+    public String buildConfirmationEmailMessage(String link) {
+        return loadHtmlTemplate(link, CONFIRMATION_EMAIL_TEMPLATE);
+    }
+
+    private String loadHtmlTemplate(String link, String fileTemplate) {
         String template;
 
         try {

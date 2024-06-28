@@ -10,12 +10,13 @@ import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
 import com.yurjinia.common.security.jwt.dto.JwtAuthenticationResponse;
 import com.yurjinia.common.security.jwt.service.JwtService;
-import com.yurjinia.project_structure.project.confirmationToken.entity.ConfirmationTokenEntity;
-import com.yurjinia.project_structure.project.confirmationToken.service.ConfirmationTokenService;
+import com.yurjinia.common.confirmationToken.entity.ConfirmationTokenEntity;
+import com.yurjinia.common.confirmationToken.service.ConfirmationTokenService;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static com.yurjinia.common.application.constants.ApplicationConstants.LOGIN_LINK;
 
@@ -40,11 +42,58 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final ConfirmationTokenService confirmationTokenService;
 
-    public JwtAuthenticationResponse signUp(RegistrationRequest registrationRequest, MultipartFile image) {
+    public String signUp(RegistrationRequest registrationRequest, MultipartFile image) {
+        validateIfUserNotExists(registrationRequest.getEmail());
+
         userService.createUser(registrationRequest, image);
 
-        final var jwt = jwtService.generateToken(registrationRequest.getEmail());
-        return new JwtAuthenticationResponse(jwt);
+        String token = confirmationTokenService.createToken(registrationRequest.getEmail());
+        String confirmationLink = "http://localhost:9000/api/v1/auth/sign-up/confirm?token=" + token;
+        sendConfirmationEmail(registrationRequest.getEmail(), confirmationLink);
+
+        return "Confirm your mail, a confirmation should have come to your mail";
+    }
+
+    private void validateIfUserNotExists(String email) {
+        userService.findByEmail(email)
+                .ifPresent(existingUser -> {
+                    if (existingUser.isEnabled()) {
+                        throw new CommonException(ErrorCode.USER_ALREADY_EXISTS, HttpStatus.CONFLICT);
+                    } else {
+                        throw new CommonException(ErrorCode.USER_ALREADY_EXISTS, HttpStatus.CONFLICT,
+                                List.of("User with this email already exists but email is not confirmed. Please confirm an email."));
+                    }
+                });
+    }
+
+    public String resendConfirmation(String email) {
+        UserEntity user = userService.getByEmail(email);
+        if (user.isActive()) {
+            throw new CommonException(ErrorCode.USER_ALREADY_ACTIVE, HttpStatus.CONFLICT);
+        }
+
+        String token = confirmationTokenService.createToken(email);
+        String confirmationLink = "http://localhost:9000/api/v1/auth/sign-up/confirm?token=" + token;
+        sendConfirmationEmail(email, confirmationLink);
+
+        return "Confirmation email resent";
+    }
+
+    private void sendConfirmationEmail(String email, String confirmationLink) {
+        emailService.send(email, emailService.buildConfirmationEmailMessage(confirmationLink));
+    }
+
+    @Transactional
+    public void confirmSignUp(String token) {
+        ConfirmationTokenEntity confirmationToken = confirmationTokenService.getToken(token);
+
+        if (confirmationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Token expired");
+        }
+
+        userService.activateUser(confirmationToken.getUserEmail());
+
+        confirmationTokenService.deleteToken(token);
     }
 
     /**
@@ -57,6 +106,7 @@ public class AuthService {
      * @return a {@link JwtAuthenticationResponse} object containing the JWT token and additional user details
      * upon successful authentication.
      */
+
     public JwtAuthenticationResponse login(LoginRequest request) {
         if (request.getUsername() != null) {
             return loginByUsername(request);
@@ -69,7 +119,7 @@ public class AuthService {
         isEmailNotExist(passwordResetRequest.getEmail());
 
         String token = confirmationTokenService.createToken(passwordResetRequest.getEmail());
-        String link = "http://localhost:9000/api/v1/auth/password-reset/validate?token=" + token;//ToDo: Resolve the security breach
+        String link = "http://localhost:9000/api/v1/auth/password-reset/validate?token=" + token;
 
         emailService.send(passwordResetRequest.getEmail(), emailService.buildForgotPasswordMessage(link));
     }
