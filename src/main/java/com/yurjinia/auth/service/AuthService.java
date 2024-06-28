@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static com.yurjinia.common.application.constants.ApplicationConstants.LOGIN_LINK;
 
@@ -54,21 +55,19 @@ public class AuthService {
     }
 
     private void validateIfUserNotExists(String email) {
-        UserEntity existingUser = userService.findByEmail(email);
-        if (existingUser != null) {
-            if (existingUser.isEnabled()) {
-                throw new CommonException(ErrorCode.USER_ALREADY_EXISTS, HttpStatus.CONFLICT);
-            } else {
-                throw new CommonException(ErrorCode.USER_ALREADY_EXISTS, HttpStatus.CONFLICT, List.of("User with this email already exists but email is not confirmed. Please confirm an email."));
-            }
-        }
+        userService.findByEmail(email)
+                .ifPresent(existingUser -> {
+                    if (existingUser.isEnabled()) {
+                        throw new CommonException(ErrorCode.USER_ALREADY_EXISTS, HttpStatus.CONFLICT);
+                    } else {
+                        throw new CommonException(ErrorCode.USER_ALREADY_EXISTS, HttpStatus.CONFLICT,
+                                List.of("User with this email already exists but email is not confirmed. Please confirm an email."));
+                    }
+                });
     }
 
     public String resendConfirmation(String email) {
-        UserEntity user = userService.findByEmail(email);
-        if (user == null) {
-            throw new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
-        }
+        UserEntity user = userService.getByEmail(email);
         if (user.isActive()) {
             throw new CommonException(ErrorCode.USER_ALREADY_ACTIVE, HttpStatus.CONFLICT);
         }
@@ -92,9 +91,8 @@ public class AuthService {
             throw new IllegalStateException("Token expired");
         }
 
-        UserEntity user = userService.getByEmail(confirmationToken.getUserEmail());
-        user.setActive(true);
-        userService.save(user);
+        userService.activateUser(confirmationToken.getUserEmail());
+
         confirmationTokenService.deleteToken(token);
     }
 
@@ -118,10 +116,7 @@ public class AuthService {
     }
 
     public void passwordResetRequest(PasswordResetRequest passwordResetRequest) {
-        UserEntity user = userService.findByEmail(passwordResetRequest.getEmail());
-        if (user == null) {
-            throw new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
-        }
+        isEmailNotExist(passwordResetRequest.getEmail());
 
         String token = confirmationTokenService.createToken(passwordResetRequest.getEmail());
         String link = "http://localhost:9000/api/v1/auth/password-reset/validate?token=" + token;

@@ -45,14 +45,6 @@ public class ConfirmationTokenEntity {
         this.projectName = projectName;
     }
 
-    public boolean isExpired() {
-        return LocalDateTime.now().isAfter(expiresAt);
-    }
-
-    public String getUserEmail() {
-        return userEmail;
-    }
-
     public ConfirmationTokenEntity(String token, LocalDateTime createdAt, LocalDateTime expiresAt, String userEmail) {
         this.token = token;
         this.createdAt = createdAt;
