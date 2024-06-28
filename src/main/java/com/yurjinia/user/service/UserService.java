@@ -44,6 +44,11 @@ public class UserService {
                 .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
 
+    public UserEntity findByEmail(String email) {
+        Optional<UserEntity> optionalUser = userRepository.findByEmail(email);
+        return optionalUser.orElse(null);
+    }
+
     public List<UserEntity> getAllByEmails(List<String> emails) {
         return userRepository.findAllByEmailIn(emails);
     }
@@ -113,7 +118,7 @@ public class UserService {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
 
-        user.setEnabled(true);
+        user.setActive(true);
         userRepository.save(user);
     }
 

@@ -28,7 +28,9 @@ public enum ErrorCode {
     BAD_REQUEST("Bad request"),
     MATCHES_OLD_PASSWORD("Password matches old password"),
     BUILD_EMAIL_ERROR("Failed to build email"),
-    TEMPLATE_FILE_NOT_FOUND("Template file not found");
+    TEMPLATE_FILE_NOT_FOUND("Template file not found"),
+    USER_ALREADY_EXISTS("User already exists"),
+    USER_ALREADY_ACTIVE("User already active");
 
     private final String description;
 

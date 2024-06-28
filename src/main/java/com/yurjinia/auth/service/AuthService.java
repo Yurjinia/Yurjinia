@@ -16,6 +16,7 @@ import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,22 +41,47 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final ConfirmationTokenService confirmationTokenService;
 
-    public JwtAuthenticationResponse signUp(RegistrationRequest registrationRequest, MultipartFile image) {
+    public String signUp(RegistrationRequest registrationRequest, MultipartFile image) {
+        validateIfUserNotExists(registrationRequest.getEmail());
+
         userService.createUser(registrationRequest, image);
 
         String token = confirmationTokenService.createToken(registrationRequest.getEmail());
-
         String confirmationLink = "http://localhost:9000/api/v1/auth/sign-up/confirm?token=" + token;
-
         sendConfirmationEmail(registrationRequest.getEmail(), confirmationLink);
 
-        final var jwt = jwtService.generateToken(registrationRequest.getEmail());
-        return new JwtAuthenticationResponse(jwt);
+        return "Confirm your mail, a confirmation should have come to your mail";
+    }
+
+    private void validateIfUserNotExists(String email) {
+        UserEntity existingUser = userService.findByEmail(email);
+        if (existingUser != null) {
+            if (existingUser.isEnabled()) {
+                throw new CommonException(ErrorCode.USER_ALREADY_EXISTS, HttpStatus.CONFLICT);
+            } else {
+                throw new CommonException(ErrorCode.USER_ALREADY_EXISTS, HttpStatus.CONFLICT, List.of("User with this email already exists but email is not confirmed. Please confirm an email."));
+            }
+        }
+    }
+
+    public String resendConfirmation(String email) {
+        UserEntity user = userService.findByEmail(email);
+        if (user == null) {
+            throw new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
+        if (user.isActive()) {
+            throw new CommonException(ErrorCode.USER_ALREADY_ACTIVE, HttpStatus.CONFLICT);
+        }
+
+        String token = confirmationTokenService.createToken(email);
+        String confirmationLink = "http://localhost:9000/api/v1/auth/sign-up/confirm?token=" + token;
+        sendConfirmationEmail(email, confirmationLink);
+
+        return "Confirmation email resent";
     }
 
     private void sendConfirmationEmail(String email, String confirmationLink) {
-        String emailBody = "Для підтвердження вашої реєстрації перейдіть за посиланням: " + confirmationLink;
-        emailService.send(email, emailBody);
+        emailService.send(email, emailService.buildConfirmationEmailMessage(confirmationLink));
     }
 
     @Transactional
@@ -67,7 +93,7 @@ public class AuthService {
         }
 
         UserEntity user = userService.getByEmail(confirmationToken.getUserEmail());
-        user.setEnabled(true);
+        user.setActive(true);
         userService.save(user);
         confirmationTokenService.deleteToken(token);
     }
@@ -82,6 +108,7 @@ public class AuthService {
      * @return a {@link JwtAuthenticationResponse} object containing the JWT token and additional user details
      * upon successful authentication.
      */
+
     public JwtAuthenticationResponse login(LoginRequest request) {
         if (request.getUsername() != null) {
             return loginByUsername(request);
@@ -91,10 +118,13 @@ public class AuthService {
     }
 
     public void passwordResetRequest(PasswordResetRequest passwordResetRequest) {
-        isEmailNotExist(passwordResetRequest.getEmail());
+        UserEntity user = userService.findByEmail(passwordResetRequest.getEmail());
+        if (user == null) {
+            throw new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
 
         String token = confirmationTokenService.createToken(passwordResetRequest.getEmail());
-        String link = "http://localhost:9000/api/v1/auth/password-reset/validate?token=" + token;//ToDo: Resolve the security breach
+        String link = "http://localhost:9000/api/v1/auth/password-reset/validate?token=" + token;
 
         emailService.send(passwordResetRequest.getEmail(), emailService.buildForgotPasswordMessage(link));
     }
@@ -103,7 +133,7 @@ public class AuthService {
         ConfirmationTokenEntity confirmationToken = confirmationTokenService.getToken(token);
 
         if (confirmationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new CommonException(ErrorCode.TOKEN_EXPIRED, HttpStatus.GATEWAY_TIMEOUT);
+            throw new CommonException(ErrorCode.TOKEN_EXPIRED, HttpStatus.BAD_REQUEST);
         }
     }
 

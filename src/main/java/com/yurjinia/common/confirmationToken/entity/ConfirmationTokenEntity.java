@@ -49,7 +49,7 @@ public class ConfirmationTokenEntity {
         return LocalDateTime.now().isAfter(expiresAt);
     }
 
-    public String getEmail() {
+    public String getUserEmail() {
         return userEmail;
     }
 
