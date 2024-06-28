@@ -6,6 +6,7 @@ import com.yurjinia.common.security.jwt.constants.JwtConstants;
 import com.yurjinia.common.security.jwt.service.JwtService;
 import com.yurjinia.common.validator.JwtValidator;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -34,13 +35,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws IOException {
         try {
-            String path = request.getRequestURI();
-            if (isAuthUrl(path)) {
-                filterChain.doFilter(request, response);
+            if (checkAuthUrl(request, response, filterChain)) {
                 return;
             }
 
-            String token = getJwt(request);
+            String token = getJwtFromRequest(request);
             validateTokenAndSetAuthentication(token, request);
 
             filterChain.doFilter(request, response);
@@ -52,12 +51,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
+    private boolean checkAuthUrl(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+        String path = request.getRequestURI();
+        if (isAuthUrl(path)) {
+            filterChain.doFilter(request, response);
+            return true;
+        }
+        return false;
+    }
+
     private boolean isAuthUrl(String path) {
         return path.startsWith(JwtConstants.AUTH_URL);
     }
 
     private void validateTokenAndSetAuthentication(String token, HttpServletRequest request) throws CommonException {
-        if (!StringUtils.hasText(token) || !JwtValidator.isValidateFormat(token)) {
+        if (!isTokenValid(token)) {
             throw new CommonException(ErrorCode.JWT_INVALID, HttpStatus.UNAUTHORIZED);
         }
 
@@ -68,6 +76,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
         validateAndAuthenticateToken(token, userDetails, request);
+    }
+
+    private boolean isTokenValid(String token) {
+        return StringUtils.hasText(token) && JwtValidator.isValidateFormat(token);
     }
 
     private boolean isAlreadyAuthenticated() {
@@ -95,7 +107,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 
-    private String getJwt(HttpServletRequest request) {
+    private String getJwtFromRequest(HttpServletRequest request) {
         String requestHeader = request.getHeader(JwtConstants.AUTHORIZATION_HEADER);
         if (StringUtils.hasText(requestHeader) && requestHeader.startsWith(JwtConstants.TOKEN_PREFIX)) {
             return requestHeader.substring(JwtConstants.TOKEN_PREFIX.length());
