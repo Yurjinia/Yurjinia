@@ -1,7 +1,5 @@
 package com.yurjinia.user.dto;
 
-import com.yurjinia.common.validator.EmailValidate;
-import com.yurjinia.common.validator.PasswordValidate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,13 +12,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDTO {
-    private String firstName;
-    private String lastName;
-    private String avatarId;
-
-    @EmailValidate
     private String email;
-
-    @PasswordValidate
-    private String password;
+    private UserProfileDTO profileDTO;
 }

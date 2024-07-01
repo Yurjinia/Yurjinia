@@ -2,6 +2,13 @@ server:
   port: 9000
 
 spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 2MB
+      max-request-size: 2MB
+  profiles:
+    active: default
   datasource:
     url: jdbc:postgresql://localhost:5432/yurjinia
     username: postgres
@@ -29,10 +36,10 @@ spring:
               - profile
               - openid
   mail:
-    host: localhost
-    port: 1025
-    username: hello
-    password: hello
+    host: smtp.gmail.com
+    port: 587
+    username: yurjiniayur@gmail.com
+    password: hvcuvdfmaafzbpba
     properties:
       mail:
         smtp:
@@ -44,6 +51,14 @@ spring:
           connectiontimeout: 5000
           timeout: 3000
           writetimeout: 5000
+
+aws:
+  s3:
+    bucket-name: yurjinia
+    region: eu-north-1
+  credentials:
+    access-key-id: AKIAXYKJXJRQVQM4LYGI
+    secret-access-key: 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
 
 jwt:
   token:

@@ -1,7 +1,6 @@
 package com.yurjinia.auth.controller.request;
 
-import com.yurjinia.common.validator.EmailValidate;
-import com.yurjinia.common.validator.PasswordValidate;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,9 +9,9 @@ import lombok.Setter;
 @Setter
 @Builder
 public class LoginRequest {
-    @EmailValidate
+    private String username;
     private String email;
 
-    @PasswordValidate
+    @NotBlank
     private String password;
 }

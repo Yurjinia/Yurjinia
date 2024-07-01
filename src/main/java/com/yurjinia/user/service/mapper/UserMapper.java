@@ -1,6 +1,6 @@
 package com.yurjinia.user.service.mapper;
 
-import com.yurjinia.project_structure.project.dto.ProjectInvitationDTO;
+import com.yurjinia.auth.controller.request.RegistrationRequest;
 import com.yurjinia.user.dto.UserDTO;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.enums.UserRole;
@@ -13,24 +13,22 @@ import org.springframework.stereotype.Component;
 public class UserMapper {
 
     private final PasswordEncoder passwordEncoder;
+    private final UserProfileMapper userProfileMapper;
 
-    public UserEntity toEntity(UserDTO userDTO) {
+    public UserEntity toEntity(RegistrationRequest registrationRequest) {
         return UserEntity.builder()
-                .firstName(userDTO.getFirstName())
-                .lastName(userDTO.getLastName())
-                .email(userDTO.getEmail())
-                .avatarId(userDTO.getAvatarId())
-                .password(passwordEncoder.encode(userDTO.getPassword()))
+                .email(registrationRequest.getEmail())
+                .userProfile(userProfileMapper.toEntity(registrationRequest))
+                //ToDo: passwordEncoder must be used outside of UserMapper.
+                .password(passwordEncoder.encode(registrationRequest.getPassword()))
                 .role(UserRole.USER)
                 .build();
     }
 
     public UserDTO toDto(UserEntity userEntity) {
         return UserDTO.builder()
-                .firstName(userEntity.getFirstName())
-                .lastName(userEntity.getLastName())
                 .email(userEntity.getEmail())
-                .avatarId(userEntity.getAvatarId())
+                .profileDTO(userProfileMapper.toDto(userEntity.getUserProfile()))
                 .build();
     }
 

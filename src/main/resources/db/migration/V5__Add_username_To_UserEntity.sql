@@ -1,0 +1,2 @@
+ALTER TABLE "user"
+    ADD COLUMN username VARCHAR(64) UNIQUE;
