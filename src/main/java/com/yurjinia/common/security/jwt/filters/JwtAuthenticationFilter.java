@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -47,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (CommonException ex) {
             handleCommonException(response, ex);
         } catch (Exception ex) {
-            handleGeneralException(response, ex);
+            handleCommonException(response, new CommonException(ErrorCode.FORBIDDEN, HttpStatus.FORBIDDEN, List.of(ex.getMessage())));
         }
     }
 
@@ -119,13 +120,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.setContentType("application/json");
         response.getWriter().write(String.format("{\"errorCode\": \"%s\",\"status\": \"%s\", \"message\": \"%s\"}",
                 ex.getErrorCode(), ex.getStatus().name(), ex.getParams().toString()));
-    }
-
-    private void handleGeneralException(HttpServletResponse response, Exception ex) throws IOException {
-        response.setStatus(HttpStatus.FORBIDDEN.value());
-        response.setContentType("application/json");
-        response.getWriter().write(String.format("{\"errorCode\": \"%s\", \"message\": \"%s\"}",
-                HttpStatus.FORBIDDEN.value(), ex.getMessage()));
     }
 
 }
