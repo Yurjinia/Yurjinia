@@ -1,5 +1,6 @@
 package com.yurjinia.common.s3.configuration;
 
+import com.yurjinia.common.utils.EnvUtils;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -19,11 +20,12 @@ public class S3Configuration {
     @Value("${aws.s3.region}")
     private String region;
 
-    @Value("${aws.credentials.access-key-id}")
-    private String accessKeyId;
-
-    @Value("${aws.credentials.secret-access-key}")
-    private String secretAccessKey;
+    private final String accessKeyId;
+    private final String secretAccessKey;
+    {
+        accessKeyId= EnvUtils.getEnv("AWS_ACCESS_KEY_ID");
+        secretAccessKey= EnvUtils.getEnv("AWS_SECRET_ACCESS_KEY");
+    }
 
     @Bean
     public S3Client s3Client() {
