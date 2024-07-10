@@ -56,6 +56,9 @@ aws:
   s3:
     bucket-name: yurjinia
     region: eu-north-1
+  credentials:
+    access-key-id: AWS_ACCESS_KEY_ID
+    secret-access-key: AWS_SECRET_ACCESS_KEY
 
 jwt:
   token:
