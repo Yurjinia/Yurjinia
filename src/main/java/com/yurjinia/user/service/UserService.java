@@ -109,12 +109,18 @@ public class UserService {
         }
     }
 
-    public void activateUser(String email) {
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
+    /* Refer to next JIRA with having more clarification about the reasons of
+       why the code was commented, and when it's going to be uncommented:
+       https://pashka1clash.atlassian.net/browse/YUR-114
 
-        user.setActive(true);
-        userRepository.save(user);
-    }
+        public void activateUser(String email) {
+            UserEntity user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
+
+            user.setActive(true);
+            userRepository.save(user);
+        }
+
+    */
 
 }

@@ -1,13 +1,12 @@
 package com.yurjinia.project_structure.project.service;
 
+import com.yurjinia.common.confirmationToken.entity.ConfirmationTokenEntity;
+import com.yurjinia.common.confirmationToken.service.ConfirmationTokenService;
 import com.yurjinia.common.emailSender.EmailSender;
 import com.yurjinia.common.emailSender.service.EmailService;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
-import com.yurjinia.common.confirmationToken.entity.ConfirmationTokenEntity;
-import com.yurjinia.common.confirmationToken.service.ConfirmationTokenService;
 import com.yurjinia.project_structure.project.dto.ProjectDTO;
-import com.yurjinia.project_structure.project.dto.ProjectInvitationDTO;
 import com.yurjinia.project_structure.project.entity.ProjectEntity;
 import com.yurjinia.project_structure.project.repository.ProjectRepository;
 import com.yurjinia.project_structure.project.service.mapper.ProjectMapper;
@@ -55,18 +54,31 @@ public class ProjectService {
         String projectName = projectDTO.getName();
 
         users.forEach(user -> {
-            inviteUserToTheProject(projectName, ProjectInvitationDTO.builder().email(user).build());
+            /* Refer to next JIRA with having more clarification about the reasons of
+               why the code was commented, and when it's going to be uncommented:
+               https://pashka1clash.atlassian.net/browse/YUR-114
+
+               inviteUserToTheProject(projectName, ProjectInvitationDTO.builder().email(user).build());
+            */
+            addUserToProject(user, projectName);
         });
     }
 
-    public void inviteUserToTheProject(String projectName, ProjectInvitationDTO projectInvitationDTO) {
-        validateIfProjectNotExists(projectName);
-        validateIfUserExistsInProject(projectInvitationDTO.getEmail(), projectName);
 
-        String token = confirmationTokenService.createToken(projectInvitationDTO.getEmail(), projectName);
-        String link = "http://localhost:9000/api/v1/projects/confirm?token=" + token;//ToDo: Resolve the security breach (MVP 1.2)
-        emailSender.send(projectInvitationDTO.getEmail(), emailService.buildInvitationMessage(link));
-    }
+    /* Refer to next JIRA with having more clarification about the reasons of
+       why the code was commented, and when it's going to be uncommented:
+       https://pashka1clash.atlassian.net/browse/YUR-114
+
+        public void inviteUserToTheProject(String projectName, ProjectInvitationDTO projectInvitationDTO) {
+            validateIfProjectNotExists(projectName);
+            validateIfUserExistsInProject(projectInvitationDTO.getEmail(), projectName);
+
+            String token = confirmationTokenService.createToken(projectInvitationDTO.getEmail(), projectName);
+            String link = "http://localhost:9000/api/v1/projects/confirm?token=" + token;//ToDo: Resolve the security breach (MVP 1.2)
+            emailSender.send(projectInvitationDTO.getEmail(), emailService.buildInvitationMessage(link));
+        }
+
+    */
 
     @Transactional
     public void addUserToProject(String email, String projectName) {
