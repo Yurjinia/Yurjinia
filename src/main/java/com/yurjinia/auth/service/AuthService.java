@@ -40,15 +40,14 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final ConfirmationTokenService confirmationTokenService;
 
-
     public JwtAuthenticationResponse signUp(RegistrationRequest registrationRequest, MultipartFile image) {
         validateIfUserNotExists(registrationRequest.getEmail());
 
         userService.createUser(registrationRequest, image);
 
-        /* Refer to next JIRA with having more clarification about the reasons of
-           why the code was commented, and when it's going to be uncommented:
-           https://pashka1clash.atlassian.net/browse/YUR-114
+        /* ToDo: Refer to next JIRA with having more clarification about the reasons of
+            why the code was commented, and when it's going to be uncommented:
+            https://pashka1clash.atlassian.net/browse/YUR-114
 
             String token = confirmationTokenService.createToken(registrationRequest.getEmail());
             String confirmationLink = "http://localhost:9000/api/v1/auth/sign-up/confirm?token=" + token;
@@ -189,9 +188,9 @@ public class AuthService {
         }
     }
 
-    /* Refer to next JIRA with having more clarification about the reasons of
-       why the code was commented, and when it's going to be uncommented:
-       https://pashka1clash.atlassian.net/browse/YUR-114
+    /* ToDo: Refer to next JIRA with having more clarification about the reasons of
+        why the code was commented, and when it's going to be uncommented:
+        https://pashka1clash.atlassian.net/browse/YUR-114
 
         public String resendConfirmation(String email) {
             UserEntity user = userService.getByEmail(email);

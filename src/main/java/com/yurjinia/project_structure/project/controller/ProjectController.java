@@ -21,9 +21,9 @@ public class ProjectController {
         return projectService.createProject(userEmail, projectDTO);
     }
 
-    /* Refer to next JIRA with having more clarification about the reasons of
-               why the code was commented, and when it's going to be uncommented:
-               https://pashka1clash.atlassian.net/browse/YUR-114
+    /* ToDo: Refer to next JIRA with having more clarification about the reasons of
+        why the code was commented, and when it's going to be uncommented:
+        https://pashka1clash.atlassian.net/browse/YUR-114
 
         @PostMapping("{projectName}/invite")
         public void inviteUserToTheProject(@PathVariable String projectName,

@@ -109,9 +109,10 @@ public class UserService {
         }
     }
 
-    /* Refer to next JIRA with having more clarification about the reasons of
-       why the code was commented, and when it's going to be uncommented:
-       https://pashka1clash.atlassian.net/browse/YUR-114
+    /*
+        ToDo: Refer to next JIRA with having more clarification about the reasons of
+         why the code was commented, and when it's going to be uncommented:
+         https://pashka1clash.atlassian.net/browse/YUR-114
 
         public void activateUser(String email) {
             UserEntity user = userRepository.findByEmail(email)
