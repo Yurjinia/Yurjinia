@@ -5,18 +5,17 @@ import com.yurjinia.auth.controller.request.LoginRequest;
 import com.yurjinia.auth.controller.request.RegistrationRequest;
 import com.yurjinia.auth.dto.PasswordResetDTO;
 import com.yurjinia.auth.dto.PasswordResetRequest;
+import com.yurjinia.common.confirmationToken.entity.ConfirmationTokenEntity;
+import com.yurjinia.common.confirmationToken.service.ConfirmationTokenService;
 import com.yurjinia.common.emailSender.service.EmailService;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
 import com.yurjinia.common.security.jwt.dto.JwtAuthenticationResponse;
 import com.yurjinia.common.security.jwt.service.JwtService;
-import com.yurjinia.common.confirmationToken.entity.ConfirmationTokenEntity;
-import com.yurjinia.common.confirmationToken.service.ConfirmationTokenService;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,7 +26,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static com.yurjinia.common.application.constants.ApplicationConstants.LOGIN_LINK;
 
@@ -44,6 +42,7 @@ public class AuthService {
 
     public String signUp(RegistrationRequest registrationRequest, MultipartFile image) {
         validateIfUserNotExists(registrationRequest.getEmail());
+        validatePasswordMatch(registrationRequest.getConfirmPassword(), registrationRequest.getPassword());
 
         userService.createUser(registrationRequest, image);
 
@@ -134,16 +133,12 @@ public class AuthService {
 
     @Transactional
     public void resetPassword(String token, PasswordResetDTO passwordResetDTO) {
-        if (!passwordResetDTO.getNewPassword().equals(passwordResetDTO.getConfirmPassword())) {
-            throw new CommonException(ErrorCode.INVALID_PASSWORD, HttpStatus.BAD_REQUEST);
-        }
+        validatePasswordMatch(passwordResetDTO.getConfirmPassword(), passwordResetDTO.getNewPassword());
 
         ConfirmationTokenEntity tokenEntity = confirmationTokenService.getToken(token);
         UserEntity userEntity = userService.getByEmail(tokenEntity.getUserEmail());
 
-        if (passwordEncoder.matches(passwordResetDTO.getNewPassword(), userEntity.getPassword())) {
-            throw new CommonException(ErrorCode.MATCHES_OLD_PASSWORD, HttpStatus.BAD_REQUEST);
-        }
+        validateNewPasswordIsNotOld(passwordResetDTO.getNewPassword(), userEntity.getPassword());
 
         userEntity.setPassword(passwordEncoder.encode(passwordResetDTO.getNewPassword()));
 
@@ -207,6 +202,18 @@ public class AuthService {
                 .email(email)
                 .password("")
                 .build();
+    }
+
+    private void validatePasswordMatch(String password, String confirmPassword) {
+        if (!confirmPassword.equals(password)) {
+            throw new CommonException(ErrorCode.INVALID_PASSWORD, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private void validateNewPasswordIsNotOld(String newPassword, String oldPassword) {
+        if (passwordEncoder.matches(newPassword, oldPassword)) {
+            throw new CommonException(ErrorCode.MATCHES_OLD_PASSWORD, HttpStatus.BAD_REQUEST);
+        }
     }
 
     private void isEmailNotExist(String email) {

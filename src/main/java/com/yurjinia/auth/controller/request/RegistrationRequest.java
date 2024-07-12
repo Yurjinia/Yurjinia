@@ -15,6 +15,7 @@ import org.hibernate.validator.constraints.Length;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegistrationRequest {
+
     private String firstName;
     private String lastName;
 
@@ -26,4 +27,7 @@ public class RegistrationRequest {
 
     @PasswordValidate
     private String password;
+
+    private String confirmPassword;
+
 }
