@@ -28,21 +28,24 @@ public @interface EmailValidate {
 
     Class<? extends Payload>[] payload() default {};
 
-    class TelConstraintValidator implements ConstraintValidator<EmailValidate, String> {
+    final class TelConstraintValidator implements ConstraintValidator<EmailValidate, String> {
 
         @Override
-        public boolean isValid(String email,
-                               ConstraintValidatorContext constraintValidatorContext) {
-
+        public boolean isValid(String email, ConstraintValidatorContext constraintValidatorContext) {
             if (StringUtils.isEmpty(email)) {
-                throw new CommonException(ErrorCode.INVALID_EMAIL, HttpStatus.BAD_REQUEST, List.of("Email address cannot be empty"));
+                throw new CommonException(
+                        ErrorCode.INVALID_EMAIL, HttpStatus.BAD_REQUEST, List.of("Email address cannot be empty")
+                );
             }
 
-            String check = "^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
-            Pattern regex = Pattern.compile(check);
-            Matcher matcher = regex.matcher(email);
+            final String regularExpression
+                    = "^[a-zA-Z0-9]+([._-]?[a-zA-Z0-9]+)*@[a-zA-Z0-9]+([.-]?[a-zA-Z0-9]+)*(\\.[a-zA-Z]{2,})+$";
+            final Pattern regularExpressionPattern = Pattern.compile(regularExpression);
+            final Matcher matcher = regularExpressionPattern.matcher(email);
+
             return matcher.matches();
         }
+
     }
 
 }
