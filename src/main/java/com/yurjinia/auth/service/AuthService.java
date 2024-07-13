@@ -42,6 +42,7 @@ public class AuthService {
 
     public JwtAuthenticationResponse signUp(RegistrationRequest registrationRequest, MultipartFile image) {
         validateIfUserNotExists(registrationRequest.getEmail());
+        validatePasswordMatch(registrationRequest.getConfirmPassword(), registrationRequest.getPassword());
 
         userService.createUser(registrationRequest, image);
 
@@ -150,16 +151,12 @@ public class AuthService {
 
     @Transactional
     public void resetPassword(String token, PasswordResetDTO passwordResetDTO) {
-        if (!passwordResetDTO.getNewPassword().equals(passwordResetDTO.getConfirmPassword())) {
-            throw new CommonException(ErrorCode.INVALID_PASSWORD, HttpStatus.BAD_REQUEST);
-        }
+        validatePasswordMatch(passwordResetDTO.getConfirmPassword(), passwordResetDTO.getNewPassword());
 
         ConfirmationTokenEntity tokenEntity = confirmationTokenService.getToken(token);
         UserEntity userEntity = userService.getByEmail(tokenEntity.getUserEmail());
 
-        if (passwordEncoder.matches(passwordResetDTO.getNewPassword(), userEntity.getPassword())) {
-            throw new CommonException(ErrorCode.MATCHES_OLD_PASSWORD, HttpStatus.BAD_REQUEST);
-        }
+        validateNewPasswordIsNotOld(passwordResetDTO.getNewPassword(), userEntity.getPassword());
 
         userEntity.setPassword(passwordEncoder.encode(passwordResetDTO.getNewPassword()));
 
@@ -180,6 +177,18 @@ public class AuthService {
                 );
             }
         });
+    }
+
+    private void validatePasswordMatch(String password, String confirmPassword) {
+        if (!confirmPassword.equals(password)) {
+            throw new CommonException(ErrorCode.INVALID_PASSWORD, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private void validateNewPasswordIsNotOld(String newPassword, String oldPassword) {
+        if (passwordEncoder.matches(newPassword, oldPassword)) {
+            throw new CommonException(ErrorCode.MATCHES_OLD_PASSWORD, HttpStatus.BAD_REQUEST);
+        }
     }
 
     private void isEmailNotExist(String email) {
