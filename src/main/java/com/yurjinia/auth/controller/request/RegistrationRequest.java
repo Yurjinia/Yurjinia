@@ -2,6 +2,7 @@ package com.yurjinia.auth.controller.request;
 
 import com.yurjinia.common.validator.EmailValidate;
 import com.yurjinia.common.validator.PasswordValidate;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,5 +28,8 @@ public class RegistrationRequest {
 
     @PasswordValidate
     private String password;
+
+    @NotBlank
+    private String confirmPassword;
 
 }
