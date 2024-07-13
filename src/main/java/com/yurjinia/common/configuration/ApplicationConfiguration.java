@@ -1,9 +1,13 @@
 package com.yurjinia.common.configuration;
 
+import com.yurjinia.common.application.constants.ApplicationConstants;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
 import com.yurjinia.user.repository.UserRepository;
+import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
+import org.jasypt.encryption.pbe.StandardPBEByteEncryptor;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -22,6 +26,21 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class ApplicationConfiguration {
 
     private final UserRepository userRepository;
+
+    @Bean
+    public Dotenv dotenv() {
+        return Dotenv.configure()
+                .filename(ApplicationConstants.ENVIRONMENT_FILE)
+                .load();
+    }
+
+    @Bean
+    public StandardPBEStringEncryptor standardPBEStringEncryptor() {
+        StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+        encryptor.setAlgorithm(StandardPBEByteEncryptor.DEFAULT_ALGORITHM);
+        encryptor.setPassword(ApplicationConstants.ENCRYPTION_PASSWORD);
+        return encryptor;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
