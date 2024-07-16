@@ -1,0 +1,67 @@
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 2MB
+      max-request-size: 2MB
+  datasource:
+    url: jdbc:postgresql://production-db:5432/yurjinia
+    username: prod_user
+    password: prod_password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            clientId: 91165201794-3p5cukhiasac3he490khe4vgrrfqb7s1.apps.googleusercontent.com
+            clientSecret: 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
+            redirectUri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - email
+              - profile
+              - openid
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: yurjiniayur@gmail.com
+    password: hvcuvdfmaafzbpba
+    properties:
+      mail:
+        smtp:
+          ssl:
+            trust: "*"
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+  aws:
+    s3:
+      bucket-name: yurjinia
+      region: eu-north-1
+    credentials:
+      access-key-id: AWS_ACCESS_KEY_ID
+      secret-access-key: AWS_SECRET_ACCESS_KEY
+  jwt:
+    token:
+      key: HvkjjOh2pmc28YGIQzCTFXCfGT6JLBhcwmx1oSJyeXE=
+      expiration: 36000
+      user-expiration: 604800
+      validateTimeout: true
+  logging:
+    level:
+      org:
+        springframework:
+          security: INFO
+          security.oauth2: INFO

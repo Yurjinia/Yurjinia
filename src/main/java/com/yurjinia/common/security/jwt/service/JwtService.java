@@ -26,10 +26,10 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    @Value("${jwt.token.key}")
+    @Value("${spring.jwt.token.key}")
     private String secretKey;
 
-    @Value("${jwt.token.expiration}")
+    @Value("${spring.jwt.token.expiration}")
     private long expirationInSeconds;
 
     public String extractUsername(String jwt) {

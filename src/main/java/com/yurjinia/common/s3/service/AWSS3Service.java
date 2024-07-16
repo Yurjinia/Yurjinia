@@ -29,7 +29,7 @@ public class AWSS3Service {
     private final Tika tika;
     private final S3Client s3Client;
 
-    @Value("${aws.s3.bucket-name}")
+    @Value("${spring.aws.s3.bucket-name}")
     private String bucketName;
 
     // ToDo: make this method work asynchronously, probably we need to use Spring WebFlux

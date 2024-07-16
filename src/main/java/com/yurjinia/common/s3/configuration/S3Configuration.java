@@ -18,15 +18,15 @@ public class S3Configuration {
 
     private final EnvironmentService environmentService;
 
-    @Value("${aws.s3.bucket-name}")
+    @Value("${spring.aws.s3.bucket-name}")
     private String bucketName;
 
-    @Value("${aws.s3.region}")
+    @Value("${spring.aws.s3.region}")
     private String region;
 
-    @Value("${aws.credentials.access-key-id}")
+    @Value("${spring.aws.credentials.access-key-id}")
     private String accessKeyId;
-    @Value("${aws.credentials.secret-access-key}")
+    @Value("${spring.aws.credentials.secret-access-key}")
     private String secretAccessKey;
 
     @Bean
