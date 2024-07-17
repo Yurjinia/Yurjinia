@@ -19,6 +19,7 @@ public class UserMapper {
         return UserEntity.builder()
                 .email(registrationRequest.getEmail())
                 .userProfile(userProfileMapper.toEntity(registrationRequest))
+                .active(true) // ToDo: temporary fix, remove when we return activation functionality
                 //ToDo: passwordEncoder must be used outside of UserMapper.
                 .password(passwordEncoder.encode(registrationRequest.getPassword()))
                 .role(UserRole.USER)
