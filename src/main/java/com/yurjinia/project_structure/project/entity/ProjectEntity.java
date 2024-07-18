@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,6 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -35,11 +37,22 @@ public class ProjectEntity {
     @Column(unique = true)
     private String name;
 
-    @ManyToMany(mappedBy = "projects")
-    private List<UserEntity> users;
+    @Column(unique = true, name = "project_code")
+    private String projectCode;
 
+    @Column(name = "project_owner_email", nullable = false)
+    private String projectOwnerEmail;
+
+    @Builder.Default
+    @ManyToMany(mappedBy = "projects")
+    private List<UserEntity> users = new ArrayList<>();
+
+    @Builder.Default
     @OneToMany
     @JoinColumn(name = "project_id")
-    private List<BoardEntity> boards;
+    private List<BoardEntity> boards = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private UserEntity owner;
 }

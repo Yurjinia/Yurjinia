@@ -1,20 +1,30 @@
 package com.yurjinia.project_structure.project.service;
 
+import com.nimbusds.oauth2.sdk.util.StringUtils;
+import com.yurjinia.common.confirmationToken.service.ConfirmationTokenService;
+import com.yurjinia.common.emailSender.service.EmailService;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
 import com.yurjinia.project_structure.project.dto.ProjectDTO;
+import com.yurjinia.project_structure.project.dto.UpdateProjectRequest;
 import com.yurjinia.project_structure.project.entity.ProjectEntity;
 import com.yurjinia.project_structure.project.repository.ProjectRepository;
 import com.yurjinia.project_structure.project.service.mapper.ProjectMapper;
+import com.yurjinia.user.dto.UserDTO;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.UserService;
+import com.yurjinia.user.service.mapper.UserMapper;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,27 +33,87 @@ public class ProjectService {
     private final UserService userService;
     private final ProjectMapper projectMapper;
     private final ProjectRepository projectRepository;
+    private final ConfirmationTokenService confirmationTokenService;
+    private final EmailService emailService;
+    private final UserMapper userMapper;
+
+    public List<ProjectDTO> getUserProjects(String userEmail) {
+        UserEntity user = userService.getByEmail(userEmail);
+
+        if (user == null) {
+            throw new EntityNotFoundException("User with email " + userEmail + " not found");
+        }
+
+        List<ProjectEntity> projects = projectRepository.findAllByUsers(user);
+
+        return projects.stream()
+                .map(projectMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<UserDTO> getProjectUsers(String projectCode) {
+        ProjectEntity project = projectRepository.findByProjectCode(projectCode)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+        List<UserEntity> users = project.getUsers();
+        return users.stream()
+                .map(userMapper::toDto)
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     public ProjectDTO createProject(String userEmail, ProjectDTO projectDTO) {
         validateIfProjectExists(projectDTO);
-        userService.validateIfUsersExists(projectDTO.getUsers().stream().toList());
 
+        // Get owner user by email
+        UserEntity owner = userService.getByEmail(userEmail);
+
+        // Set project owner email
+        projectDTO.setProjectOwnerEmail(owner.getEmail());
+
+        // Map ProjectDTO to ProjectEntity
         ProjectEntity projectEntity = projectMapper.toEntity(projectDTO);
-        UserEntity userEntityList = userService.getByEmail(userEmail);
-        projectEntity.setUsers(List.of(userEntityList));
-        projectRepository.save(projectEntity);
+        projectEntity.setOwner(owner); // Set owner of the project
 
-        userService.addProject(projectEntity);
+        // Initialize users list if null
+        if (projectEntity.getUsers() == null) {
+            projectEntity.setUsers(new ArrayList<>());
+        }
 
-        inviteUsers(projectDTO);
+        // Add owner to the project's user list
+        projectEntity.getUsers().add(owner);
 
-        return projectDTO;
+        // Save projectEntity to database
+        ProjectEntity savedProject = projectRepository.save(projectEntity);
+
+        // Map ProjectEntity back to ProjectDTO
+        return projectMapper.toDto(savedProject);
+    }
+
+    @Transactional
+    public ProjectDTO updateProject(String projectCode, UpdateProjectRequest updateRequest) {
+        // Find existing project by projectCode
+        ProjectEntity existingProject = projectRepository.findByProjectCode(projectCode)
+                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+
+        // Update project fields if they are not blank in the updateRequest
+        if (StringUtils.isNotBlank(updateRequest.getProjectOwnerEmail())) {
+            existingProject.setProjectOwnerEmail(updateRequest.getProjectOwnerEmail());
+        }
+        if (StringUtils.isNotBlank(updateRequest.getProjectName())) {
+            existingProject.setName(updateRequest.getProjectName());
+        }
+        // Update other fields similarly...
+
+        // Save updated projectEntity
+        ProjectEntity updatedProject = projectRepository.save(existingProject);
+
+        // Map updated ProjectEntity back to ProjectDTO
+        return projectMapper.toDto(updatedProject);
     }
 
     private void inviteUsers(ProjectDTO projectDTO) {
         Set<String> users = projectDTO.getUsers();
-        String projectName = projectDTO.getName();
+        String projectName = projectDTO.getProjectName();
 
         users.forEach(user -> {
             /* ToDo: Refer to next JIRA with having more clarification about the reasons of
@@ -70,8 +140,8 @@ public class ProjectService {
     }
 
     private void validateIfProjectExists(ProjectDTO projectDTO) {
-        if (projectRepository.existsByName(projectDTO.getName())) {
-            throw new CommonException(ErrorCode.PROJECT_ALREADY_EXISTS, HttpStatus.CONFLICT, List.of("Project by name " + projectDTO.getName() + " already exists"));
+        if (projectRepository.existsByName(projectDTO.getProjectName())) {
+            throw new CommonException(ErrorCode.PROJECT_ALREADY_EXISTS, HttpStatus.CONFLICT, List.of("Project by name " + projectDTO.getProjectName() + " already exists"));
         }
     }
 
