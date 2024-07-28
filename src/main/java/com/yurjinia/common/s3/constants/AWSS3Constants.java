@@ -1,7 +1,14 @@
 package com.yurjinia.common.s3.constants;
 
+import org.springframework.beans.factory.annotation.Value;
+
 public class AWSS3Constants {
-    public static final String MAIN_PACKAGE = "users/";
+
+    @Value("${APP.MAIN_PACKAGE}")
+    public static String MAIN_PACKAGE;
     public static final String FORWARD_SLASH = "/";
-    public static final String DEFAULT_AVATAR_NAME = "avatar.png";//ToDO: Implement the adaptation of the image to PNG format
+
+    @Value("${APP.DEFAULT_AVATAR_NAME}")
+    public static String DEFAULT_AVATAR_NAME;//ToDO: Implement the adaptation of the image to PNG format
+
 }

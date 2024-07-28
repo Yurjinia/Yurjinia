@@ -2,6 +2,8 @@ server:
   port: 9000
 
 spring:
+  config:
+    import: credentials.yml
   servlet:
     multipart:
       enabled: true
@@ -10,9 +12,9 @@ spring:
   profiles:
     active: default
   datasource:
-    url: jdbc:postgresql://localhost:5432/yurjinia
-    username: postgres
-    password: 2617
+    url: ${DATABASE.URL}
+    username: ${DATABASE.PASSWORD}
+    password: ${DATABASE.USERNAME}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -28,9 +30,9 @@ spring:
       client:
         registration:
           google:
-            clientId: 91165201794-3p5cukhiasac3he490khe4vgrrfqb7s1.apps.googleusercontent.com
-            clientSecret: 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
-            redirectUri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            clientId: ${GOOGLE.CLIENT_ID}
+            clientSecret: ${GOOGLE.CLIENT_SECRET}
+            redirectUri: ${GOOGLE.REDIRECT_URI}
             scope:
               - email
               - profile
@@ -38,8 +40,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: yurjiniayur@gmail.com
-    password: hvcuvdfmaafzbpba
+    username: ${MAIL.USERNAME}
+    password: ${MAIL.PASSWORD}
     properties:
       mail:
         smtp:
@@ -54,15 +56,15 @@ spring:
 
 aws:
   s3:
-    bucket-name: yurjinia
-    region: eu-north-1
+    bucket-name: ${AWS.S3.BUCKET_NAME}
+    region: ${AWS.S3.REGION}
   credentials:
     access-key-id: AWS_ACCESS_KEY_ID
     secret-access-key: AWS_SECRET_ACCESS_KEY
 
 jwt:
   token:
-    key: HvkjjOh2pmc28YGIQzCTFXCfGT6JLBhcwmx1oSJyeXE=
+    key: ${JWT.TOKEN.KEY}
     expiration: 36000
     user-expiration: 604800
     validateTimeout: true
