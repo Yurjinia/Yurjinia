@@ -3,7 +3,6 @@ package com.yurjinia.user.service;
 import com.yurjinia.auth.controller.request.RegistrationRequest;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
-import com.yurjinia.project_structure.project.entity.ProjectEntity;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.repository.UserRepository;
 import com.yurjinia.user.service.mapper.UserMapper;
@@ -46,18 +45,6 @@ public class UserService {
 
     public Optional<UserEntity> findByEmail(String email) {
         return userRepository.findByEmail(email);
-    }
-
-    public void addProject(ProjectEntity projectEntity) {
-        UserEntity userEntity = projectEntity.getUsers().getFirst();
-
-        if (userEntity.getProjects() == null) {
-            userEntity.setProjects(List.of(projectEntity));
-        } else {
-            userEntity.getProjects().add(projectEntity);
-        }
-
-        save(userEntity);
     }
 
     @Transactional

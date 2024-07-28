@@ -1,54 +1,30 @@
 package com.yurjinia.project_structure.project.controller;
 
-import com.yurjinia.project_structure.project.dto.ProjectDTO;
-import com.yurjinia.project_structure.project.dto.UpdateProjectRequest;
 import com.yurjinia.project_structure.project.service.ProjectService;
-import com.yurjinia.user.dto.UserDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/projects")
+@RequestMapping("/api/v1/projects")
 public class ProjectController {
 
     private final ProjectService projectService;
 
-    @PostMapping("/{userEmail}")
-    public ProjectDTO createProject(@PathVariable String userEmail, @RequestBody ProjectDTO projectDTO) {
-        return projectService.createProject(userEmail, projectDTO);
-    }
-
-    @GetMapping("/{projectCode}/users")
-    public ResponseEntity<List<UserDTO>> getProjectUsers(@PathVariable String projectCode) {
-        List<UserDTO> users = projectService.getProjectUsers(projectCode);
-        return ResponseEntity.ok(users);
-    }
-
-    @PutMapping("/{projectCode}")
-    public ResponseEntity<?> updateProject(@PathVariable String projectCode, @RequestBody UpdateProjectRequest updateRequest) {
-        try {
-            ProjectDTO updatedProject = projectService.updateProject(projectCode, updateRequest);
-            return ResponseEntity.ok(updatedProject);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
-    }
+//    @PutMapping("/{projectCode}")
+//    public ResponseEntity<?> updateProject(@PathVariable String projectCode, @RequestBody UpdateProjectRequest updateRequest) {
+//        try {
+//            ProjectDTO updatedProject = projectService.updateProject(projectCode, updateRequest);
+//            return ResponseEntity.ok(updatedProject);
+//        } catch (IllegalArgumentException e) {
+//            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+//        } catch (NoSuchElementException e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+//        } catch (RuntimeException e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+//        }
+//    }
 
 /*
 
