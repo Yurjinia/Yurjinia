@@ -59,8 +59,8 @@ aws:
     bucket-name: ${AWS.S3.BUCKET_NAME}
     region: ${AWS.S3.REGION}
   credentials:
-    access-key-id: AWS_ACCESS_KEY_ID
-    secret-access-key: AWS_SECRET_ACCESS_KEY
+    access-key-id: ${AWS.S3.CREDENTIALS.ACCESS_KEY_ID}
+    secret-access-key: ${AWS.S3.CREDENTIALS.SECRET_ACCESS_KEY}
 
 jwt:
   token:
