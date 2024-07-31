@@ -66,8 +66,6 @@ jwt:
   token:
     key: ${JWT.TOKEN.KEY}
     expiration: 36000
-    user-expiration: 604800
-    validateTimeout: true
 
 logging:
   level:

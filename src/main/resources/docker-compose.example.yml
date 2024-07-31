@@ -16,8 +16,8 @@ services:
     image: maildev/maildev
     container_name: maildev
     ports:
-      - "1080:80"   # Веб-інтерфейс MailDev доступний на порту 1080
-      - "1025:1025" # SMTP-сервер MailDev слухає на порту 1025
+      - "1080:80"   # MailDev web interface is available on port 1080
+      - "1025:1025" # MailDev SMTP server listening on port 1025
     environment:
       - MAILDEV_SMTP_PORT=1025
       - MAILDEV_WEB_PORT=80

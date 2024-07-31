@@ -33,7 +33,7 @@ import java.util.List;
 public class AuthService {
 
     @Value("${APP.LOGIN_LINK}")
-    private String LOGIN_LINK;
+    private String loginLink;
 
     private final JwtService jwtService;
     private final UserService userService;
@@ -165,7 +165,7 @@ public class AuthService {
         userService.save(userEntity);
         confirmationTokenService.deleteToken(token);
 
-        emailService.send(userEntity.getEmail(), emailService.buildForgotPasswordSuccessMessage(LOGIN_LINK));
+        emailService.send(userEntity.getEmail(), emailService.buildForgotPasswordSuccessMessage(loginLink));
     }
 
     private void validateIfUserNotExists(String email) {

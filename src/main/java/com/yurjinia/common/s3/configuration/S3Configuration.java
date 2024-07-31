@@ -23,14 +23,12 @@ public class S3Configuration {
 
     @Value("${aws.credentials.access-key-id}")
     private String accessKeyId;
+
     @Value("${aws.credentials.secret-access-key}")
     private String secretAccessKey;
 
     @Bean
     public S3Client s3Client() {
-        /*accessKeyId = environmentService.getEnv(accessKeyId);
-        secretAccessKey = environmentService.getEnv(secretAccessKey);*/
-
         return S3Client.builder()
                 .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(
