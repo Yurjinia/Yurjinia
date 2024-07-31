@@ -25,10 +25,10 @@ import static com.yurjinia.common.application.constants.TextConstants.FORWARD_SL
 public class UserProfileService {
 
     @Value("${APP.MAIN_PACKAGE}")
-    public String MAIN_PACKAGE;
+    public String mainPackage;
 
     @Value("${APP.DEFAULT_AVATAR_NAME}")
-    public String DEFAULT_AVATAR_NAME;//ToDO: Implement the adaptation of the image to PNG format
+    public String defaultAvatarName;//ToDO: Implement the adaptation of the image to PNG format
 
     private final AWSS3Service awss3Service;
     private final UserProfileMapper userProfileMapper;
@@ -45,7 +45,7 @@ public class UserProfileService {
     }
 
     public Optional<String> uploadAvatar(UserEntity userEntity, MultipartFile image) {
-        String key = MAIN_PACKAGE + userEntity.getEmail() + FORWARD_SLASH + DEFAULT_AVATAR_NAME;
+        String key = mainPackage + userEntity.getEmail() + FORWARD_SLASH + defaultAvatarName;
 
         return awss3Service.uploadImage(image, key);
     }
@@ -67,7 +67,7 @@ public class UserProfileService {
     public UserProfileDTO updateAvatar(String userEmail, MultipartFile image) {
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
         UserEntity userEntity = userProfileEntity.getUser();
-        String key = MAIN_PACKAGE + userEntity.getEmail() + FORWARD_SLASH + DEFAULT_AVATAR_NAME;
+        String key = mainPackage + userEntity.getEmail() + FORWARD_SLASH + defaultAvatarName;
 
         String imageURL = awss3Service.uploadFile(image, key);
         userProfileEntity.setAvatarId(imageURL);
