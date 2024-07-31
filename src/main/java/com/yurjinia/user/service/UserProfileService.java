@@ -11,19 +11,24 @@ import com.yurjinia.user.repository.UserProfileRepository;
 import com.yurjinia.user.service.mapper.UserProfileMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
-import static com.yurjinia.common.s3.constants.AWSS3Constants.DEFAULT_AVATAR_NAME;
-import static com.yurjinia.common.s3.constants.AWSS3Constants.FORWARD_SLASH;
-import static com.yurjinia.common.s3.constants.AWSS3Constants.MAIN_PACKAGE;
+import static com.yurjinia.common.application.TextConstants.FORWARD_SLASH;
 
 @Service
 @RequiredArgsConstructor
 public class UserProfileService {
+
+    @Value("${APP.MAIN_PACKAGE}")
+    public String MAIN_PACKAGE;
+
+    @Value("${APP.DEFAULT_AVATAR_NAME}")
+    public String DEFAULT_AVATAR_NAME;//ToDO: Implement the adaptation of the image to PNG format
 
     private final AWSS3Service awss3Service;
     private final UserProfileMapper userProfileMapper;
