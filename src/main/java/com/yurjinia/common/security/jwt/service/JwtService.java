@@ -115,8 +115,8 @@ public class JwtService {
         }
     }
 
-    public String encode(String password) {
-        return passwordEncoder.encode(password);
+    public String encode(String text) {
+        return passwordEncoder.encode(text);
     }
 
     private String processBearerToken(String token) {
