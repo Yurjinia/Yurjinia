@@ -29,7 +29,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Value("${APP.AUTH.URL}")
-    public String AUTH_URL;
+    public String authUrl;
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
@@ -62,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isAuthUrl(String path) {
-        return path.startsWith(AUTH_URL);
+        return path.startsWith(authUrl);
     }
 
     private String extractJwtFromRequest(HttpServletRequest request) {

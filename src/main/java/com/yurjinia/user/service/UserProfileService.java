@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
-import static com.yurjinia.common.application.TextConstants.FORWARD_SLASH;
+import static com.yurjinia.common.application.constants.TextConstants.FORWARD_SLASH;
 
 @Service
 @RequiredArgsConstructor
