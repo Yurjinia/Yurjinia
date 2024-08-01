@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ public class ProjectService {
     @Transactional
     public ProjectDTO createProject(String userEmail, ProjectDTO projectDTO) {
         validateIfProjectExists(projectDTO);
+        setDefaultValueIfUsersNull(projectDTO);
         userService.validateIfUsersExists(projectDTO.getUsers().stream().toList());
 
         ProjectEntity projectEntity = projectMapper.toEntity(projectDTO);
@@ -72,6 +74,13 @@ public class ProjectService {
     private void validateIfProjectExists(ProjectDTO projectDTO) {
         if (projectRepository.existsByName(projectDTO.getName())) {
             throw new CommonException(ErrorCode.PROJECT_ALREADY_EXISTS, HttpStatus.CONFLICT, List.of("Project by name " + projectDTO.getName() + " already exists"));
+        }
+    }
+
+    private void setDefaultValueIfUsersNull(ProjectDTO projectDTO) {
+        Set<String> users = projectDTO.getUsers();
+        if (users == null) {
+            projectDTO.setUsers(new HashSet<>());
         }
     }
 
