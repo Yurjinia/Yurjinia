@@ -3,6 +3,7 @@ package com.yurjinia.user.service;
 import com.yurjinia.auth.controller.request.RegistrationRequest;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
+import com.yurjinia.common.security.jwt.service.JwtService;
 import com.yurjinia.project_structure.project.entity.ProjectEntity;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.repository.UserRepository;
@@ -25,12 +26,14 @@ public class UserService {
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final UserProfileService userProfileService;
+    private final JwtService jwtService;
 
     public void save(RegistrationRequest registrationRequest) {
         save(userMapper.toEntity(registrationRequest));
     }
 
     public void save(UserEntity userEntity) {
+        userEntity.setPassword(jwtService.encode(userEntity.getPassword()));
         userRepository.save(userEntity);
     }
 
