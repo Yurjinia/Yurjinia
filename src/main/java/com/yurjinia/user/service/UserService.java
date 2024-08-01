@@ -49,7 +49,7 @@ public class UserService {
     }
 
     public void addProject(ProjectEntity projectEntity) {
-        UserEntity userEntity = projectEntity.getUsers().getFirst();
+        UserEntity userEntity = projectEntity.getUsers().iterator().next();
 
         if (userEntity.getProjects() == null) {
             userEntity.setProjects(List.of(projectEntity));
