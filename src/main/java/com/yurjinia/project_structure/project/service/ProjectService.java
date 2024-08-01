@@ -13,9 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,15 +27,12 @@ public class ProjectService {
 
     @Transactional
     public ProjectDTO createProject(String userEmail, ProjectDTO projectDTO) {
+        UserEntity owner = userService.getByEmail(userEmail);
         validateIfProjectExists(projectDTO);
-        setDefaultValueIfUsersNull(projectDTO);
-        userService.validateIfUsersExists(projectDTO.getUsers().stream().toList());
+        validateAllUsersExist(projectDTO.getUsers());
 
         ProjectEntity projectEntity = projectMapper.toEntity(projectDTO);
-        associateUserWithProject(userEmail, projectEntity);
-        projectRepository.save(projectEntity);
-
-        userService.addProject(projectEntity);
+        associateUserWithProject(owner, projectEntity);
 
         inviteUsers(projectDTO);
 
@@ -63,11 +60,7 @@ public class ProjectService {
                 .orElseThrow(() -> new CommonException(ErrorCode.PROJECT_NOT_FOUND, HttpStatus.NOT_FOUND));
         UserEntity userEntity = userService.getByEmail(email);
 
-        projectEntity.getUsers().add(userEntity);
-        userEntity.getProjects().add(projectEntity);
-
-        projectRepository.save(projectEntity);
-        userService.save(userEntity);
+        associateUserWithProject(userEntity, projectEntity);
     }
 
     private void validateIfProjectExists(ProjectDTO projectDTO) {
@@ -76,15 +69,25 @@ public class ProjectService {
         }
     }
 
-    private void associateUserWithProject(String userEmail, ProjectEntity projectEntity) {
-        UserEntity userEntity = userService.getByEmail(userEmail);
-        projectEntity.getUsers().add(userEntity);
+    private void associateUserWithProject(UserEntity user, ProjectEntity projectEntity) {
+        projectEntity.getUsers().add(user);
+        user.getProjects().add(projectEntity);
+
+        projectRepository.save(projectEntity);
+        userService.save(user);
     }
 
-    private void setDefaultValueIfUsersNull(ProjectDTO projectDTO) {
-        Set<String> users = projectDTO.getUsers();
-        if (users == null) {
-            projectDTO.setUsers(new HashSet<>());
+    public void validateAllUsersExist(Set<String> userEmails) {
+        List<String> existingEmails = userService.findAllByEmail(userEmails).stream().map(UserEntity::getEmail).toList();
+        if (existingEmails.size() != userEmails.size()) {
+            Set<String> missingEmails = userEmails.stream()
+                    .filter(user -> !existingEmails.contains(user))
+                    .collect(Collectors.toSet());
+
+            if (!missingEmails.isEmpty()) {
+                throw new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.CONFLICT,
+                        List.of("Users by emails: " + missingEmails + " does not found."));
+            }
         }
     }
 
