@@ -33,10 +33,7 @@ public class ProjectService {
         userService.validateIfUsersExists(projectDTO.getUsers().stream().toList());
 
         ProjectEntity projectEntity = projectMapper.toEntity(projectDTO);
-        UserEntity userEntity = userService.getByEmail(userEmail);
-        List<UserEntity> userEntityList = new ArrayList<>();
-        userEntityList.add(userEntity);
-        projectEntity.setUsers(userEntityList);
+        associateUserWithProject(userEmail, projectEntity);
         projectRepository.save(projectEntity);
 
         userService.addProject(projectEntity);
@@ -78,6 +75,13 @@ public class ProjectService {
         if (projectRepository.existsByName(projectDTO.getName())) {
             throw new CommonException(ErrorCode.PROJECT_ALREADY_EXISTS, HttpStatus.CONFLICT, List.of("Project by name " + projectDTO.getName() + " already exists"));
         }
+    }
+
+    private void associateUserWithProject(String userEmail, ProjectEntity projectEntity) {
+        UserEntity userEntity = userService.getByEmail(userEmail);
+        List<UserEntity> userEntityList = new ArrayList<>();
+        userEntityList.add(userEntity);
+        projectEntity.setUsers(userEntityList);
     }
 
     private void setDefaultValueIfUsersNull(ProjectDTO projectDTO) {
