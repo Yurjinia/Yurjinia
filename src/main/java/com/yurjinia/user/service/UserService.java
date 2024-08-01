@@ -4,7 +4,6 @@ import com.yurjinia.auth.controller.request.RegistrationRequest;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
 import com.yurjinia.common.security.jwt.service.JwtService;
-import com.yurjinia.project_structure.project.entity.ProjectEntity;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.repository.UserRepository;
 import com.yurjinia.user.service.mapper.UserMapper;
@@ -14,10 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,18 +46,6 @@ public class UserService {
 
     public Optional<UserEntity> findByEmail(String email) {
         return userRepository.findByEmail(email);
-    }
-
-    public void addProject(ProjectEntity projectEntity) {
-        UserEntity userEntity = projectEntity.getUsers().getFirst();
-
-        if (userEntity.getProjects() == null) {
-            userEntity.setProjects(List.of(projectEntity));
-        } else {
-            userEntity.getProjects().add(projectEntity);
-        }
-
-        save(userEntity);
     }
 
     @Transactional
@@ -98,18 +83,8 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
-    public void validateIfUsersExists(List<String> userEmails) {
-        List<String> emailsFromDB = userRepository.findAllByEmailIn(userEmails).stream().map(UserEntity::getEmail).toList();
-        if (emailsFromDB.size() != userEmails.size()) {
-            Set<String> missingUsers = userEmails.stream()
-                    .filter(user -> !emailsFromDB.contains(user))
-                    .collect(Collectors.toSet());
-
-            if (!missingUsers.isEmpty()) {
-                throw new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.CONFLICT,
-                        List.of("Users by emails: " + missingUsers + " does not found."));
-            }
-        }
+    public Set<UserEntity> findAllByEmail(Set<String> emails) {
+        return userRepository.findAllByEmailIn(emails);
     }
 
     /*

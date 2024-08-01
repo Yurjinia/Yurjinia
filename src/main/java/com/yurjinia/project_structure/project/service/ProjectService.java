@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,15 +27,12 @@ public class ProjectService {
 
     @Transactional
     public ProjectDTO createProject(String userEmail, ProjectDTO projectDTO) {
+        UserEntity owner = userService.getByEmail(userEmail);
         validateIfProjectExists(projectDTO);
-        userService.validateIfUsersExists(projectDTO.getUsers().stream().toList());
+        validateAllUsersExist(projectDTO.getUsers());
 
         ProjectEntity projectEntity = projectMapper.toEntity(projectDTO);
-        UserEntity userEntityList = userService.getByEmail(userEmail);
-        projectEntity.setUsers(List.of(userEntityList));
-        projectRepository.save(projectEntity);
-
-        userService.addProject(projectEntity);
+        associateUserWithProject(owner, projectEntity);
 
         inviteUsers(projectDTO);
 
@@ -62,16 +60,34 @@ public class ProjectService {
                 .orElseThrow(() -> new CommonException(ErrorCode.PROJECT_NOT_FOUND, HttpStatus.NOT_FOUND));
         UserEntity userEntity = userService.getByEmail(email);
 
-        projectEntity.getUsers().add(userEntity);
-        userEntity.getProjects().add(projectEntity);
-
-        projectRepository.save(projectEntity);
-        userService.save(userEntity);
+        associateUserWithProject(userEntity, projectEntity);
     }
 
     private void validateIfProjectExists(ProjectDTO projectDTO) {
         if (projectRepository.existsByName(projectDTO.getName())) {
             throw new CommonException(ErrorCode.PROJECT_ALREADY_EXISTS, HttpStatus.CONFLICT, List.of("Project by name " + projectDTO.getName() + " already exists"));
+        }
+    }
+
+    private void associateUserWithProject(UserEntity user, ProjectEntity projectEntity) {
+        projectEntity.getUsers().add(user);
+        user.getProjects().add(projectEntity);
+
+        projectRepository.save(projectEntity);
+        userService.save(user);
+    }
+
+    public void validateAllUsersExist(Set<String> userEmails) {
+        List<String> existingEmails = userService.findAllByEmail(userEmails).stream().map(UserEntity::getEmail).toList();
+        if (existingEmails.size() != userEmails.size()) {
+            Set<String> missingEmails = userEmails.stream()
+                    .filter(user -> !existingEmails.contains(user))
+                    .collect(Collectors.toSet());
+
+            if (!missingEmails.isEmpty()) {
+                throw new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.CONFLICT,
+                        List.of("Users by emails: " + missingEmails + " does not found."));
+            }
         }
     }
 
