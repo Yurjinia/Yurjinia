@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,8 +33,10 @@ public class ProjectService {
         userService.validateIfUsersExists(projectDTO.getUsers().stream().toList());
 
         ProjectEntity projectEntity = projectMapper.toEntity(projectDTO);
-        UserEntity userEntityList = userService.getByEmail(userEmail);
-        projectEntity.setUsers(List.of(userEntityList));
+        UserEntity userEntity = userService.getByEmail(userEmail);
+        List<UserEntity> userEntityList = new ArrayList<>();
+        userEntityList.add(userEntity);
+        projectEntity.setUsers(userEntityList);
         projectRepository.save(projectEntity);
 
         userService.addProject(projectEntity);
