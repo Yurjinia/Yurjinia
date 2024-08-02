@@ -17,7 +17,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -35,8 +37,9 @@ public class ProjectEntity {
     @Column(unique = true)
     private String name;
 
+    @Builder.Default
     @ManyToMany(mappedBy = "projects")
-    private List<UserEntity> users;
+    private Set<UserEntity> users = new HashSet<>();
 
     @OneToMany
     @JoinColumn(name = "project_id")
