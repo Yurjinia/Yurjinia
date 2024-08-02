@@ -2,6 +2,7 @@ package com.yurjinia.project_structure.project.controller;
 
 import com.yurjinia.project_structure.project.dto.ProjectDTO;
 import com.yurjinia.project_structure.project.service.ProjectService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +18,7 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @PostMapping("/{userEmail}")
-    public ProjectDTO createProject(@PathVariable String userEmail, @RequestBody ProjectDTO projectDTO) {
+    public ProjectDTO createProject(@PathVariable String userEmail, @Valid @RequestBody ProjectDTO projectDTO) {
         return projectService.createProject(userEmail, projectDTO);
     }
 

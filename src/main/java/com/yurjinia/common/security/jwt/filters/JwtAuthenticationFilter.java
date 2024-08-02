@@ -6,11 +6,11 @@ import com.yurjinia.common.security.jwt.constants.JwtConstants;
 import com.yurjinia.common.security.jwt.service.JwtService;
 import com.yurjinia.common.validator.JwtValidator;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,6 +28,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    @Value("${APP.AUTH.URL}")
+    public String authUrl;
+
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
@@ -36,12 +39,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws IOException {
         try {
-            if (shouldSkipFilter(request, response, filterChain)) {
+            if (isRequestSentToPublicEndpoint(request) || isAlreadyAuthenticated()) {
+                filterChain.doFilter(request, response);
                 return;
             }
 
             String token = extractJwtFromRequest(request);
-            UserDetails userDetails = authenticateToken(token, request, response, filterChain);
+            UserDetails userDetails = authenticateToken(token);
             setAuthentication(userDetails, request);
 
             filterChain.doFilter(request, response);
@@ -52,17 +56,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    private boolean shouldSkipFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+    private boolean isRequestSentToPublicEndpoint(HttpServletRequest request) {
         String path = request.getRequestURI();
-        if (isAuthUrl(path)) {
-            filterChain.doFilter(request, response);
-            return true;
-        }
-        return false;
+        return isAuthUrl(path);
     }
 
     private boolean isAuthUrl(String path) {
-        return path.startsWith(JwtConstants.AUTH_URL);
+        return path.startsWith(authUrl);
     }
 
     private String extractJwtFromRequest(HttpServletRequest request) {
@@ -73,20 +73,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 
-    private UserDetails authenticateToken(String token,
-                                          HttpServletRequest request,
-                                          HttpServletResponse response,
-                                          FilterChain filterChain) throws CommonException, ServletException, IOException {
+    private UserDetails authenticateToken(String token) throws CommonException {
         if (!isValidToken(token)) {
             throw new CommonException(ErrorCode.JWT_INVALID, HttpStatus.UNAUTHORIZED);
         }
 
         String userEmail = jwtService.extractUsername(token);
-        if (isAlreadyAuthenticated()) {
-            filterChain.doFilter(request, response);
-        }
-
         UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+
         if (!jwtService.isTokenValid(token, userDetails)) {
             throw new CommonException(ErrorCode.FORBIDDEN, HttpStatus.FORBIDDEN);
         }
