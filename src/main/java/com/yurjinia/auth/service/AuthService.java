@@ -19,6 +19,7 @@ import com.yurjinia.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,11 +35,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.yurjinia.common.application.constants.ApplicationConstants.LOGIN_LINK;
-
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
+    @Value("${APP.LOGIN_LINK}")
+    private String loginLink;
 
     private final JwtService jwtService;
     private final UserService userService;
@@ -192,7 +194,7 @@ public class AuthService {
         userService.save(userEntity);
         confirmationTokenService.deleteToken(token);
 
-        emailService.send(userEntity.getEmail(), emailService.buildForgotPasswordSuccessMessage(LOGIN_LINK));
+        emailService.send(userEntity.getEmail(), emailService.buildForgotPasswordSuccessMessage(loginLink));
     }
 
     private void validateIfUserNotExists(String email) {

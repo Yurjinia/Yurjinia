@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +28,9 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    @Value("${APP.AUTH.URL}")
+    public String authUrl;
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
@@ -65,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isAuthUrl(String path) {
-        return path.startsWith(JwtConstants.AUTH_URL);
+        return path.startsWith(authUrl);
     }
 
     private String extractJwtFromRequest(HttpServletRequest request) {

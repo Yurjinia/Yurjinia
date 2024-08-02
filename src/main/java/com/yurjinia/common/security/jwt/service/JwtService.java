@@ -8,10 +8,12 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -24,6 +26,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
 
     @Value("${jwt.token.key}")
@@ -31,6 +34,8 @@ public class JwtService {
 
     @Value("${jwt.token.expiration}")
     private long expirationInSeconds;
+
+    private final PasswordEncoder passwordEncoder;
 
     public String extractUsername(String jwt) {
         return extractClaim(jwt, Claims::getSubject);
@@ -113,6 +118,10 @@ public class JwtService {
 
             throw new CommonException(ErrorCode.JWT_INVALID, HttpStatus.BAD_REQUEST, List.of(exception.getMessage()));
         }
+    }
+
+    public String encode(String text) {
+        return passwordEncoder.encode(text);
     }
 
     private String processBearerToken(String token) {
