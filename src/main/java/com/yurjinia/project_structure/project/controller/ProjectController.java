@@ -1,9 +1,15 @@
 package com.yurjinia.project_structure.project.controller;
 
+import com.yurjinia.project_structure.project.dto.ProjectDTO;
 import com.yurjinia.project_structure.project.service.ProjectService;
+import com.yurjinia.user.dto.UserDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -12,18 +18,23 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-//    @PutMapping("/{projectCode}")
-//    public ResponseEntity<?> updateProject(@PathVariable String projectCode, @RequestBody UpdateProjectRequest updateRequest) {
-//        try {
-//            ProjectDTO updatedProject = projectService.updateProject(projectCode, updateRequest);
-//            return ResponseEntity.ok(updatedProject);
-//        } catch (IllegalArgumentException e) {
-//            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-//        } catch (NoSuchElementException e) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-//        } catch (RuntimeException e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-//        }
+    @GetMapping("/{projectCode}/users")
+    public ResponseEntity<List<UserDTO>> getProjectUsers(@PathVariable String projectCode) {
+        List<UserDTO> users = projectService.getProjectUsers(projectCode);
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+    @PutMapping("/{projectCode}")
+    public ResponseEntity<ProjectDTO> updateProject(@PathVariable String projectCode, @Valid @RequestBody ProjectDTO projectDTO) {
+        ProjectDTO updatedProject = projectService.
+                updateProject(projectCode, projectDTO);
+        return new ResponseEntity<>(updatedProject, HttpStatus.OK);
+    }
+
+//    @DeleteMapping("/{projectCode}")
+//    public ResponseEntity<Void> deleteProject(@PathVariable String projectCode) {
+//        projectService.deleteProject(projectCode);
+//        return ResponseEntity.noContent().build(); // Повертає статус 204 No Content
 //    }
 
 /*

@@ -14,6 +14,8 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
     @Query("SELECT CASE WHEN COUNT(p) > 0 THEN TRUE ELSE FALSE END FROM ProjectEntity p WHERE p.name = :name OR p.code = :code")
     boolean existsByNameOrCode(@Param("name") String name, @Param("code") String code);
 
+    boolean existsByNameAndCodeNot(String name, String code);
+    boolean existsByCode(String code);
     Optional<ProjectEntity> findProjectEntityByName(String name);
     Optional<ProjectEntity> findByCode(String code);
 

@@ -4,6 +4,7 @@ import com.yurjinia.common.confirmationToken.service.ConfirmationTokenService;
 import com.yurjinia.common.emailSender.service.EmailService;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
+import com.yurjinia.project_structure.board.repository.BoardRepository;
 import com.yurjinia.project_structure.project.dto.ProjectDTO;
 import com.yurjinia.project_structure.project.entity.ProjectEntity;
 import com.yurjinia.project_structure.project.repository.ProjectRepository;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,9 +29,8 @@ public class ProjectService {
     private final UserService userService;
     private final ProjectMapper projectMapper;
     private final ProjectRepository projectRepository;
-    private final ConfirmationTokenService confirmationTokenService;
-    private final EmailService emailService;
     private final UserMapper userMapper;
+    private final BoardRepository boardRepository;
 
     public List<ProjectDTO> getUserProjects(String userEmail) {
         return userService.getByEmail(userEmail)
@@ -65,27 +66,40 @@ public class ProjectService {
         userService.save(owner);
     }
 
+    @Transactional
+    public ProjectDTO updateProject(String projectCode, ProjectDTO projectDTO) {
+        ProjectEntity existingProject = findProjectByCode(projectCode);
+
+        validateIfProjectNotConflicts(projectDTO, projectCode);
+
+        if (projectDTO.getProjectName() != null && !projectDTO.getProjectName().isBlank()) {
+            existingProject.setName(projectDTO.getProjectName());
+        }
+
+        if (projectDTO.getProjectCode() != null && !projectDTO.getProjectCode().isBlank()) {
+            existingProject.setCode(projectDTO.getProjectCode());
+        }
+
+        if (projectDTO.getUserEmails() != null && !projectDTO.getUserEmails().isEmpty()) {
+            Set<UserEntity> userEntities = projectDTO.getUserEmails().stream()
+                    .map(userService::getByEmail)
+                    .collect(Collectors.toSet());
+            existingProject.setUsers(userEntities);
+        }
+
+        ProjectEntity updatedProject = projectRepository.save(existingProject);
+        return projectMapper.toDto(updatedProject);
+    }
 
 //    @Transactional
-//    public ProjectDTO updateProject(String projectCode, UpdateProjectRequest updateRequest) {
-//        // Find existing project by projectCode
-//        ProjectEntity existingProject = projectRepository.findByProjectCode(projectCode)
-//                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+//    public void deleteProject(String projectCode) {
+//        findProjectByCode(projectCode);
 //
-//        // Update project fields if they are not blank in the updateRequest
-//        if (StringUtils.isNotBlank(updateRequest.getProjectOwnerEmail())) {
-//            existingProject.setProjectOwnerEmail(updateRequest.getProjectOwnerEmail());
-//        }
-//        if (StringUtils.isNotBlank(updateRequest.getProjectName())) {
-//            existingProject.setName(updateRequest.getProjectName());
-//        }
-//        // Update other fields similarly...
+//        // Видалення всіх дошок, що належать проекту
+//        boardRepository.deleteByProject(project);
 //
-//        // Save updated projectEntity
-//        ProjectEntity updatedProject = projectRepository.save(existingProject);
-//
-//        // Map updated ProjectEntity back to ProjectDTO
-//        return projectMapper.toDto(updatedProject);
+//        // Видалення проекту
+//        projectRepository.delete(project);
 //    }
 
     private void inviteUsers(ProjectDTO projectDTO) {
@@ -114,6 +128,23 @@ public class ProjectService {
 
         projectRepository.save(projectEntity);
         userService.save(userEntity);
+    }
+
+    private ProjectEntity findProjectByCode(String projectCode) {
+        return projectRepository.findByCode(projectCode)
+                .orElseThrow(() -> new CommonException(ErrorCode.PROJECT_NOT_FOUND, HttpStatus.NOT_FOUND, List.of("Project not found with code: " + projectCode)));
+    }
+
+    private void validateIfProjectNotConflicts(ProjectDTO projectDTO, String existingProjectCode) {
+        if (!projectDTO.getProjectCode().equals(existingProjectCode) && projectRepository.existsByCode(projectDTO.getProjectCode())) {
+            throw new CommonException(ErrorCode.PROJECT_ALREADY_EXISTS, HttpStatus.CONFLICT,
+                    List.of("Project by code " + projectDTO.getProjectCode() + " already exists"));
+        }
+
+        if (projectRepository.existsByNameAndCodeNot(projectDTO.getProjectName(), existingProjectCode)) {
+            throw new CommonException(ErrorCode.PROJECT_ALREADY_EXISTS, HttpStatus.CONFLICT,
+                    List.of("Project by name " + projectDTO.getProjectName() + " already exists"));
+        }
     }
 
     private void validateIfProjectNotExists(ProjectDTO projectDTO) {
