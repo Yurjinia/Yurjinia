@@ -3,6 +3,7 @@ package com.yurjinia.common.security.jwt.filters;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
 import com.yurjinia.common.security.jwt.constants.JwtConstants;
+import com.yurjinia.common.security.jwt.service.JwtBlacklistService;
 import com.yurjinia.common.security.jwt.service.JwtService;
 import com.yurjinia.common.validator.JwtValidator;
 import jakarta.servlet.FilterChain;
@@ -29,6 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final JwtBlacklistService jwtBlacklistService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -41,6 +43,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             String token = extractJwtFromRequest(request);
+
+            if (jwtBlacklistService.isTokenBlacklisted(token)) {
+                throw new CommonException(ErrorCode.JWT_INVALID, HttpStatus.UNAUTHORIZED);
+            }
+
             UserDetails userDetails = authenticateToken(token);
             setAuthentication(userDetails, request);
 

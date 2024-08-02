@@ -12,6 +12,14 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_DB=yurjinia
 
+  redis:
+    image: redis:7.0-alpine
+    container_name: yurjinia_redis_container
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
   maildev:
     image: maildev/maildev
     container_name: maildev
@@ -21,3 +29,6 @@ services:
     environment:
       - MAILDEV_SMTP_PORT=1025
       - MAILDEV_WEB_PORT=80
+
+volumes:
+  redis_data:

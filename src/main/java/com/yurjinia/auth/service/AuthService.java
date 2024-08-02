@@ -10,18 +10,25 @@ import com.yurjinia.common.confirmationToken.service.ConfirmationTokenService;
 import com.yurjinia.common.emailSender.service.EmailService;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
+import com.yurjinia.common.security.jwt.constants.JwtConstants;
 import com.yurjinia.common.security.jwt.dto.JwtAuthenticationResponse;
+import com.yurjinia.common.security.jwt.service.JwtBlacklistService;
 import com.yurjinia.common.security.jwt.service.JwtService;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -37,6 +44,7 @@ public class AuthService {
     private final UserService userService;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final JwtBlacklistService jwtBlacklistService;
     private final AuthenticationManager authenticationManager;
     private final ConfirmationTokenService confirmationTokenService;
 
@@ -130,6 +138,27 @@ public class AuthService {
                 .email(email)
                 .password("")
                 .build();
+    }
+
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        String requestHeader = request.getHeader(JwtConstants.AUTHORIZATION_HEADER);
+
+        if (StringUtils.hasText(requestHeader) && requestHeader.startsWith(JwtConstants.TOKEN_PREFIX)) {
+            String token = requestHeader.substring(JwtConstants.TOKEN_PREFIX.length());
+            long expirationTime = jwtService.getExpirationTime(token);
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+
+            if (auth != null) {
+                SecurityContextHolder.getContext().setAuthentication(null);
+
+                if (jwtBlacklistService.isTokenBlacklisted(token)) {
+                    throw new CommonException(ErrorCode.JWT_INVALID, HttpStatus.UNAUTHORIZED);
+                }
+
+                jwtBlacklistService.blacklistToken(token, expirationTime);
+                new SecurityContextLogoutHandler().logout(request, response, auth);
+            }
+        }
     }
 
     public void passwordResetRequest(PasswordResetRequest passwordResetRequest) {
