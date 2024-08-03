@@ -31,6 +31,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Value("${APP.AUTH.URL}")
     public String authUrl;
 
+    private static final String swagger = "/swagger-ui/";
+    private static final String api_doc= "/v3/api-docs";
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
@@ -62,7 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isAuthUrl(String path) {
-        return path.startsWith(authUrl);
+        return path.startsWith(authUrl) || path.startsWith(swagger) || path.startsWith(api_doc);
     }
 
     private String extractJwtFromRequest(HttpServletRequest request) {

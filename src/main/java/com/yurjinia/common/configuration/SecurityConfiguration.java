@@ -22,6 +22,13 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
+    private static final String[] SWAGGER_WHITELIST = {
+            "swagger-ui/**",
+            "v3/api-docs/**",
+            "swagger-resources/**",
+            "swagger-resources/",
+    };
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationProvider authenticationProvider;
 
@@ -32,13 +39,13 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .oauth2Login(oauth2Login -> oauth2Login
-                        .defaultSuccessUrl("/api/v1/auth/login/google", true));
+                ;
 
         return http.build();
     }
