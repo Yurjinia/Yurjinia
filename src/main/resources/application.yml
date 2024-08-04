@@ -13,8 +13,8 @@ spring:
     active: default
   datasource:
     url: ${DATABASE.URL}
-    username: ${DATABASE.PASSWORD}
-    password: ${DATABASE.USERNAME}
+    username: ${DATABASE.USERNAME}
+    password: ${DATABASE.PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -55,9 +55,9 @@ spring:
           writetimeout: 5000
   data:
     redis:
-      host: localhost
-      port: 6379
-      password: ""
+      host: ${REDIS.HOST}
+      port: ${REDIS.PORT}
+      password: ${REDIS.PASSWORD}
       connect-timeout: 5000
 
 aws:

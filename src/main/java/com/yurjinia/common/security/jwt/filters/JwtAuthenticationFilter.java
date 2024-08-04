@@ -72,7 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return path.startsWith(authUrl);
     }
 
-    private String extractJwtFromRequest(HttpServletRequest request) {
+    public String extractJwtFromRequest(HttpServletRequest request) {
         String requestHeader = request.getHeader(JwtConstants.AUTHORIZATION_HEADER);
         if (StringUtils.hasText(requestHeader) && requestHeader.startsWith(JwtConstants.TOKEN_PREFIX)) {
             return requestHeader.substring(JwtConstants.TOKEN_PREFIX.length());

@@ -43,12 +43,12 @@ public class AuthController {
         return authService.login(userDTO);
     }
 
-    @PostMapping("/logout")
+    /*@PostMapping("/logout")
     public ResponseEntity<Void> logout(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response) {
         authService.logout(request, response);
 
         return ResponseEntity.noContent().build();
-    }
+    }*/
 
     @ResponseBody
     @GetMapping("/login/google")

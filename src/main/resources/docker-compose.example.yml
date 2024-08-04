@@ -14,11 +14,10 @@ services:
 
   redis:
     image: redis:7.0-alpine
-    container_name: yurjinia_redis_container
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
+      - ~/redis_data:/data
 
   maildev:
     image: maildev/maildev

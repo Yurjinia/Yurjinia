@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -140,27 +141,6 @@ public class AuthService {
                 .email(email)
                 .password("")
                 .build();
-    }
-
-    public void logout(HttpServletRequest request, HttpServletResponse response) {
-        String requestHeader = request.getHeader(JwtConstants.AUTHORIZATION_HEADER);
-
-        if (StringUtils.hasText(requestHeader) && requestHeader.startsWith(JwtConstants.TOKEN_PREFIX)) {
-            String token = requestHeader.substring(JwtConstants.TOKEN_PREFIX.length());
-            long expirationTime = jwtService.getExpirationTime(token);
-            var auth = SecurityContextHolder.getContext().getAuthentication();
-
-            if (auth != null) {
-                SecurityContextHolder.getContext().setAuthentication(null);
-
-                if (jwtBlacklistService.isTokenBlacklisted(token)) {
-                    throw new CommonException(ErrorCode.JWT_INVALID, HttpStatus.UNAUTHORIZED);
-                }
-
-                jwtBlacklistService.blacklistToken(token, expirationTime);
-                new SecurityContextLogoutHandler().logout(request, response, auth);
-            }
-        }
     }
 
     public void passwordResetRequest(PasswordResetRequest passwordResetRequest) {

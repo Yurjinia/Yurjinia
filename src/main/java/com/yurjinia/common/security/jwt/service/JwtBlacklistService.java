@@ -1,6 +1,6 @@
 package com.yurjinia.common.security.jwt.service;
 
-import com.yurjinia.common.security.jwt.repository.BlacklistRepository;
+import com.yurjinia.common.cache.service.CacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -8,14 +8,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class JwtBlacklistService {
 
-    private final BlacklistRepository blacklistRepository;
+    private final CacheService cacheService;
 
     public void blacklistToken(String token, long expirationTime) {
-        blacklistRepository.blacklistToken(token, expirationTime);
+        cacheService.blacklistToken(token, expirationTime);
     }
 
     public boolean isTokenBlacklisted(String token) {
-        return blacklistRepository.isTokenBlacklisted(token);
+        return cacheService.isTokenBlacklisted(token);
     }
 
 }
