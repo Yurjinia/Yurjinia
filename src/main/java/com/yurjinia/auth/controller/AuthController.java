@@ -37,6 +37,10 @@ public class AuthController {
         return authService.login(userDTO);
     }
 
+    /**
+     * @param user
+     * @path /oauth2/authorization/google (for Google authentication)
+     */
     @ResponseBody
     @GetMapping("/login/google")
     @Operation(summary = "Login through Google", description = "Getting user information after login via Google OAuth2.")
