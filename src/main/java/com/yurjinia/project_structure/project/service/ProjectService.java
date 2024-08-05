@@ -12,7 +12,6 @@ import com.yurjinia.project_structure.project.service.mapper.ProjectMapper;
 import com.yurjinia.user.dto.UserDTO;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.UserService;
-import com.yurjinia.user.service.mapper.UserMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -32,20 +31,18 @@ public class ProjectService {
     private final UserService userService;
     private final ProjectMapper projectMapper;
     private final ProjectRepository projectRepository;
-    private final UserMapper userMapper;
 
     public List<ProjectDTO> getUserProjects(String userEmail) {
-        return userService.getByEmail(userEmail)
-                .getProjects()
-                .stream()
-                .map(projectMapper::toDto)
+        UserEntity user = userService.getByEmail(userEmail);
+        UserDTO ownerDto = userService.mapToDto(user);
+        return user.getProjects().stream()
+                .map(projectEntity -> projectMapper.toDto(projectEntity, ownerDto))
                 .toList();
     }
 
     public List<UserDTO> getProjectUsers(String projectCode) {
-        return getProject(projectCode).getUsers().stream()
-                .map(userMapper::toDto)
-                .toList();
+        Set<UserEntity> users = getProject(projectCode).getUsers();
+        return userService.mapToDto(users);
     }
 
     private ProjectEntity getProject(String projectCode) {
@@ -61,6 +58,10 @@ public class ProjectService {
 
         UserEntity owner = userService.getByEmail(userEmail);
         ProjectEntity projectEntity = projectMapper.toEntity(createProjectRequest, owner);
+
+        if (projectEntity.getUsers().contains(owner)) {
+            throw new CommonException(ErrorCode.USER_ALREADY_IN_PROJECT, HttpStatus.CONFLICT, List.of("User " + owner.getEmail() + " is already in the project"));
+        }
         associateUserWithProject(owner, projectEntity);
 
         inviteUsers(createProjectRequest.getProjectCode(), createProjectRequest.getUserEmails());
@@ -81,7 +82,9 @@ public class ProjectService {
         }
 
         ProjectEntity updatedProject = projectRepository.save(existingProject);
-        return projectMapper.toDto(updatedProject);
+
+        UserDTO ownerDto = userService.mapToDto(updatedProject.getOwner());
+        return projectMapper.toDto(updatedProject, ownerDto);
     }
 
     @Transactional
@@ -133,17 +136,11 @@ public class ProjectService {
     }
 
     private void associateUserWithProject(UserEntity user, ProjectEntity projectEntity) {
-
-        if (projectEntity.getUsers().contains(user)) {
-            throw new CommonException(ErrorCode.USER_ALREADY_IN_PROJECT, HttpStatus.CONFLICT, List.of("User " + user.getEmail() + " is already in the project"));
-        }
-
         projectEntity.getUsers().add(user);
         user.getProjects().add(projectEntity);
 
         projectRepository.save(projectEntity);
         userService.save(user);
-
     }
 
     private ProjectEntity findProjectByCode(String projectCode) {
@@ -180,7 +177,7 @@ public class ProjectService {
         }
     }
 
-    public void validateAllUsersExist(Set<String> userEmails) {
+    private void validateAllUsersExist(Set<String> userEmails) {
         List<String> existingEmails = userService.findAllByEmail(userEmails).stream().map(UserEntity::getEmail).toList();
         if (existingEmails.size() != userEmails.size()) {
             Set<String> missingEmails = userEmails.stream()

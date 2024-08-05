@@ -4,23 +4,28 @@ import com.yurjinia.auth.controller.request.RegistrationRequest;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
 import com.yurjinia.common.security.jwt.service.JwtService;
+import com.yurjinia.user.dto.UserDTO;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.repository.UserRepository;
 import com.yurjinia.user.service.mapper.UserMapper;
+import com.yurjinia.user.service.mapper.UserProfileMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserMapper userMapper;
+    private final UserProfileMapper userProfileMapper;
     private final UserRepository userRepository;
     private final UserProfileService userProfileService;
     private final JwtService jwtService;
@@ -85,6 +90,19 @@ public class UserService {
 
     public Set<UserEntity> findAllByEmail(Set<String> emails) {
         return userRepository.findAllByEmailIn(emails);
+    }
+
+    public UserDTO mapToDto(UserEntity userEntity) {
+        return UserDTO.builder()
+                .email(userEntity.getEmail())
+                .profileDTO(userProfileMapper.toDto(userEntity.getUserProfile()))
+                .build();
+    }
+
+    public List<UserDTO> mapToDto(Set<UserEntity> userEntities) {
+        return userEntities.stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
     }
 
     /*

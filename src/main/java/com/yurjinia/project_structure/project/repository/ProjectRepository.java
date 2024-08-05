@@ -15,8 +15,9 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
     boolean existsByNameOrCode(@Param("name") String name, @Param("code") String code);
 
     boolean existsByName(String name);
+
     boolean existsByCode(String code);
-    Optional<ProjectEntity> findProjectEntityByName(String name);
+
     Optional<ProjectEntity> findByCode(String code);
 
 }
