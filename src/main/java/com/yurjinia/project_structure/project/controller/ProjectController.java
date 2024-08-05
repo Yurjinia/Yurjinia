@@ -1,25 +1,55 @@
 package com.yurjinia.project_structure.project.controller;
 
+import com.yurjinia.project_structure.project.dto.InviteToProjectRequest;
 import com.yurjinia.project_structure.project.dto.ProjectDTO;
+import com.yurjinia.project_structure.project.dto.UpdateProjectRequest;
 import com.yurjinia.project_structure.project.service.ProjectService;
+import com.yurjinia.user.dto.UserDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/projects")
+@RequestMapping("/api/v1/projects")
 public class ProjectController {
 
     private final ProjectService projectService;
 
-    @PostMapping("/{userEmail}")
-    public ProjectDTO createProject(@PathVariable String userEmail, @Valid @RequestBody ProjectDTO projectDTO) {
-        return projectService.createProject(userEmail, projectDTO);
+    @GetMapping("/{projectCode}/users")
+    public ResponseEntity<List<UserDTO>> getProjectUsers(@PathVariable String projectCode) {
+        List<UserDTO> users = projectService.getProjectUsers(projectCode);
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+    @PutMapping("/{projectCode}")
+    public ResponseEntity<ProjectDTO> updateProject(@PathVariable String projectCode,
+                                                    @Valid @RequestBody UpdateProjectRequest updateProjectRequest) {
+        ProjectDTO updatedProject = projectService.updateProject(projectCode, updateProjectRequest);
+        return new ResponseEntity<>(updatedProject, HttpStatus.OK);
+    }
+
+    @PostMapping("/{projectCode}/invite")
+    public ResponseEntity<Void> inviteUsers(@PathVariable String projectCode,
+                                            @Valid @RequestBody InviteToProjectRequest inviteToProjectRequest) {
+        projectService.inviteUsers(projectCode, inviteToProjectRequest);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{projectCode}")
+    public ResponseEntity<Void> deleteProject(@PathVariable String projectCode) {
+        projectService.deleteProject(projectCode);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{projectCode}/users/{userEmail}")
+    public ResponseEntity<Void> deleteUserFromProject(@PathVariable String projectCode, @PathVariable String userEmail) {
+        projectService.deleteUserFromProject(projectCode, userEmail);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     /* ToDo: Refer to next JIRA with having more clarification about the reasons of

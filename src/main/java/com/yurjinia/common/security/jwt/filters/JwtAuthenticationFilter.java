@@ -72,10 +72,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private String extractJwtFromRequest(HttpServletRequest request) {
         String requestHeader = request.getHeader(JwtConstants.AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(requestHeader) && requestHeader.startsWith(JwtConstants.TOKEN_PREFIX)) {
-            return requestHeader.substring(JwtConstants.TOKEN_PREFIX.length());
+
+        if (!StringUtils.hasText(requestHeader) || !requestHeader.startsWith(JwtConstants.TOKEN_PREFIX)) {
+            return null;
         }
-        return null;
+
+        return requestHeader.substring(JwtConstants.TOKEN_PREFIX.length());
     }
 
     private UserDetails authenticateToken(String token) throws CommonException {
@@ -89,6 +91,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (!jwtService.isTokenValid(token, userDetails)) {
             throw new CommonException(ErrorCode.FORBIDDEN, HttpStatus.FORBIDDEN);
         }
+
         return userDetails;
     }
 

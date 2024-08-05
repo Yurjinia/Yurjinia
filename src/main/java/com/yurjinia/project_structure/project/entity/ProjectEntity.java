@@ -2,23 +2,10 @@ package com.yurjinia.project_structure.project.entity;
 
 import com.yurjinia.project_structure.board.entity.BoardEntity;
 import com.yurjinia.user.entity.UserEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -34,15 +21,22 @@ public class ProjectEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String name;
+
+    @Column(nullable = false, unique = true)
+    private String code;
 
     @Builder.Default
     @ManyToMany(mappedBy = "projects")
     private Set<UserEntity> users = new HashSet<>();
 
-    @OneToMany
+    @Builder.Default
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "project_id")
-    private List<BoardEntity> boards;
+    private Set<BoardEntity> boards = new HashSet<>();
 
+    @ManyToOne
+    @JoinColumn(nullable = false, name = "owner_id")
+    private UserEntity owner;
 }
