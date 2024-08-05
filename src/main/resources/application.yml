@@ -13,8 +13,8 @@ spring:
     active: default
   datasource:
     url: ${DATABASE.URL}
-    username: ${DATABASE.PASSWORD}
-    password: ${DATABASE.USERNAME}
+    username: ${DATABASE.USERNAME}
+    password: ${DATABASE.PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -53,6 +53,12 @@ spring:
           connectiontimeout: 5000
           timeout: 3000
           writetimeout: 5000
+  data:
+    redis:
+      host: ${REDIS.HOST}
+      port: ${REDIS.PORT}
+      password: ${REDIS.PASSWORD}
+      connect-timeout: 5000
 
 aws:
   s3:
@@ -78,4 +84,3 @@ logging:
       com.yurjinia.user.repository: ERROR
       com.yurjinia.common.security.jwt.filters.JwtAuthenticationFilter: WARN
     root: info
-
