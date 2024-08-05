@@ -1,10 +1,7 @@
 package com.yurjinia.common.cache.service;
 
-import com.yurjinia.common.exception.CommonException;
-import com.yurjinia.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;

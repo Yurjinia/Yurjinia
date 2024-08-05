@@ -19,22 +19,23 @@ import org.springframework.util.StringUtils;
 public class LogoutHandler {
 
     private final JwtService jwtService;
-    private final JwtBlacklistService jwtBlacklistService;
 
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         String requestHeader = request.getHeader(JwtConstants.AUTHORIZATION_HEADER);
 
-        if (StringUtils.hasText(requestHeader) && requestHeader.startsWith(JwtConstants.TOKEN_PREFIX)) {
-            String token = requestHeader.substring(JwtConstants.TOKEN_PREFIX.length());
-            long expirationTime = jwtService.getExpirationTime(token);
-
-            if (jwtBlacklistService.isTokenBlacklisted(token)) {
-                throw new CommonException(ErrorCode.JWT_EXPIRED, HttpStatus.UNAUTHORIZED);
-            }
-
-            jwtBlacklistService.blacklistToken(token, expirationTime);
-            new SecurityContextLogoutHandler().logout(request, response, authentication);
+        if (!StringUtils.hasText(requestHeader) || !requestHeader.startsWith(JwtConstants.TOKEN_PREFIX)) {
+            throw new CommonException(ErrorCode.JWT_INVALID, HttpStatus.BAD_REQUEST);
         }
+
+        String token = requestHeader.substring(JwtConstants.TOKEN_PREFIX.length());
+        long expirationTime = jwtService.getExpirationTime(token);
+
+        if (jwtService.isTokenBlacklisted(token)) {
+            throw new CommonException(ErrorCode.JWT_EXPIRED, HttpStatus.UNAUTHORIZED);
+        }
+
+        jwtService.blacklistToken(token, expirationTime);
+        new SecurityContextLogoutHandler().logout(request, response, authentication);
     }
 
 }

@@ -84,6 +84,3 @@ logging:
       com.yurjinia.user.repository: ERROR
       com.yurjinia.common.security.jwt.filters.JwtAuthenticationFilter: WARN
     root: info
-
-
-
