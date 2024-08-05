@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -30,14 +29,11 @@ public class LogoutHandler {
             long expirationTime = jwtService.getExpirationTime(token);
 
             if (jwtBlacklistService.isTokenBlacklisted(token)) {
-                throw new CommonException(ErrorCode.JWT_INVALID, HttpStatus.UNAUTHORIZED);
+                throw new CommonException(ErrorCode.JWT_EXPIRED, HttpStatus.UNAUTHORIZED);
             }
 
-            if (authentication != null) {
-                SecurityContextHolder.getContext().setAuthentication(null);
-                jwtBlacklistService.blacklistToken(token, expirationTime);
-                new SecurityContextLogoutHandler().logout(request, response, authentication);
-            }
+            jwtBlacklistService.blacklistToken(token, expirationTime);
+            new SecurityContextLogoutHandler().logout(request, response, authentication);
         }
     }
 

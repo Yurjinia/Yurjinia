@@ -6,23 +6,13 @@ import com.yurjinia.auth.dto.PasswordResetDTO;
 import com.yurjinia.auth.dto.PasswordResetRequest;
 import com.yurjinia.auth.service.AuthService;
 import com.yurjinia.common.security.jwt.dto.JwtAuthenticationResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -42,13 +32,6 @@ public class AuthController {
     public JwtAuthenticationResponse login(@Valid @RequestBody LoginRequest userDTO) {
         return authService.login(userDTO);
     }
-
-    /*@PostMapping("/logout")
-    public ResponseEntity<Void> logout(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response) {
-        authService.logout(request, response);
-
-        return ResponseEntity.noContent().build();
-    }*/
 
     @ResponseBody
     @GetMapping("/login/google")

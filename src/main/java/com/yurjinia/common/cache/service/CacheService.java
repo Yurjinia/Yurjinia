@@ -1,7 +1,10 @@
 package com.yurjinia.common.cache.service;
 
+import com.yurjinia.common.exception.CommonException;
+import com.yurjinia.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
@@ -20,9 +23,7 @@ public class CacheService {
     }
 
     public boolean isTokenBlacklisted(String token) {
-        String string = BLACKLIST_PREFIX + token;
-
-        return Boolean.TRUE.equals(redisTemplate.hasKey(string.trim()));
+        return redisTemplate.hasKey(BLACKLIST_PREFIX + token);
     }
 
 }
