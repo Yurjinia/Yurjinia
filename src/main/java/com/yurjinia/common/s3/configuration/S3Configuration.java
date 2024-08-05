@@ -1,6 +1,5 @@
 package com.yurjinia.common.s3.configuration;
 
-import com.yurjinia.common.environment.EnvironmentService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,8 +15,6 @@ import software.amazon.awssdk.services.s3.S3Client;
 @RequiredArgsConstructor
 public class S3Configuration {
 
-    private final EnvironmentService environmentService;
-
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 
@@ -26,14 +23,12 @@ public class S3Configuration {
 
     @Value("${aws.credentials.access-key-id}")
     private String accessKeyId;
+
     @Value("${aws.credentials.secret-access-key}")
     private String secretAccessKey;
 
     @Bean
     public S3Client s3Client() {
-        accessKeyId = environmentService.getEnv(accessKeyId);
-        secretAccessKey = environmentService.getEnv(secretAccessKey);
-
         return S3Client.builder()
                 .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(

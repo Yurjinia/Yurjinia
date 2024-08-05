@@ -5,14 +5,12 @@ import com.yurjinia.user.dto.UserDTO;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.enums.UserRole;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class UserMapper {
 
-    private final PasswordEncoder passwordEncoder;
     private final UserProfileMapper userProfileMapper;
 
     public UserEntity toEntity(RegistrationRequest registrationRequest) {
@@ -20,8 +18,7 @@ public class UserMapper {
                 .email(registrationRequest.getEmail())
                 .userProfile(userProfileMapper.toEntity(registrationRequest))
                 .active(true) // ToDo: temporary fix, remove when we return activation functionality
-                //ToDo: passwordEncoder must be used outside of UserMapper.
-                .password(passwordEncoder.encode(registrationRequest.getPassword()))
+                .password(registrationRequest.getPassword())
                 .role(UserRole.USER)
                 .build();
     }

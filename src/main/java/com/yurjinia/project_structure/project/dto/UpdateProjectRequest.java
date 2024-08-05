@@ -6,7 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UpdateProjectRequest {
-    private String projectOwnerEmail;
     private String projectName;
     private String projectCode;
 }

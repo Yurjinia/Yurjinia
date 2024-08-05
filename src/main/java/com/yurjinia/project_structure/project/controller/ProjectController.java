@@ -1,6 +1,8 @@
 package com.yurjinia.project_structure.project.controller;
 
+import com.yurjinia.project_structure.project.dto.InviteToProjectRequest;
 import com.yurjinia.project_structure.project.dto.ProjectDTO;
+import com.yurjinia.project_structure.project.dto.UpdateProjectRequest;
 import com.yurjinia.project_structure.project.service.ProjectService;
 import com.yurjinia.user.dto.UserDTO;
 import jakarta.validation.Valid;
@@ -25,42 +27,31 @@ public class ProjectController {
     }
 
     @PutMapping("/{projectCode}")
-    public ResponseEntity<ProjectDTO> updateProject(@PathVariable String projectCode, @Valid @RequestBody ProjectDTO projectDTO) {
-        ProjectDTO updatedProject = projectService.
-                updateProject(projectCode, projectDTO);
+    public ResponseEntity<ProjectDTO> updateProject(@PathVariable String projectCode,
+                                                    @Valid @RequestBody UpdateProjectRequest updateProjectRequest) {
+        ProjectDTO updatedProject = projectService.updateProject(projectCode, updateProjectRequest);
         return new ResponseEntity<>(updatedProject, HttpStatus.OK);
     }
 
-//    @DeleteMapping("/{projectCode}")
-//    public ResponseEntity<Void> deleteProject(@PathVariable String projectCode) {
-//        projectService.deleteProject(projectCode);
-//        return ResponseEntity.noContent().build(); // Повертає статус 204 No Content
-//    }
-
-/*
-
-    @PutMapping("/projects/{projectCode}")
-    public ResponseEntity<ProjectDTO> updateProject(
-            @PathVariable String projectCode,
-            @RequestBody @Valid UpdateProjectRequest updateProjectRequest) {
-        ProjectDTO updatedProject = projectService.updateProject(projectCode, updateProjectRequest);
-        return ResponseEntity.ok(updatedProject);
+    @PostMapping("/{projectCode}/invite")
+    public ResponseEntity<Void> inviteUsers(@PathVariable String projectCode,
+                                            @Valid @RequestBody InviteToProjectRequest inviteToProjectRequest) {
+        projectService.inviteUsers(projectCode, inviteToProjectRequest);
+        return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/projects/{projectCode}")
+    @DeleteMapping("/{projectCode}")
     public ResponseEntity<Void> deleteProject(@PathVariable String projectCode) {
         projectService.deleteProject(projectCode);
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/projects/{projectCode}/users/{userEmail}")
-    public ResponseEntity<Void> removeUserFromProject(
-            @PathVariable String projectCode,
-            @PathVariable String userEmail) {
-        projectService.removeUserFromProject(projectCode, userEmail);
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/{projectCode}/users/{userEmail}")
+    public ResponseEntity<Void> deleteUserFromProject(@PathVariable String projectCode, @PathVariable String userEmail) {
+        projectService.deleteUserFromProject(projectCode, userEmail);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-*/
+
     /* ToDo: Refer to next JIRA with having more clarification about the reasons of
         why the code was commented, and when it's going to be uncommented:
         https://pashka1clash.atlassian.net/browse/YUR-114
