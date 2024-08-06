@@ -8,11 +8,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Constraint(validatedBy = UpperCaseValidator.class)
-@Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.METHOD})
+@Constraint(validatedBy = UpperCaseValidator.class)
 public @interface UpperCase {
     String message() default "Field must contain only uppercase letters";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }
+

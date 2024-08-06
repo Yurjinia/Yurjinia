@@ -46,8 +46,8 @@ public class ProjectEntity {
     private Set<UserEntity> users = new HashSet<>();
 
     @Builder.Default
-    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "project_id")
+    @OneToMany(cascade = CascadeType.ALL)
     private Set<BoardEntity> boards = new HashSet<>();
 
     @ManyToOne
