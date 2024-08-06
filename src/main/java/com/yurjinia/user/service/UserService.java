@@ -102,13 +102,6 @@ public class UserService {
         return userEntities.stream().map(this::mapToDto).toList();
     }
 
-    private UserProfileDTO mapToUserProfileDto(UserProfileEntity userProfileEntity) {
-        return UserProfileDTO.builder()
-                .username(userProfileEntity.getUsername())
-                .avatarId(userProfileEntity.getAvatarId())
-                .build();
-    }
-
     /*
         ToDo: Refer to next JIRA with having more clarification about the reasons of
          why the code was commented, and when it's going to be uncommented:

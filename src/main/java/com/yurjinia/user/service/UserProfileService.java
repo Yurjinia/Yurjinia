@@ -96,6 +96,7 @@ public class UserProfileService {
     public UserProfileDTO mapToDto(UserProfileEntity userProfileEntity){
         return userProfileMapper.toDto(userProfileEntity);
     }
+
     private UserProfileEntity getUserProfileByEmail(String email) {
         return userProfileRepository.findByUserEmail(email)
                 .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
