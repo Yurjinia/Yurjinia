@@ -1,6 +1,7 @@
 package com.yurjinia.common.configuration;
 
 import com.yurjinia.common.application.constants.RequestMatchersConstants;
+import com.yurjinia.common.handlers.LogoutHandler;
 import com.yurjinia.common.security.jwt.filters.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -28,8 +30,10 @@ public class SecurityConfiguration {
     public String googleLoginUrl;
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final LogoutHandler logoutHandler;
     private final AuthenticationProvider authenticationProvider;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -47,6 +51,13 @@ public class SecurityConfiguration {
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
                 .oauth2Login(oauth2Login -> oauth2Login.defaultSuccessUrl(googleLoginUrl));
+                .oauth2Login(oauth2Login -> oauth2Login
+                        .defaultSuccessUrl("/api/v1/auth/login/google", true))
+                .logout(logout -> logout
+                        .logoutUrl("/api/v1/auth/logout")
+                        .addLogoutHandler(logoutHandler::logout)
+                        .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler())
+                );
 
         return http.build();
     }

@@ -65,13 +65,17 @@ public class AuthController {
     @Operation(summary = "Token validation for password reset", description = "Validation of password reset token.")
     public ResponseEntity<Void> validateResetPassword(@RequestParam("token") String token) {
         authService.validateResetPassword(token);
+
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/password-reset")
+    public ResponseEntity<Void> resetPassword(@RequestParam("token") String token, @RequestBody PasswordResetDTO passwordResetDTO) {
     @Operation(summary = "Password reset", description = "Resetting the user's password using a token and a new password.")
     public void resetPassword(@RequestParam("token") String token, @RequestBody PasswordResetDTO passwordResetDTO) {
         authService.resetPassword(token, passwordResetDTO);
+
+        return ResponseEntity.noContent().build();
     }
 
     /*

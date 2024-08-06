@@ -4,6 +4,7 @@ import com.yurjinia.project_structure.project.dto.ProjectDTO;
 import com.yurjinia.project_structure.project.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,8 +19,10 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @PostMapping("/{userEmail}")
-    public ProjectDTO createProject(@PathVariable String userEmail, @Valid @RequestBody ProjectDTO projectDTO) {
-        return projectService.createProject(userEmail, projectDTO);
+    public ResponseEntity<Void> createProject(@PathVariable String userEmail, @Valid @RequestBody ProjectDTO projectDTO) {
+        projectService.createProject(userEmail, projectDTO);
+
+        return ResponseEntity.noContent().build();
     }
 
     /* ToDo: Refer to next JIRA with having more clarification about the reasons of

@@ -46,6 +46,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             String token = extractJwtFromRequest(request);
+
+            if (jwtService.isTokenBlacklisted(token)) {
+                throw new CommonException(ErrorCode.JWT_INVALID, HttpStatus.UNAUTHORIZED);
+            }
+
             UserDetails userDetails = authenticateToken(token);
             setAuthentication(userDetails, request);
 
