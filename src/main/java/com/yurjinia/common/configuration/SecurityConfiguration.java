@@ -1,7 +1,9 @@
 package com.yurjinia.common.configuration;
 
+import com.yurjinia.common.application.constants.RequestMatchersConstants;
 import com.yurjinia.common.security.jwt.filters.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -22,12 +24,8 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
-    private static final String[] SWAGGER_WHITELIST = {
-            "swagger-ui/**",
-            "v3/api-docs/**",
-            "swagger-resources/**",
-            "swagger-resources/",
-    };
+    @Value("${APP.GOOGLE.LOGIN.URL}")
+    public String googleLoginUrl;
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationProvider authenticationProvider;
@@ -39,16 +37,16 @@ public class SecurityConfiguration {
                 // ToDo: create CORS configuration after main features are done
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
+                        .requestMatchers(RequestMatchersConstants.AUTH_URL).permitAll()
+                        .requestMatchers(RequestMatchersConstants.SWAGGER_WHITELIST).permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
-                .oauth2Login(oauth2Login -> oauth2Login.loginPage("/api/v1/auth/login/google"));
+                .oauth2Login(oauth2Login -> oauth2Login.defaultSuccessUrl(googleLoginUrl));
 
         return http.build();
     }
