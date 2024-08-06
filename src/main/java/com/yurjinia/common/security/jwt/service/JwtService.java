@@ -36,6 +36,7 @@ public class JwtService {
     private long expirationInSeconds;
 
     private final PasswordEncoder passwordEncoder;
+    private final JwtBlacklistService jwtBlacklistService;
 
     public String extractUsername(String jwt) {
         return extractClaim(jwt, Claims::getSubject);
@@ -44,6 +45,19 @@ public class JwtService {
     public boolean isTokenValid(String jwt, UserDetails userDetails) {
         final String username = extractUsername(jwt);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(jwt);
+    }
+
+    public long getExpirationTime(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.getExpiration().getTime() - System.currentTimeMillis();
+    }
+
+    public boolean isTokenBlacklisted(String token) {
+        return jwtBlacklistService.isTokenBlacklisted(token);
+    }
+
+    public void blacklistToken(String token, long expirationTime) {
+        jwtBlacklistService.blacklistToken(token, expirationTime);
     }
 
     private boolean isTokenExpired(String jwt) {
