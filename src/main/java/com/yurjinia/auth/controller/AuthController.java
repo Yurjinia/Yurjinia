@@ -54,12 +54,15 @@ public class AuthController {
     @GetMapping("/password-reset/validate")
     public ResponseEntity<Void> validateResetPassword(@RequestParam("token") String token) {
         authService.validateResetPassword(token);
+
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/password-reset")
-    public void resetPassword(@RequestParam("token") String token, @RequestBody PasswordResetDTO passwordResetDTO) {
+    public ResponseEntity<Void> resetPassword(@RequestParam("token") String token, @RequestBody PasswordResetDTO passwordResetDTO) {
         authService.resetPassword(token, passwordResetDTO);
+
+        return ResponseEntity.noContent().build();
     }
 
     /*
