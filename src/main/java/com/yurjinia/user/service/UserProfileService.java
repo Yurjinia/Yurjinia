@@ -1,5 +1,6 @@
 package com.yurjinia.user.service;
 
+import com.yurjinia.auth.controller.request.RegistrationRequest;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
 import com.yurjinia.common.s3.service.AWSS3Service;
@@ -34,14 +35,14 @@ public class UserProfileService {
     private final UserProfileMapper userProfileMapper;
     private final UserProfileRepository userProfileRepository;
 
-    public UserProfileDTO changeUsername(String userEmail, UsernameDTO usernameDTO) {
+    public void changeUsername(String userEmail, UsernameDTO usernameDTO) {
         validateIfUsernameExists(usernameDTO.getUsername());
 
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
 
         userProfileEntity.setUsername(usernameDTO.getUsername());
         userProfileRepository.save(userProfileEntity);
-        return userProfileMapper.toDto(userProfileEntity);
+        userProfileMapper.toDto(userProfileEntity);
     }
 
     public Optional<String> uploadAvatar(UserEntity userEntity, MultipartFile image) {
@@ -64,7 +65,7 @@ public class UserProfileService {
         return userProfileMapper.toDto(getUserProfileByEmail(userEmail));
     }
 
-    public UserProfileDTO updateAvatar(String userEmail, MultipartFile image) {
+    public void updateAvatar(String userEmail, MultipartFile image) {
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
         UserEntity userEntity = userProfileEntity.getUser();
         String key = mainPackage + userEntity.getEmail() + FORWARD_SLASH + defaultAvatarName;
@@ -74,10 +75,10 @@ public class UserProfileService {
 
         userProfileRepository.save(userProfileEntity);
 
-        return userProfileMapper.toDto(userProfileEntity);
+        userProfileMapper.toDto(userProfileEntity);
     }
 
-    public UserProfileDTO deleteAvatar(String userEmail) {
+    public void deleteAvatar(String userEmail) {
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
 
         awss3Service.deleteImage(userProfileEntity.getAvatarId());
@@ -85,9 +86,16 @@ public class UserProfileService {
 
         userProfileRepository.save(userProfileEntity);
 
-        return userProfileMapper.toDto(userProfileEntity);
+        userProfileMapper.toDto(userProfileEntity);
     }
 
+    public UserProfileEntity mapToEntity(RegistrationRequest registrationRequest) {
+        return userProfileMapper.toEntity(registrationRequest);
+    }
+
+    public UserProfileDTO mapToDto(UserProfileEntity userProfileEntity){
+        return userProfileMapper.toDto(userProfileEntity);
+    }
     private UserProfileEntity getUserProfileByEmail(String email) {
         return userProfileRepository.findByUserEmail(email)
                 .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND));

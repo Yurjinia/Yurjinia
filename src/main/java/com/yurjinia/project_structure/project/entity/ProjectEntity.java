@@ -36,10 +36,10 @@ public class ProjectEntity {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String name;
+    private String code;
 
     @Column(nullable = false, unique = true)
-    private String code;
+    private String name;
 
     @Builder.Default
     @ManyToMany(mappedBy = "projects")

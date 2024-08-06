@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +30,8 @@ public class UserService {
     private final JwtService jwtService;
 
     public void save(RegistrationRequest registrationRequest) {
-        save(userMapper.toEntity(registrationRequest));
+        UserProfileEntity userProfileEntity = userProfileService.mapToEntity(registrationRequest);
+        save(userMapper.toEntity(registrationRequest, userProfileEntity));
     }
 
     public void save(UserEntity userEntity) {
@@ -73,7 +73,8 @@ public class UserService {
 
     public void createUser(RegistrationRequest registrationRequest, String avatarId) {
         validateIfEmailExists(registrationRequest);
-        UserEntity userEntity = userMapper.toEntity(registrationRequest);
+        UserProfileEntity userProfileEntity = userProfileService.mapToEntity(registrationRequest);
+        UserEntity userEntity = userMapper.toEntity(registrationRequest, userProfileEntity);
         userEntity.getUserProfile().setAvatarId(avatarId);
         save(userEntity);
     }
@@ -93,16 +94,12 @@ public class UserService {
     }
 
     public UserDTO mapToDto(UserEntity userEntity) {
-        return UserDTO.builder()
-                .email(userEntity.getEmail())
-                .profileDTO(mapToUserProfileDto(userEntity.getUserProfile()))
-                .build();
+        UserProfileDTO userProfileDTO = userProfileService.mapToDto(userEntity.getUserProfile());
+        return userMapper.toDto(userEntity, userProfileDTO);
     }
 
     public List<UserDTO> mapToDto(Set<UserEntity> userEntities) {
-        return userEntities.stream()
-                .map(this::mapToDto)
-                .collect(Collectors.toList());
+        return userEntities.stream().map(this::mapToDto).toList();
     }
 
     private UserProfileDTO mapToUserProfileDto(UserProfileEntity userProfileEntity) {

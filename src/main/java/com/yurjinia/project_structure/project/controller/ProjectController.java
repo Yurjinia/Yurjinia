@@ -30,14 +30,14 @@ public class ProjectController {
     @GetMapping("/{projectCode}/users")
     public ResponseEntity<List<UserDTO>> getProjectUsers(@PathVariable String projectCode) {
         List<UserDTO> users = projectService.getProjectUsers(projectCode);
-        return new ResponseEntity<>(users, HttpStatus.OK);
+        return ResponseEntity.ok(users);
     }
 
     @PutMapping("/{projectCode}")
     public ResponseEntity<ProjectDTO> updateProject(@PathVariable String projectCode,
                                                     @Valid @RequestBody UpdateProjectRequest updateProjectRequest) {
         ProjectDTO updatedProject = projectService.updateProject(projectCode, updateProjectRequest);
-        return new ResponseEntity<>(updatedProject, HttpStatus.OK);
+        return ResponseEntity.ok(updatedProject);
     }
 
     @PostMapping("/{projectCode}/invite")
@@ -56,7 +56,7 @@ public class ProjectController {
     @DeleteMapping("/{projectCode}/users/{userEmail}")
     public ResponseEntity<Void> deleteUserFromProject(@PathVariable String projectCode, @PathVariable String userEmail) {
         projectService.deleteUserFromProject(projectCode, userEmail);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
     /* ToDo: Refer to next JIRA with having more clarification about the reasons of

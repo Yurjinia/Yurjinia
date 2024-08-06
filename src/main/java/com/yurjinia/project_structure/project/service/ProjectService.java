@@ -35,7 +35,9 @@ public class ProjectService {
     public List<ProjectDTO> getUserProjects(String userEmail) {
         UserEntity user = userService.getByEmail(userEmail);
         UserDTO ownerDto = userService.mapToDto(user);
-        return user.getProjects().stream()
+
+        return user.getProjects()
+                .stream()
                 .map(projectEntity -> projectMapper.toDto(projectEntity, ownerDto))
                 .toList();
     }
