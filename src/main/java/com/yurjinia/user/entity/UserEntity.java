@@ -26,7 +26,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -64,7 +66,8 @@ public class UserEntity implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "project_id")
     )
-    private List<ProjectEntity> projects;
+    @Builder.Default
+    private Set<ProjectEntity> projects = new HashSet<>();
 
     @ManyToMany
     @JoinTable(
@@ -72,7 +75,8 @@ public class UserEntity implements UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "board_id")
     )
-    private List<BoardEntity> boards;
+    @Builder.Default
+    private Set<BoardEntity> boards = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

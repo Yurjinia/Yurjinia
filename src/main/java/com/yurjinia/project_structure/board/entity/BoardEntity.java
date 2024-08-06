@@ -18,7 +18,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -33,8 +35,9 @@ public class BoardEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Builder.Default
     @ManyToMany(mappedBy = "boards")
-    private List<UserEntity> users;
+    private Set<UserEntity> users = new HashSet<>();
 
     @OneToMany(mappedBy = "board")
     private List<ColumnEntity> columns;
