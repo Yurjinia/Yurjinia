@@ -33,7 +33,6 @@ public class SecurityConfiguration {
     private final LogoutHandler logoutHandler;
     private final AuthenticationProvider authenticationProvider;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -50,9 +49,7 @@ public class SecurityConfiguration {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
-                .oauth2Login(oauth2Login -> oauth2Login.defaultSuccessUrl(googleLoginUrl));
-                .oauth2Login(oauth2Login -> oauth2Login
-                        .defaultSuccessUrl("/api/v1/auth/login/google", true))
+                .oauth2Login(oauth2Login -> oauth2Login.defaultSuccessUrl(googleLoginUrl))
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/auth/logout")
                         .addLogoutHandler(logoutHandler::logout)
