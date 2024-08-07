@@ -32,7 +32,9 @@ public enum ErrorCode {
     USER_ALREADY_EXISTS("User already exists"),
     USER_ALREADY_ACTIVE("User already active"),
     FORBIDDEN("Forbidden"),
-    UNAUTHORIZED("Unauthorized");
+    UNAUTHORIZED("Unauthorized"),
+    OWNER_CANNOT_BE_REMOVED("Owner cannot be removed"),
+    OWNER_CANNOT_BE_A_USER("Owner cannot be a user");
 
     //TODO: Add HttpStatus to the error code
     private final String description;
