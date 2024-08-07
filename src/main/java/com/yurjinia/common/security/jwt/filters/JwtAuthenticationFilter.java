@@ -69,7 +69,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private boolean isPublicUrl(String path) {
         return Arrays.stream(publicUrl).anyMatch(path::startsWith);
-
     }
 
     private String extractJwtFromRequest(HttpServletRequest request) {

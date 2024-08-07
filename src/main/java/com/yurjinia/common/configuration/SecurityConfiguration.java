@@ -41,6 +41,7 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(RequestMatchersConstants.AUTH_URL).permitAll()
+                        //todo: Need to disable Swagger on Prod Environment
                         .requestMatchers(RequestMatchersConstants.SWAGGER_WHITELIST).permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session

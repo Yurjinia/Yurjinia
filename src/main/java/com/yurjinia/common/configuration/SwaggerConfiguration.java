@@ -24,8 +24,8 @@ public class SwaggerConfiguration {
     @Bean
     GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
-                .group(SwaggerConstants.PUBLIC_API)
-                .pathsToMatch(SwaggerConstants.PUBLIC_URL)
+                .group(SwaggerConstants.SWAGGER_PUBLIC_API_GROUP)
+                .pathsToMatch(SwaggerConstants.SWAGGER_PUBLIC_URL_PATH_MATCHERS)
                 .addOpenApiCustomizer(openApi -> openApi.info(new Info().title("Public API Documentation").version("1.0")))
                 .build();
     }
@@ -33,8 +33,8 @@ public class SwaggerConfiguration {
     @Bean
     GroupedOpenApi privateApi() {
         return GroupedOpenApi.builder()
-                .group(SwaggerConstants.PRIVATE_API)
-                .pathsToMatch(SwaggerConstants.PRIVATE_URL)
+                .group(SwaggerConstants.SWAGGER_PRIVATE_API_GROUP)
+                .pathsToMatch(SwaggerConstants.SWAGGER_PRIVATE_URL_PATH_MATCHERS)
                 .addOpenApiCustomizer(openApi -> {
                     openApi.info(new Info().title("Private API Documentation").version("1.0"))
                             .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
@@ -46,7 +46,6 @@ public class SwaggerConfiguration {
                 })
                 .build();
     }
-
 
 }
 
