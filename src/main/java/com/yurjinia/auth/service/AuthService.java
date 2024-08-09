@@ -14,6 +14,7 @@ import com.yurjinia.common.security.jwt.dto.JwtAuthenticationResponse;
 import com.yurjinia.common.security.jwt.service.JwtService;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -71,7 +72,9 @@ public class AuthService {
      * upon successful authentication.
      */
 
-    public JwtAuthenticationResponse login(LoginRequest request) {
+    public JwtAuthenticationResponse login(LoginRequest request, HttpServletRequest httpServletRequest) {
+        jwtService.blacklistTokenIfExists(httpServletRequest);
+
         if (request.getUsername() != null) {
             return loginByUsername(request);
         } else {
