@@ -34,7 +34,11 @@ public enum ErrorCode {
     FORBIDDEN("Forbidden"),
     UNAUTHORIZED("Unauthorized"),
     OWNER_CANNOT_BE_REMOVED("Owner cannot be removed"),
-    OWNER_CANNOT_BE_A_USER("Owner cannot be a user");
+    OWNER_CANNOT_BE_A_USER("Owner cannot be a user"),
+    BOARD_ALREADY_EXISTS("Board already exists"),
+    BOARD_NOT_FOUND("Board not found"),
+    ;
+
 
     //TODO: Add HttpStatus to the error code
     private final String description;

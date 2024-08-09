@@ -1,6 +1,5 @@
 package com.yurjinia.user.entity;
 
-import com.yurjinia.project_structure.board.entity.BoardEntity;
 import com.yurjinia.project_structure.project.entity.ProjectEntity;
 import com.yurjinia.user.enums.UserRole;
 import jakarta.persistence.CascadeType;
@@ -68,15 +67,6 @@ public class UserEntity implements UserDetails {
     )
     @Builder.Default
     private Set<ProjectEntity> projects = new HashSet<>();
-
-    @ManyToMany
-    @JoinTable(
-            name = "board_user",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "board_id")
-    )
-    @Builder.Default
-    private Set<BoardEntity> boards = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
