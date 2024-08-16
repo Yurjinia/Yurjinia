@@ -35,10 +35,10 @@ public class BoardEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String name;
+    private String code;
 
     @Column(nullable = false)
-    private String code;
+    private String name;
 
     @OneToMany(mappedBy = "board")
     private List<ColumnEntity> columns;

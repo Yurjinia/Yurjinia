@@ -35,8 +35,8 @@ public class BoardService {
 
     @Transactional
     public BoardDTO updateBoard(UpdateBoardRequest updateBoardRequest, String boardCode, String projectCode) {
-        BoardEntity boardEntity = getBoard(boardCode, projectCode);
         validateIfBoardNotExist(updateBoardRequest.getBoardName(), updateBoardRequest.getBoardCode(), projectCode);
+        BoardEntity boardEntity = getBoard(boardCode, projectCode);
 
         if (StringUtils.isNotBlank(updateBoardRequest.getBoardName())) {
             boardEntity.setName(updateBoardRequest.getBoardName());

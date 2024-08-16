@@ -26,12 +26,11 @@ public class BoardController {
     private final BoardService boardService;
 
     @PostMapping
-    public ResponseEntity<Void> createBoard(@Valid @RequestBody BoardDTO boardDTO, @PathVariable String projectCode) {
+    public ResponseEntity<Void> createBoard(@PathVariable String projectCode, @Valid @RequestBody BoardDTO boardDTO) {
         boardService.createBoard(boardDTO, projectCode);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    //todo можливо він маю бути в ProjectController
     @GetMapping
     public ResponseEntity<List<BoardDTO>> getProjectBoards(@PathVariable String projectCode) {
         List<BoardDTO> projectBoards = boardService.getProjectBoards(projectCode);
@@ -39,10 +38,9 @@ public class BoardController {
     }
 
     @PutMapping("/{boardCode}")
-    public ResponseEntity<BoardDTO> updateBoard(
-            @Valid @RequestBody UpdateBoardRequest updateBoardRequest,
-            @PathVariable String projectCode,
-            @PathVariable String boardCode) {
+    public ResponseEntity<BoardDTO> updateBoard(@PathVariable String projectCode,
+                                                @PathVariable String boardCode,
+                                                @Valid @RequestBody UpdateBoardRequest updateBoardRequest) {
         BoardDTO boardDTO = boardService.updateBoard(updateBoardRequest, boardCode, projectCode);
         return ResponseEntity.ok(boardDTO);
     }

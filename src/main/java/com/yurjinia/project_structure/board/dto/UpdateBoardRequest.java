@@ -7,8 +7,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UpdateBoardRequest {
-    private String boardName;
 
     @UpperCase
     private String boardCode;
+
+    private String boardName;
+
 }
