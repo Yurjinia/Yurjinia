@@ -1,8 +1,10 @@
 package com.yurjinia.common.configuration;
 
+import com.yurjinia.common.application.constants.RequestMatchersConstants;
 import com.yurjinia.common.handlers.LogoutHandler;
 import com.yurjinia.common.security.jwt.filters.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -24,9 +26,13 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
+    @Value("${APP.GOOGLE.LOGIN.URL}")
+    public String googleLoginUrl;
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final LogoutHandler logoutHandler;
     private final AuthenticationProvider authenticationProvider;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -34,14 +40,17 @@ public class SecurityConfiguration {
                 // ToDo: create CORS configuration after main features are done
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(RequestMatchersConstants.AUTH_URL).permitAll()
+                        //todo: Need to disable Swagger on Prod Environment
+                        .requestMatchers(RequestMatchersConstants.SWAGGER_WHITELIST).permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .oauth2Login(oauth2Login -> oauth2Login
-                        .defaultSuccessUrl("/api/v1/auth/login/google", true))
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(customAuthenticationEntryPoint))
+                .oauth2Login(oauth2Login -> oauth2Login.defaultSuccessUrl(googleLoginUrl))
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/auth/logout")
                         .addLogoutHandler(logoutHandler::logout)

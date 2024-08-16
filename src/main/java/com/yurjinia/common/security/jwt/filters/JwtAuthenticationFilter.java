@@ -22,14 +22,15 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Value("${APP.AUTH.URL}")
-    public String authUrl;
+    @Value("${APP.PUBLIC.URL}")
+    public String[] publicUrl;
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
@@ -63,11 +64,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private boolean isRequestSentToPublicEndpoint(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return isAuthUrl(path);
+        return isPublicUrl(path);
     }
 
-    private boolean isAuthUrl(String path) {
-        return path.startsWith(authUrl);
+    private boolean isPublicUrl(String path) {
+        return Arrays.stream(publicUrl).anyMatch(path::startsWith);
     }
 
     private String extractJwtFromRequest(HttpServletRequest request) {
