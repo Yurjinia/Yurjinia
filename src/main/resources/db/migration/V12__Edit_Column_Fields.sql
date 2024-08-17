@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX unique_name_board ON "column" (name, board_id);

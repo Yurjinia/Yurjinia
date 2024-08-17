@@ -8,5 +8,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ColumnService {
 
+    private final ColumnMapper columnMapper;
+    private final BoardService boardService;
     private final ColumnRepository columnRepository;
 }
