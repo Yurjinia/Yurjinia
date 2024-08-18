@@ -47,7 +47,7 @@ public class ProjectService {
         return userService.mapToDto(users);
     }
 
-    private ProjectEntity getProject(String projectCode) {
+    public ProjectEntity getProject(String projectCode) {
         return projectRepository.findByCode(projectCode)
                 .orElseThrow(() -> new CommonException(ErrorCode.PROJECT_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
