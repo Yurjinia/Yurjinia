@@ -11,4 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ColumnDTO {
+
+    @NotNull
+    private String name;
+
 }

@@ -6,5 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ColumnRepository extends JpaRepository<ColumnEntity, Long> {
+
     boolean existsByNameAndBoardCode(String name, String boardCode);
+
 }

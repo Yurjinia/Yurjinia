@@ -37,7 +37,8 @@ public enum ErrorCode {
     OWNER_CANNOT_BE_A_USER("Owner cannot be a user"),
     BOARD_ALREADY_EXISTS("Board already exists"),
     BOARD_NOT_FOUND("Board not found"),
-    COLUMN_ALREADY_EXISTS("Column already exists");
+    COLUMN_ALREADY_EXISTS("Column already exists"),
+    COLUMN_NOT_FOUND("Column not found");
 
 
     //TODO: Add HttpStatus to the error code
