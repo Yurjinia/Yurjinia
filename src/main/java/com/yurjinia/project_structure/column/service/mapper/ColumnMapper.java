@@ -10,6 +10,7 @@ public class ColumnMapper {
     public ColumnDTO toDTO(ColumnEntity columnEntity) {
         return ColumnDTO.builder()
                 .name(columnEntity.getName())
+                .columnPosition(columnEntity.getColumnPosition())
                 .build();
     }
 

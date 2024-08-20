@@ -15,4 +15,6 @@ public class ColumnDTO {
     @NotNull
     private String name;
 
+    private long columnPosition;
+
 }

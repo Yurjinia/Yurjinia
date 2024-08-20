@@ -31,7 +31,6 @@ public class BoardController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    //todo можливо він маю бути в ProjectController
     @GetMapping
     public ResponseEntity<List<BoardDTO>> getProjectBoards(@PathVariable String projectCode) {
         List<BoardDTO> projectBoards = boardService.getProjectBoards(projectCode);

@@ -1,6 +1,7 @@
 package com.yurjinia.project_structure.column.controller;
 
 import com.yurjinia.project_structure.column.dto.ColumnDTO;
+import com.yurjinia.project_structure.column.dto.UpdateColumnPositionRequest;
 import com.yurjinia.project_structure.column.dto.UpdateColumnRequest;
 import com.yurjinia.project_structure.column.service.ColumnService;
 import lombok.RequiredArgsConstructor;
@@ -48,13 +49,20 @@ public class ColumnController {
         return ResponseEntity.ok(columnDTO);
     }
 
+    @PutMapping("/order")
+    public ResponseEntity<List<ColumnDTO>> updateColumnPosition(@PathVariable String projectCode,
+                                                                @PathVariable String boardCode,
+                                                                @RequestBody UpdateColumnPositionRequest updateColumnPositionRequest) {
+        List<ColumnDTO> columnDTO = columnService.updateColumnPosition(projectCode, boardCode, updateColumnPositionRequest);
+        return ResponseEntity.ok(columnDTO);
+    }
+
     @DeleteMapping("/{columnName}")
     public ResponseEntity<Void> deleteColumn(@PathVariable String projectCode,
                                              @PathVariable String boardCode,
                                              @PathVariable String columnName) {
         columnService.deleteColumn(projectCode, boardCode, columnName);
         return ResponseEntity.noContent().build();
-
     }
 
 }

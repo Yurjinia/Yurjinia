@@ -40,6 +40,9 @@ public class ColumnEntity {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private Long columnPosition;
+
     @ManyToOne
     @JoinColumn(name = "board_id")
     private BoardEntity board;

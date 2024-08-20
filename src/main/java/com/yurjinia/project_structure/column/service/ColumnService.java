@@ -5,6 +5,7 @@ import com.yurjinia.common.exception.ErrorCode;
 import com.yurjinia.project_structure.board.entity.BoardEntity;
 import com.yurjinia.project_structure.board.service.BoardService;
 import com.yurjinia.project_structure.column.dto.ColumnDTO;
+import com.yurjinia.project_structure.column.dto.UpdateColumnPositionRequest;
 import com.yurjinia.project_structure.column.dto.UpdateColumnRequest;
 import com.yurjinia.project_structure.column.entity.ColumnEntity;
 import com.yurjinia.project_structure.column.repository.ColumnRepository;
@@ -30,7 +31,11 @@ public class ColumnService {
         validateIfColumnNotExist(columnDTO.getName(), boardCode);
 
         ColumnEntity columnEntity = columnMapper.toEntity(columnDTO);
-        columnEntity.setBoard(boardService.getBoard(boardCode, projectCode));
+        BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
+        long nextPosition = boardEntity.getColumns().size();
+
+        columnEntity.setColumnPosition(nextPosition);
+        columnEntity.setBoard(boardEntity);
 
         columnRepository.save(columnEntity);
     }
@@ -44,18 +49,38 @@ public class ColumnService {
             columnEntity.setName(updateColumnRequest.getColumnName());
         }
 
-        /*columnEntity.setPosition(columnDTO.getPosition());
-        columnEntity.setDescription(columnDTO.getDescription());*/
-        //ToDo: write coordination logic for columns and tickets in columns
-
         columnRepository.save(columnEntity);
         return columnMapper.toDTO(columnEntity);
     }
 
-    public List<ColumnDTO> getColumns(String projectCode, String boardCode) {
+    public List<ColumnDTO> updateColumnPosition(String projectCode, String boardCode, UpdateColumnPositionRequest request) {
         BoardEntity board = boardService.getBoard(boardCode, projectCode);
+        List<ColumnEntity> columns = board.getColumns();
 
-        return board.getColumns().stream()
+        ColumnEntity currentColumn = columns.stream()
+                .filter(column -> column.getName().equals(request.getColumnName()))
+                .findFirst()
+                .orElseThrow(() -> new CommonException(ErrorCode.COLUMN_NOT_FOUND, HttpStatus.NOT_FOUND));
+
+        columns.remove(currentColumn);
+        columns.add((int) request.getColumnPosition(), currentColumn);
+
+        for (int i = 0; i < columns.size(); i++) {
+            ColumnEntity column = columns.get(i);
+            column.setColumnPosition((long) i);
+        }
+
+        columnRepository.saveAll(columns);
+
+        return columns.stream()
+                .map(columnMapper::toDTO)
+                .toList();
+    }
+
+    public List<ColumnDTO> getColumns(String projectCode, String boardCode) {
+        BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
+
+        return boardEntity.getColumns().stream()
                 .map(columnMapper::toDTO)
                 .toList();
     }
@@ -66,15 +91,12 @@ public class ColumnService {
         columnRepository.delete(columnEntity);
     }
 
-    public ColumnEntity getColumnByName(String projectCode, String boardCode, String columnName){
+    public ColumnEntity getColumnByName(String projectCode, String boardCode, String columnName) {
         BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
 
         return boardEntity.getColumns().stream()
                 .filter(columnEntity -> columnEntity.getName().equals(columnName)).findFirst()
-                .orElseThrow(()-> new CommonException(ErrorCode.COLUMN_NOT_FOUND, HttpStatus.NOT_FOUND));
-        //todo Check please😘 which one is better with streams or with one more request to database
-        /*return columnRepository.findByBoardAndName(boardEntity, columnName).
-                orElseThrow(()->new CommonException(ErrorCode.COLUMN_NOT_FOUND, HttpStatus.NOT_FOUND));*/
+                .orElseThrow(() -> new CommonException(ErrorCode.COLUMN_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
 
     private void validateIfColumnNotExist(String columnName, String boardCode) {
