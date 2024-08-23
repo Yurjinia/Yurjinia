@@ -73,7 +73,7 @@ public class AuthService {
      */
 
     public JwtAuthenticationResponse login(LoginRequest request, HttpServletRequest httpServletRequest) {
-        jwtService.blacklistTokenIfExists(httpServletRequest);
+        jwtService.blacklistToken(httpServletRequest);
 
         if (request.getUsername() != null) {
             return loginByUsername(request);

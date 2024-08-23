@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
+import static org.springframework.util.StringUtils.hasText;
+
 @Service
 @RequiredArgsConstructor
 public class JwtService {
@@ -61,10 +63,10 @@ public class JwtService {
         jwtBlacklistService.blacklistToken(token, expirationTime);
     }
 
-    public void blacklistTokenIfExists(HttpServletRequest httpServletRequest) {
+    public void blacklistToken(HttpServletRequest httpServletRequest) {
         String requestHeader = httpServletRequest.getHeader(JwtConstants.AUTHORIZATION_HEADER);
 
-        if (!org.springframework.util.StringUtils.hasText(requestHeader) || !requestHeader.startsWith(JwtConstants.TOKEN_PREFIX)) {
+        if (!hasText(requestHeader) || !requestHeader.startsWith(JwtConstants.TOKEN_PREFIX)) {
             return;
         }
 
