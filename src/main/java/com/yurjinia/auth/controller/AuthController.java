@@ -7,6 +7,7 @@ import com.yurjinia.auth.dto.PasswordResetRequest;
 import com.yurjinia.auth.service.AuthService;
 import com.yurjinia.common.security.jwt.dto.JwtAuthenticationResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -31,28 +32,40 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping(value = "/sign-up", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "New user registration",
+            description = "This endpoint allows a user to register by passing registration details and an optional profile picture.")
     public JwtAuthenticationResponse signUp(@RequestPart("registrationRequest") RegistrationRequest registrationRequest,
                                             @RequestPart(value = "image", required = false) MultipartFile image) {
         return authService.signUp(registrationRequest, image);
     }
 
     @PostMapping("/login")
+    @Operation(summary = "User login", description = "User authentication using credentials.")
+    public JwtAuthenticationResponse login(@Valid @RequestBody LoginRequest userDTO) {
+        return authService.login(userDTO);
     public JwtAuthenticationResponse login(@Valid @RequestBody LoginRequest userDTO, HttpServletRequest httpServletRequest) {
         return authService.login(userDTO, httpServletRequest);
     }
 
+    /**
+     * @param user
+     * @path /oauth2/authorization/google (for Google authentication)
+     */
     @ResponseBody
     @GetMapping("/login/google")
+    @Operation(summary = "Login through Google", description = "Getting user information after login via Google OAuth2.")
     public JwtAuthenticationResponse getLoginInfo(@AuthenticationPrincipal OAuth2User user) {
         return authService.handleOAuthUser(user);
     }
 
     @PostMapping("/password-reset/request")
+    @Operation(summary = "Password reset request", description = "Request to send password reset instructions to email.")
     public void passwordResetRequest(@RequestBody PasswordResetRequest passwordResetRequest) {
         authService.passwordResetRequest(passwordResetRequest);
     }
 
     @GetMapping("/password-reset/validate")
+    @Operation(summary = "Token validation for password reset", description = "Validation of password reset token.")
     public ResponseEntity<Void> validateResetPassword(@RequestParam("token") String token) {
         authService.validateResetPassword(token);
 
@@ -60,6 +73,7 @@ public class AuthController {
     }
 
     @PostMapping("/password-reset")
+    @Operation(summary = "Password reset", description = "Resetting the user's password using a token and a new password.")
     public ResponseEntity<Void> resetPassword(@RequestParam("token") String token, @RequestBody PasswordResetDTO passwordResetDTO) {
         authService.resetPassword(token, passwordResetDTO);
 
