@@ -8,6 +8,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +25,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+
+import static org.springframework.util.StringUtils.hasText;
 
 @Service
 @RequiredArgsConstructor
@@ -57,6 +60,19 @@ public class JwtService {
     }
 
     public void blacklistToken(String token, long expirationTime) {
+        jwtBlacklistService.blacklistToken(token, expirationTime);
+    }
+
+    public void blacklistToken(HttpServletRequest httpServletRequest) {
+        String requestHeader = httpServletRequest.getHeader(JwtConstants.AUTHORIZATION_HEADER);
+
+        if (!hasText(requestHeader) || !requestHeader.startsWith(JwtConstants.TOKEN_PREFIX)) {
+            return;
+        }
+
+        String token = requestHeader.substring(JwtConstants.TOKEN_PREFIX.length());
+        long expirationTime = getExpirationTime(token);
+
         jwtBlacklistService.blacklistToken(token, expirationTime);
     }
 

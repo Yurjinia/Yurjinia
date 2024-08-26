@@ -7,6 +7,7 @@ import com.yurjinia.auth.dto.PasswordResetRequest;
 import com.yurjinia.auth.service.AuthService;
 import com.yurjinia.common.security.jwt.dto.JwtAuthenticationResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -40,8 +41,8 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "User login", description = "User authentication using credentials.")
-    public JwtAuthenticationResponse login(@Valid @RequestBody LoginRequest userDTO) {
-        return authService.login(userDTO);
+    public JwtAuthenticationResponse login(@Valid @RequestBody LoginRequest userDTO, HttpServletRequest httpServletRequest) {
+        return authService.login(userDTO, httpServletRequest);
     }
 
     /**
