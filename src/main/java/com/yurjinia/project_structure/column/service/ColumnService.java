@@ -17,32 +17,32 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
 public class ColumnService {
 
-    private final ColumnMapper columnMapper;
     private final BoardService boardService;
+    private final ColumnMapper columnMapper;
     private final ColumnRepository columnRepository;
 
-    @Transactional()
+    @Transactional
     public void createColumn(String projectCode, String boardCode, ColumnDTO columnDTO) {
-        validateIfColumnNotExist(columnDTO.getName(), boardCode);
+        validateIfColumnNotExists(columnDTO.getName(), boardCode);
 
         ColumnEntity columnEntity = columnMapper.toEntity(columnDTO);
         BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
-        long nextPosition = boardEntity.getColumns().size();
+        long columnPosition = boardEntity.getColumns().size();
 
-        columnEntity.setColumnPosition(nextPosition);
+        columnEntity.setColumnPosition(columnPosition);
         columnEntity.setBoard(boardEntity);
 
         columnRepository.save(columnEntity);
     }
 
     public ColumnDTO updateColumn(String projectCode, String boardCode, String columnName, UpdateColumnRequest updateColumnRequest) {
-        validateIfColumnNotExist(updateColumnRequest.getColumnName(), boardCode);
-
+        validateIfColumnNotExists(updateColumnRequest.getColumnName(), boardCode);
         ColumnEntity columnEntity = getColumnByName(projectCode, boardCode, columnName);
 
         if (StringUtils.isNotBlank(updateColumnRequest.getColumnName())) {
@@ -63,12 +63,10 @@ public class ColumnService {
                 .orElseThrow(() -> new CommonException(ErrorCode.COLUMN_NOT_FOUND, HttpStatus.NOT_FOUND));
 
         columns.remove(currentColumn);
-        columns.add((int) request.getColumnPosition(), currentColumn);
+        columns.add(request.getColumnPosition(), currentColumn);
 
-        for (int i = 0; i < columns.size(); i++) {
-            ColumnEntity column = columns.get(i);
-            column.setColumnPosition((long) i);
-        }
+        IntStream.range(0, columns.size())
+                .forEach(i -> columns.get(i).setColumnPosition((long) i));
 
         columnRepository.saveAll(columns);
 
@@ -78,9 +76,7 @@ public class ColumnService {
     }
 
     public List<ColumnDTO> getColumns(String projectCode, String boardCode) {
-        BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
-
-        return boardEntity.getColumns().stream()
+        return boardService.getBoard(boardCode, projectCode).getColumns().stream()
                 .map(columnMapper::toDTO)
                 .toList();
     }
@@ -92,14 +88,12 @@ public class ColumnService {
     }
 
     public ColumnEntity getColumnByName(String projectCode, String boardCode, String columnName) {
-        BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
-
-        return boardEntity.getColumns().stream()
+        return boardService.getBoard(boardCode, projectCode).getColumns().stream()
                 .filter(columnEntity -> columnEntity.getName().equals(columnName)).findFirst()
                 .orElseThrow(() -> new CommonException(ErrorCode.COLUMN_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
 
-    private void validateIfColumnNotExist(String columnName, String boardCode) {
+    private void validateIfColumnNotExists(String columnName, String boardCode) {
         if (columnRepository.existsByNameAndBoardCode(columnName, boardCode)) {
             throw new CommonException(ErrorCode.COLUMN_ALREADY_EXISTS, HttpStatus.CONFLICT,
                     List.of("Column by name " + columnName + " already exists"));

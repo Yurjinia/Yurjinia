@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 public class UpdateColumnPositionRequest {
     private String columnName;
-    private long columnPosition;
+    private int columnPosition;
 }
