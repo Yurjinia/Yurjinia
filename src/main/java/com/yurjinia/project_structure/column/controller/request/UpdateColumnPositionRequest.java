@@ -1,4 +1,4 @@
-package com.yurjinia.project_structure.column.dto;
+package com.yurjinia.project_structure.column.controller.request;
 
 import lombok.Getter;
 import lombok.Setter;

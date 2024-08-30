@@ -1,8 +1,9 @@
 package com.yurjinia.project_structure.column.controller;
 
 import com.yurjinia.project_structure.column.dto.ColumnDTO;
-import com.yurjinia.project_structure.column.dto.UpdateColumnPositionRequest;
-import com.yurjinia.project_structure.column.dto.UpdateColumnRequest;
+import com.yurjinia.project_structure.column.controller.request.CreateColumnRequest;
+import com.yurjinia.project_structure.column.controller.request.UpdateColumnPositionRequest;
+import com.yurjinia.project_structure.column.controller.request.UpdateColumnRequest;
 import com.yurjinia.project_structure.column.service.ColumnService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,8 +29,8 @@ public class ColumnController {
     @PostMapping
     public ResponseEntity<Void> createColumn(@PathVariable String projectCode,
                                              @PathVariable String boardCode,
-                                             @RequestBody ColumnDTO columnDTO) {
-        columnService.createColumn(projectCode, boardCode, columnDTO);
+                                             @RequestBody CreateColumnRequest createColumnRequest) {
+        columnService.createColumn(projectCode, boardCode, createColumnRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

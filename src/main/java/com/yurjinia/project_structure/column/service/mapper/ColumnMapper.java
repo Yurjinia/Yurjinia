@@ -1,5 +1,6 @@
 package com.yurjinia.project_structure.column.service.mapper;
 
+import com.yurjinia.project_structure.column.controller.request.CreateColumnRequest;
 import com.yurjinia.project_structure.column.dto.ColumnDTO;
 import com.yurjinia.project_structure.column.entity.ColumnEntity;
 import org.springframework.stereotype.Component;
@@ -14,9 +15,10 @@ public class ColumnMapper {
                 .build();
     }
 
-    public ColumnEntity toEntity(ColumnDTO dto) {
+    public ColumnEntity toEntity(CreateColumnRequest createColumnRequest) {
         return ColumnEntity.builder()
-                .name(dto.getName())
+                .name(createColumnRequest.getName())
                 .build();
     }
+
 }
