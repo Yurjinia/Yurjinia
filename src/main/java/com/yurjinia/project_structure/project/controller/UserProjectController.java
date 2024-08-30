@@ -1,4 +1,5 @@
-package com.yurjinia.user.controller;
+package com.yurjinia.project_structure.project.controller;
+
 
 import com.yurjinia.project_structure.project.dto.CreateProjectRequest;
 import com.yurjinia.project_structure.project.dto.ProjectDTO;
@@ -18,18 +19,18 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/users/{userEmail}")
-public class UserController {
+@RequestMapping("/api/v1/users/{userEmail}/projects")
+public class UserProjectController {
 
     private final ProjectService projectService;
 
-    @GetMapping("/projects")
+    @GetMapping
     public ResponseEntity<List<ProjectDTO>> getUserProjects(@PathVariable String userEmail) {
         List<ProjectDTO> projects = projectService.getUserProjects(userEmail);
         return ResponseEntity.ok(projects);
     }
 
-    @PostMapping("/projects")
+    @PostMapping
     public ResponseEntity<Void> createProject(@PathVariable String userEmail,
                                               @Valid @RequestBody CreateProjectRequest createProjectRequest) {
         projectService.createProject(userEmail, createProjectRequest);
