@@ -1,6 +1,5 @@
 package com.yurjinia.project_structure.project.controller;
 
-import com.yurjinia.project_structure.project.dto.CreateProjectRequest;
 import com.yurjinia.project_structure.project.dto.InviteToProjectRequest;
 import com.yurjinia.project_structure.project.dto.ProjectDTO;
 import com.yurjinia.project_structure.project.dto.UpdateProjectRequest;
@@ -8,7 +7,6 @@ import com.yurjinia.project_structure.project.service.ProjectService;
 import com.yurjinia.user.dto.UserDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,19 +30,6 @@ public class ProjectController {
     public ResponseEntity<List<UserDTO>> getProjectUsers(@PathVariable String projectCode) {
         List<UserDTO> users = projectService.getProjectUsers(projectCode);
         return ResponseEntity.ok(users);
-    }
-
-    @GetMapping("/{userEmail}")
-    public ResponseEntity<List<ProjectDTO>> getUserProjects(@PathVariable String userEmail) {
-        List<ProjectDTO> projects = projectService.getUserProjects(userEmail);
-        return ResponseEntity.ok(projects);
-    }
-
-    @PostMapping("/{userEmail}")
-    public ResponseEntity<Void> createProject(@PathVariable String userEmail,
-                                              @Valid @RequestBody CreateProjectRequest createProjectRequest) {
-        projectService.createProject(userEmail, createProjectRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{projectCode}")
