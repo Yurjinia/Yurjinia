@@ -112,12 +112,16 @@ public class AuthService {
     }
 
     private JwtAuthenticationResponse loginByEmail(LoginRequest request) {
-        isEmailNotExist(request.getEmail());
+        UserEntity userEntity = userService.getByEmail(request.getEmail());
+        validatePassword(request.getPassword(), userEntity.getPassword());
+
         return authenticate(request.getEmail(), request.getPassword());
     }
 
     private JwtAuthenticationResponse loginByUsername(LoginRequest request) {
         UserEntity userEntity = userService.getByUsername(request.getUsername());
+        validatePassword(request.getPassword(), userEntity.getPassword());
+
         return authenticate(userEntity.getEmail(), request.getPassword());
     }
 
@@ -192,13 +196,19 @@ public class AuthService {
 
     private void validateNewPasswordIsNotOld(String newPassword, String oldPassword) {
         if (passwordEncoder.matches(newPassword, oldPassword)) {
-            throw new CommonException(ErrorCode.MATCHES_OLD_PASSWORD, HttpStatus.BAD_REQUEST);
+            throw new CommonException(ErrorCode.PASSWORD_MATCHES_OLD_PASSWORD, HttpStatus.BAD_REQUEST);
         }
     }
 
     private void isEmailNotExist(String email) {
         if (!userService.existsByEmail(email)) {
             throw new CommonException(ErrorCode.EMAIL_NOT_EXISTS, HttpStatus.NOT_FOUND, List.of("User by email: " + email + " does not exist"));
+        }
+    }
+
+    private void validatePassword(String requestPassword, String userPassword) {
+        if (!passwordEncoder.matches(requestPassword, userPassword)) {
+            throw new CommonException(ErrorCode.PASSWORD_IS_NOT_MATCHED, HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -237,5 +247,4 @@ public class AuthService {
         }
 
     */
-
 }
