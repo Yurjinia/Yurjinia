@@ -1,5 +1,6 @@
 package com.yurjinia.user.service;
 
+import com.yurjinia.auth.controller.request.RegistrationRequest;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
 import com.yurjinia.common.s3.service.AWSS3Service;
@@ -11,36 +12,41 @@ import com.yurjinia.user.repository.UserProfileRepository;
 import com.yurjinia.user.service.mapper.UserProfileMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
-import static com.yurjinia.common.s3.constants.AWSS3Constants.DEFAULT_AVATAR_NAME;
-import static com.yurjinia.common.s3.constants.AWSS3Constants.FORWARD_SLASH;
-import static com.yurjinia.common.s3.constants.AWSS3Constants.MAIN_PACKAGE;
+import static com.yurjinia.common.application.constants.TextConstants.FORWARD_SLASH;
 
 @Service
 @RequiredArgsConstructor
 public class UserProfileService {
 
+    @Value("${APP.MAIN_PACKAGE}")
+    public String mainPackage;
+
+    @Value("${APP.DEFAULT_AVATAR_NAME}")
+    public String defaultAvatarName;//ToDO: Implement the adaptation of the image to PNG format
+
     private final AWSS3Service awss3Service;
     private final UserProfileMapper userProfileMapper;
     private final UserProfileRepository userProfileRepository;
 
-    public UserProfileDTO changeUsername(String userEmail, UsernameDTO usernameDTO) {
+    public void changeUsername(String userEmail, UsernameDTO usernameDTO) {
         validateIfUsernameExists(usernameDTO.getUsername());
 
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
 
         userProfileEntity.setUsername(usernameDTO.getUsername());
         userProfileRepository.save(userProfileEntity);
-        return userProfileMapper.toDto(userProfileEntity);
+        userProfileMapper.toDto(userProfileEntity);
     }
 
     public Optional<String> uploadAvatar(UserEntity userEntity, MultipartFile image) {
-        String key = MAIN_PACKAGE + userEntity.getEmail() + FORWARD_SLASH + DEFAULT_AVATAR_NAME;
+        String key = mainPackage + userEntity.getEmail() + FORWARD_SLASH + defaultAvatarName;
 
         return awss3Service.uploadImage(image, key);
     }
@@ -59,20 +65,20 @@ public class UserProfileService {
         return userProfileMapper.toDto(getUserProfileByEmail(userEmail));
     }
 
-    public UserProfileDTO updateAvatar(String userEmail, MultipartFile image) {
+    public void updateAvatar(String userEmail, MultipartFile image) {
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
         UserEntity userEntity = userProfileEntity.getUser();
-        String key = MAIN_PACKAGE + userEntity.getEmail() + FORWARD_SLASH + DEFAULT_AVATAR_NAME;
+        String key = mainPackage + userEntity.getEmail() + FORWARD_SLASH + defaultAvatarName;
 
         String imageURL = awss3Service.uploadFile(image, key);
         userProfileEntity.setAvatarId(imageURL);
 
         userProfileRepository.save(userProfileEntity);
 
-        return userProfileMapper.toDto(userProfileEntity);
+        userProfileMapper.toDto(userProfileEntity);
     }
 
-    public UserProfileDTO deleteAvatar(String userEmail) {
+    public void deleteAvatar(String userEmail) {
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
 
         awss3Service.deleteImage(userProfileEntity.getAvatarId());
@@ -80,6 +86,14 @@ public class UserProfileService {
 
         userProfileRepository.save(userProfileEntity);
 
+        userProfileMapper.toDto(userProfileEntity);
+    }
+
+    public UserProfileEntity mapToEntity(RegistrationRequest registrationRequest) {
+        return userProfileMapper.toEntity(registrationRequest);
+    }
+
+    public UserProfileDTO mapToDto(UserProfileEntity userProfileEntity){
         return userProfileMapper.toDto(userProfileEntity);
     }
 

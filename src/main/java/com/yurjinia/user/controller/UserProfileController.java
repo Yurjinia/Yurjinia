@@ -6,6 +6,7 @@ import com.yurjinia.user.service.UserProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,18 +33,24 @@ public class UserProfileController {
     }
 
     @PutMapping("/username")
-    public UserProfileDTO changeUsername(@PathVariable String userEmail, @Valid @RequestBody UsernameDTO username) {
-        return userProfileService.changeUsername(userEmail, username);
+    public ResponseEntity<Void> changeUsername(@PathVariable String userEmail, @Valid @RequestBody UsernameDTO username) {
+        userProfileService.changeUsername(userEmail, username);
+
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public UserProfileDTO updateAvatar(@PathVariable String userEmail, @RequestPart(value = "image") MultipartFile image) {
-        return userProfileService.updateAvatar(userEmail, image);
+    public ResponseEntity<Void> updateAvatar(@PathVariable String userEmail, @RequestPart(value = "image") MultipartFile image) {
+        userProfileService.updateAvatar(userEmail, image);
+
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/avatar")
-    public UserProfileDTO deleteAvatar(@PathVariable String userEmail) {
-        return userProfileService.deleteAvatar(userEmail);
+    public ResponseEntity<Void> deleteAvatar(@PathVariable String userEmail) {
+        userProfileService.deleteAvatar(userEmail);
+
+        return ResponseEntity.noContent().build();
     }
 
 }

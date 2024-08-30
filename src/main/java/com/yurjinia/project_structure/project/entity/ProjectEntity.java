@@ -2,6 +2,7 @@ package com.yurjinia.project_structure.project.entity;
 
 import com.yurjinia.project_structure.board.entity.BoardEntity;
 import com.yurjinia.user.entity.UserEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -17,7 +19,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -32,14 +35,22 @@ public class ProjectEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
+    private String code;
+
+    @Column(nullable = false, unique = true)
     private String name;
 
+    @Builder.Default
     @ManyToMany(mappedBy = "projects")
-    private List<UserEntity> users;
+    private Set<UserEntity> users = new HashSet<>();
 
-    @OneToMany
+    @Builder.Default
     @JoinColumn(name = "project_id")
-    private List<BoardEntity> boards;
+    @OneToMany(cascade = CascadeType.ALL)
+    private Set<BoardEntity> boards = new HashSet<>();
 
+    @ManyToOne
+    @JoinColumn(nullable = false, name = "owner_id")
+    private UserEntity owner;
 }

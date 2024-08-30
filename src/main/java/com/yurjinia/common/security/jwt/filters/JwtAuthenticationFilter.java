@@ -6,11 +6,11 @@ import com.yurjinia.common.security.jwt.constants.JwtConstants;
 import com.yurjinia.common.security.jwt.service.JwtService;
 import com.yurjinia.common.validator.JwtValidator;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,10 +22,15 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    @Value("${APP.PUBLIC.URL}")
+    public String[] publicUrl;
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
@@ -35,60 +40,59 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws IOException {
         try {
-            if (shouldSkipFilter(request, response, filterChain)) {
+            if (isRequestSentToPublicEndpoint(request) || isAlreadyAuthenticated()) {
+                filterChain.doFilter(request, response);
                 return;
             }
 
             String token = extractJwtFromRequest(request);
-            UserDetails userDetails = authenticateToken(token, request, response, filterChain);
+
+            if (jwtService.isTokenBlacklisted(token)) {
+                throw new CommonException(ErrorCode.JWT_INVALID, HttpStatus.UNAUTHORIZED);
+            }
+
+            UserDetails userDetails = authenticateToken(token);
             setAuthentication(userDetails, request);
 
             filterChain.doFilter(request, response);
         } catch (CommonException ex) {
             handleCommonException(response, ex);
         } catch (Exception ex) {
-            handleGeneralException(response, ex);
+            handleCommonException(response, new CommonException(ErrorCode.FORBIDDEN, HttpStatus.FORBIDDEN, List.of(ex.getMessage())));
         }
     }
 
-    private boolean shouldSkipFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+    private boolean isRequestSentToPublicEndpoint(HttpServletRequest request) {
         String path = request.getRequestURI();
-        if (isAuthUrl(path)) {
-            filterChain.doFilter(request, response);
-            return true;
-        }
-        return false;
+        return isPublicUrl(path);
     }
 
-    private boolean isAuthUrl(String path) {
-        return path.startsWith(JwtConstants.AUTH_URL);
+    private boolean isPublicUrl(String path) {
+        return Arrays.stream(publicUrl).anyMatch(path::startsWith);
     }
 
     private String extractJwtFromRequest(HttpServletRequest request) {
         String requestHeader = request.getHeader(JwtConstants.AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(requestHeader) && requestHeader.startsWith(JwtConstants.TOKEN_PREFIX)) {
-            return requestHeader.substring(JwtConstants.TOKEN_PREFIX.length());
+
+        if (!StringUtils.hasText(requestHeader) || !requestHeader.startsWith(JwtConstants.TOKEN_PREFIX)) {
+            return null;
         }
-        return null;
+
+        return requestHeader.substring(JwtConstants.TOKEN_PREFIX.length());
     }
 
-    private UserDetails authenticateToken(String token,
-                                          HttpServletRequest request,
-                                          HttpServletResponse response,
-                                          FilterChain filterChain) throws CommonException, ServletException, IOException {
+    private UserDetails authenticateToken(String token) throws CommonException {
         if (!isValidToken(token)) {
             throw new CommonException(ErrorCode.JWT_INVALID, HttpStatus.UNAUTHORIZED);
         }
 
         String userEmail = jwtService.extractUsername(token);
-        if (isAlreadyAuthenticated()) {
-            filterChain.doFilter(request, response);
-        }
-
         UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+
         if (!jwtService.isTokenValid(token, userDetails)) {
             throw new CommonException(ErrorCode.FORBIDDEN, HttpStatus.FORBIDDEN);
         }
+
         return userDetails;
     }
 
@@ -119,13 +123,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.setContentType("application/json");
         response.getWriter().write(String.format("{\"errorCode\": \"%s\",\"status\": \"%s\", \"message\": \"%s\"}",
                 ex.getErrorCode(), ex.getStatus().name(), ex.getParams().toString()));
-    }
-
-    private void handleGeneralException(HttpServletResponse response, Exception ex) throws IOException {
-        response.setStatus(HttpStatus.FORBIDDEN.value());
-        response.setContentType("application/json");
-        response.getWriter().write(String.format("{\"errorCode\": \"%s\", \"message\": \"%s\"}",
-                HttpStatus.FORBIDDEN.value(), ex.getMessage()));
     }
 
 }

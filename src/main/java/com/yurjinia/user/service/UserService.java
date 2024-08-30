@@ -3,8 +3,11 @@ package com.yurjinia.user.service;
 import com.yurjinia.auth.controller.request.RegistrationRequest;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
-import com.yurjinia.project_structure.project.entity.ProjectEntity;
+import com.yurjinia.common.security.jwt.service.JwtService;
+import com.yurjinia.user.dto.UserDTO;
+import com.yurjinia.user.dto.UserProfileDTO;
 import com.yurjinia.user.entity.UserEntity;
+import com.yurjinia.user.entity.UserProfileEntity;
 import com.yurjinia.user.repository.UserRepository;
 import com.yurjinia.user.service.mapper.UserMapper;
 import jakarta.transaction.Transactional;
@@ -16,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,12 +27,15 @@ public class UserService {
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final UserProfileService userProfileService;
+    private final JwtService jwtService;
 
     public void save(RegistrationRequest registrationRequest) {
-        save(userMapper.toEntity(registrationRequest));
+        UserProfileEntity userProfileEntity = userProfileService.mapToEntity(registrationRequest);
+        save(userMapper.toEntity(registrationRequest, userProfileEntity));
     }
 
     public void save(UserEntity userEntity) {
+        userEntity.setPassword(jwtService.encode(userEntity.getPassword()));
         userRepository.save(userEntity);
     }
 
@@ -46,18 +51,6 @@ public class UserService {
 
     public Optional<UserEntity> findByEmail(String email) {
         return userRepository.findByEmail(email);
-    }
-
-    public void addProject(ProjectEntity projectEntity) {
-        UserEntity userEntity = projectEntity.getUsers().getFirst();
-
-        if (userEntity.getProjects() == null) {
-            userEntity.setProjects(List.of(projectEntity));
-        } else {
-            userEntity.getProjects().add(projectEntity);
-        }
-
-        save(userEntity);
     }
 
     @Transactional
@@ -80,7 +73,8 @@ public class UserService {
 
     public void createUser(RegistrationRequest registrationRequest, String avatarId) {
         validateIfEmailExists(registrationRequest);
-        UserEntity userEntity = userMapper.toEntity(registrationRequest);
+        UserProfileEntity userProfileEntity = userProfileService.mapToEntity(registrationRequest);
+        UserEntity userEntity = userMapper.toEntity(registrationRequest, userProfileEntity);
         userEntity.getUserProfile().setAvatarId(avatarId);
         save(userEntity);
     }
@@ -95,26 +89,32 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
-    public void validateIfUsersExists(List<String> userEmails) {
-        List<String> emailsFromDB = userRepository.findAllByEmailIn(userEmails).stream().map(UserEntity::getEmail).toList();
-        if (emailsFromDB.size() != userEmails.size()) {
-            Set<String> missingUsers = userEmails.stream()
-                    .filter(user -> !emailsFromDB.contains(user))
-                    .collect(Collectors.toSet());
+    public Set<UserEntity> findAllByEmail(Set<String> emails) {
+        return userRepository.findAllByEmailIn(emails);
+    }
 
-            if (!missingUsers.isEmpty()) {
-                throw new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.CONFLICT,
-                        List.of("Users by emails: " + missingUsers + " does not found."));
-            }
+    public UserDTO mapToDto(UserEntity userEntity) {
+        UserProfileDTO userProfileDTO = userProfileService.mapToDto(userEntity.getUserProfile());
+        return userMapper.toDto(userEntity, userProfileDTO);
+    }
+
+    public List<UserDTO> mapToDto(Set<UserEntity> userEntities) {
+        return userEntities.stream().map(this::mapToDto).toList();
+    }
+
+    /*
+        ToDo: Refer to next JIRA with having more clarification about the reasons of
+         why the code was commented, and when it's going to be uncommented:
+         https://pashka1clash.atlassian.net/browse/YUR-114
+
+        public void activateUser(String email) {
+            UserEntity user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
+
+            user.setActive(true);
+            userRepository.save(user);
         }
-    }
 
-    public void activateUser(String email) {
-        UserEntity user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
-
-        user.setActive(true);
-        userRepository.save(user);
-    }
+    */
 
 }
