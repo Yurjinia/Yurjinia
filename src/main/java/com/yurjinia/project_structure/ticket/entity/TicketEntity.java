@@ -1,4 +1,4 @@
-package com.yurjinia.project_structure.task.entity;
+package com.yurjinia.project_structure.ticket.entity;
 
 import com.yurjinia.project_structure.board.entity.BoardEntity;
 import com.yurjinia.project_structure.column.entity.ColumnEntity;
@@ -18,34 +18,37 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "task")
-public class TaskEntity {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "ticket")
+public class TicketEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+     @Column(nullable = false, unique = true)
     private String code;
 
     @Column(nullable = false)
-    private String name;
+    private String title;
 
     @Enumerated(EnumType.STRING)
-    private TaskType type;
+    private TicketType type;
 
     @ManyToOne
     @JoinColumn(name = "status_id", nullable = false)
-    private TaskStatusEntity status;
+    private TicketStatusEntity status;
 
     @Column(nullable = false)
     private String description;
@@ -68,13 +71,13 @@ public class TaskEntity {
     private UserEntity reporter;
 
     @Enumerated(EnumType.STRING)
-    private TaskPriority priority;
+    private TicketPriority priority;
 
     @Column(nullable = false)
-    private LocalDate created;
+    private LocalDateTime created;
 
     @Column(nullable = false)
-    private LocalDate updated;
+    private LocalDateTime updated;
 
     @ManyToOne
     @JoinColumn(name = "column_id")
@@ -86,13 +89,13 @@ public class TaskEntity {
 
     @PrePersist
     protected void onCreate() {
-        this.created = LocalDate.now();
-        this.updated = LocalDate.now();
+        this.created = LocalDateTime.now();
+        this.updated = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        this.updated = LocalDate.now();
+        this.updated = LocalDateTime.now();
     }
 
 }

@@ -64,6 +64,10 @@ public class BoardService {
         return boardRepository.findByCodeAndProjectCode(boardCode, projectCode).orElseThrow(() -> new CommonException(ErrorCode.BOARD_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
 
+    public void save(BoardEntity boardEntity) {
+        boardRepository.save(boardEntity);
+    }
+
     private void validateIfBoardNotExist(String boardName, String boardCode, String projectCode) {
         if (boardRepository.existsByNameOrCodeAndProject(boardName, boardCode, projectCode)) {
             throw new CommonException(ErrorCode.BOARD_ALREADY_EXISTS, HttpStatus.CONFLICT,
