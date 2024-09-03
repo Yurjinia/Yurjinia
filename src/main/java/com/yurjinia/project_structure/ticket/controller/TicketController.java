@@ -3,6 +3,7 @@ package com.yurjinia.project_structure.ticket.controller;
 
 import com.yurjinia.project_structure.ticket.dto.CreateTicketRequest;
 import com.yurjinia.project_structure.ticket.dto.TicketDTO;
+import com.yurjinia.project_structure.ticket.dto.UpdateTicketPositionRequest;
 import com.yurjinia.project_structure.ticket.service.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,12 +26,22 @@ public class TicketController {
         return ResponseEntity.ok(ticketDTO);
     }
 
-    /*@GetMapping("/tickets/{ticketCode}")
+    @GetMapping("/tickets/{ticketCode}")
     public ResponseEntity<TicketDTO> getTicket(@PathVariable String userEmail,
                                                @PathVariable String projectCode,
                                                @PathVariable String boardCode,
                                                @PathVariable String ticketCode){
-        ticketService.getTicket()
-    }*/
+        TicketDTO ticket = ticketService.getTicket(userEmail, projectCode, boardCode, ticketCode);
+        return ResponseEntity.ok(ticket);
+    }
+
+    @PutMapping("/tickets/{ticketCode}")
+    public void updateTicketPosition (@PathVariable String projectCode,
+                                      @PathVariable String boardCode,
+                                      @PathVariable String userEmail,
+                                      @PathVariable String ticketCode,
+                                      @RequestBody UpdateTicketPositionRequest updateTicketPositionRequest){
+        ticketService.updateTicketPosition(projectCode, boardCode, userEmail, ticketCode, updateTicketPositionRequest);
+    }
 
 }

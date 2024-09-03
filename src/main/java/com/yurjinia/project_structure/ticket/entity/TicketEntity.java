@@ -79,6 +79,9 @@ public class TicketEntity {
     @Column(nullable = false)
     private LocalDateTime updated;
 
+    @Column(nullable = false)
+    private Long position;
+
     @ManyToOne
     @JoinColumn(name = "column_id")
     private ColumnEntity column;
