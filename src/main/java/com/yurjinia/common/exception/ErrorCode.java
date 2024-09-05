@@ -39,7 +39,7 @@ public enum ErrorCode {
     BOARD_NOT_FOUND("Board not found"),
     COLUMN_ALREADY_EXISTS("Column already exists"),
     COLUMN_NOT_FOUND("Column not found"),
-    TICKET_NOT_FOUND("Ticket not found"),;
+    TICKET_NOT_FOUND("Ticket not found");
 
 
     //TODO: Add HttpStatus to the error code
