@@ -5,5 +5,6 @@ import lombok.Data;
 @Data
 public class UpdateTicketPositionRequest {
     String columnName;
+    String ticketCode;
     int ticketPosition;
 }

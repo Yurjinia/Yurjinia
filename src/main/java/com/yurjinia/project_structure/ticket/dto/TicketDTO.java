@@ -7,7 +7,11 @@ import com.yurjinia.project_structure.ticket.entity.TicketType;
 import com.yurjinia.user.dto.UserDTO;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -42,6 +46,8 @@ public class TicketDTO {
     private UserDTO reporter;
 
     private TicketPriority priority;
+
+    private Long position;
 
     private LocalDate created;
 

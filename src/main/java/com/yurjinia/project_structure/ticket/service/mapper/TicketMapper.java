@@ -4,6 +4,8 @@ import com.yurjinia.project_structure.comment.service.mapper.CommentMapper;
 import com.yurjinia.project_structure.ticket.dto.CreateTicketRequest;
 import com.yurjinia.project_structure.ticket.dto.TicketDTO;
 import com.yurjinia.project_structure.ticket.entity.TicketEntity;
+import com.yurjinia.user.dto.UserProfileDTO;
+import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.mapper.UserMapper;
 import com.yurjinia.user.service.mapper.UserProfileMapper;
 import lombok.RequiredArgsConstructor;
@@ -24,23 +26,35 @@ public class TicketMapper {
     }
 
     public TicketDTO toDTO(TicketEntity ticketEntity) {
-        /*UserEntity assignee = ticketEntity.getAssignee();
-        UserEntity reporter = ticketEntity.getReporter();
-        UserProfileDTO assigneeProfileDTO = userProfileMapper.toDto(assignee.getUserProfile());
-        UserProfileDTO reporterProfileDTO = userProfileMapper.toDto(reporter.getUserProfile());*/
-        return TicketDTO.builder()
-                .title(ticketEntity.getTitle())
-                .type(ticketEntity.getType())
-                .code(ticketEntity.getCode())
-                .description(ticketEntity.getDescription())
-                //.assignee(userMapper.toDto(assignee, assigneeProfileDTO))
-                //.comments(commentMapper.toDtos(ticketEntity.getComments()))
-                .status(ticketEntity.getStatus())
-                .endDate(ticketEntity.getEndDate())
-                .startDate(ticketEntity.getStartDate())
-                // .reporter(userMapper.toDto(reporter, reporterProfileDTO))
-                .priority(ticketEntity.getPriority())
-                .build();
+        TicketDTO ticketDTO = new TicketDTO();
+
+        if (ticketEntity.getAssignee() != null) {
+            UserEntity assignee = ticketEntity.getAssignee();
+            UserProfileDTO assigneeProfileDTO = userProfileMapper.toDto(assignee.getUserProfile());
+            ticketDTO.setAssignee(userMapper.toDto(assignee, assigneeProfileDTO));
+        }
+
+        if (ticketEntity.getReporter() != null) {
+            UserEntity reporter = ticketEntity.getReporter();
+            UserProfileDTO reporterProfileDTO = userProfileMapper.toDto(reporter.getUserProfile());
+            ticketDTO.setReporter(userMapper.toDto(reporter, reporterProfileDTO));
+        }
+
+        if (ticketEntity.getComments() != null) {
+            ticketDTO.setComments(commentMapper.toDtos(ticketEntity.getComments()));
+        }
+
+        ticketDTO.setTitle(ticketEntity.getTitle());
+        ticketDTO.setType(ticketEntity.getType());
+        ticketDTO.setCode(ticketEntity.getCode());
+        ticketDTO.setStatus(ticketEntity.getStatus());
+        ticketDTO.setDescription(ticketEntity.getDescription());
+        ticketDTO.setStartDate(ticketEntity.getStartDate());
+        ticketDTO.setEndDate(ticketEntity.getEndDate());
+        ticketDTO.setPosition(ticketEntity.getPosition());
+        ticketDTO.setPriority(ticketEntity.getPriority());
+
+        return ticketDTO;
 
     }
 }
