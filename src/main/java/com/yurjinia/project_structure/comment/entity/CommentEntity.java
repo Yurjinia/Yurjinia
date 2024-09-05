@@ -30,8 +30,8 @@ public class CommentEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "task_id")
-    private TicketEntity task;
+    @JoinColumn(name = "ticket_id")
+    private TicketEntity ticket;
 
     @Column(nullable = false)
     private String text;
