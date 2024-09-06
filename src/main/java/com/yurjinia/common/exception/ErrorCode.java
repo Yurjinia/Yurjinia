@@ -39,7 +39,9 @@ public enum ErrorCode {
     BOARD_NOT_FOUND("Board not found"),
     COLUMN_ALREADY_EXISTS("Column already exists"),
     COLUMN_NOT_FOUND("Column not found"),
-    TICKET_NOT_FOUND("Ticket not found");
+    TICKET_NOT_FOUND("Ticket not found"),
+    PASSWORD_MATCHES_OLD_PASSWORD("Password matches old password"),
+    PASSWORD_IS_NOT_MATCHED("Password matches old password");
 
 
     //TODO: Add HttpStatus to the error code

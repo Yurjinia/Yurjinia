@@ -27,7 +27,6 @@ public class ColumnService {
 
     private final ColumnMapper columnMapper;
     private final BoardService boardService;
-    private final ProjectService projectService;
     private final ColumnRepository columnRepository;
 
     @Transactional()
@@ -104,16 +103,13 @@ public class ColumnService {
     }
 
     private void validateIfColumnNotExist(String columnName, String boardCode, String projectCode) {
-        // Отримати всі борди проекту за допомогою projectCode
         List<BoardDTO> projectBoards = boardService.getProjectBoards(projectCode);
 
-        // Знайти борду з заданим boardCode
         BoardDTO board = projectBoards.stream()
                 .filter(b -> b.getBoardCode().equals(boardCode))
                 .findFirst()
                 .orElseThrow(() -> new CommonException(ErrorCode.BOARD_NOT_FOUND, HttpStatus.NOT_FOUND, List.of("Board with code " + boardCode + " not found in project " + projectCode)));
 
-        // Перевірити, чи існує колонка з таким ім'ям
         boolean columnExists = board.getColumns().stream()
                 .anyMatch(column -> column.getName().equalsIgnoreCase(columnName));
 
