@@ -11,7 +11,7 @@
     </parent>
     <groupId>com.yurjinia</groupId>
     <artifactId>yurjinia</artifactId>
-    <version>1.3</version>
+    <version>1.4</version>
     <name>yurjinia</name>
     <description>A Java project, clone of Jira</description>
 
