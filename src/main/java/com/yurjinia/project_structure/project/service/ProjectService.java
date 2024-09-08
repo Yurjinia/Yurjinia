@@ -33,7 +33,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
 
     public List<ProjectDTO> getUserProjects(String userEmail) {
-        UserEntity user = userService.getByEmail(userEmail);
+        UserEntity user = userService.getUserByEmail(userEmail);
         UserDTO ownerDto = userService.mapToDto(user);
 
         return user.getProjects()
@@ -58,7 +58,7 @@ public class ProjectService {
         validateAllUsersExist(createProjectRequest.getUserEmails());
         validateOwnerNotInUserList(userEmail, createProjectRequest.getUserEmails());
 
-        UserEntity owner = userService.getByEmail(userEmail);
+        UserEntity owner = userService.getUserByEmail(userEmail);
         ProjectEntity projectEntity = projectMapper.toEntity(createProjectRequest, owner);
 
         if (projectEntity.getUsers().contains(owner)) {
@@ -99,7 +99,7 @@ public class ProjectService {
     public void deleteUserFromProject(String projectCode, String userEmail) {
         ProjectEntity project = getProject(projectCode);
 
-        UserEntity user = userService.getByEmail(userEmail);
+        UserEntity user = userService.getUserByEmail(userEmail);
 
         if (!project.getUsers().contains(user)) {
             throw new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND, List.of("User is not part of this project"));
@@ -133,7 +133,7 @@ public class ProjectService {
     public void addUserToProject(String email, String projectCode) {
         ProjectEntity projectEntity = projectRepository.findByCode(projectCode)
                 .orElseThrow(() -> new CommonException(PROJECT_NOT_FOUND, HttpStatus.NOT_FOUND, List.of("Project not found with code: " + projectCode)));
-        UserEntity userEntity = userService.getByEmail(email);
+        UserEntity userEntity = userService.getUserByEmail(email);
         associateUserWithProject(userEntity, projectEntity);
     }
 

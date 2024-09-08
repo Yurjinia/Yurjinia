@@ -44,7 +44,7 @@ public class TicketService {
         BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
         ColumnEntity columnEntity = columnService.getColumnByName(projectCode, boardCode, columnName);
         TicketEntity ticketEntity = ticketMapper.toEntity(createTicketRequest);
-        UserEntity userEntity = userService.getByEmail(userEmail);
+        UserEntity userEntity = userService.getUserByEmail(userEmail);
         int uniqTicketCode = boardEntity.getUniqTicketCode();
 
         ticketEntity.setCode(generateUniqueTaskCode(boardCode, uniqTicketCode));

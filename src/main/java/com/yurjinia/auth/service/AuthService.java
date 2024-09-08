@@ -112,7 +112,7 @@ public class AuthService {
     }
 
     private JwtAuthenticationResponse loginByEmail(LoginRequest request) {
-        UserEntity userEntity = userService.getByEmail(request.getEmail());
+        UserEntity userEntity = userService.getUserByEmail(request.getEmail());
         validatePassword(request.getPassword(), userEntity.getPassword());
 
         return authenticate(request.getEmail(), request.getPassword());
@@ -163,14 +163,14 @@ public class AuthService {
         validatePasswordMatch(passwordResetDTO.getConfirmPassword(), passwordResetDTO.getNewPassword());
 
         ConfirmationTokenEntity tokenEntity = confirmationTokenService.getToken(token);
-        UserEntity userEntity = userService.getByEmail(tokenEntity.getUserEmail());
+        UserEntity userEntity = userService.getUserByEmail(tokenEntity.getUserEmail());
 
         validateNewPasswordIsNotOld(passwordResetDTO.getNewPassword(), userEntity.getPassword());
 
         userEntity.setPassword(passwordEncoder.encode(passwordResetDTO.getNewPassword()));
 
         userService.save(userEntity);
-        confirmationTokenService.deleteToken(token);
+        confirmationTokenService.deleteToken(tokenEntity);
 
         emailService.send(userEntity.getEmail(), emailService.buildForgotPasswordSuccessMessage(loginLink));
     }

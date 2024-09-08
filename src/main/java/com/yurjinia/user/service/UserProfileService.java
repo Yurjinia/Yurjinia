@@ -4,6 +4,7 @@ import com.yurjinia.auth.controller.request.RegistrationRequest;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
 import com.yurjinia.common.s3.service.AWSS3Service;
+import com.yurjinia.user.dto.UpdateUserProfileRequest;
 import com.yurjinia.user.dto.UserProfileDTO;
 import com.yurjinia.user.dto.UsernameDTO;
 import com.yurjinia.user.entity.UserEntity;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static com.yurjinia.common.application.constants.TextConstants.FORWARD_SLASH;
 
@@ -89,17 +91,33 @@ public class UserProfileService {
         userProfileMapper.toDto(userProfileEntity);
     }
 
+    public UserProfileDTO updateUserProfile(String userEmail, UpdateUserProfileRequest updateUserProfileRequest) {
+        UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
+
+        updateFieldIfNotBlank(updateUserProfileRequest.getFirstName(), userProfileEntity::setFirstName);
+        updateFieldIfNotBlank(updateUserProfileRequest.getLastName(), userProfileEntity::setLastName);
+        userProfileRepository.save(userProfileEntity);
+
+        return userProfileMapper.toDto(userProfileEntity);
+    }
+
     public UserProfileEntity mapToEntity(RegistrationRequest registrationRequest) {
         return userProfileMapper.toEntity(registrationRequest);
     }
 
-    public UserProfileDTO mapToDto(UserProfileEntity userProfileEntity){
+    public UserProfileDTO mapToDto(UserProfileEntity userProfileEntity) {
         return userProfileMapper.toDto(userProfileEntity);
     }
 
     private UserProfileEntity getUserProfileByEmail(String email) {
         return userProfileRepository.findByUserEmail(email)
                 .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
+    }
+
+    private void updateFieldIfNotBlank(String newValue, Consumer<String> updater) {
+        if (StringUtils.isNotBlank(newValue)) {
+            updater.accept(newValue);
+        }
     }
 
 }

@@ -9,6 +9,4 @@ import java.util.Optional;
 @Repository
 public interface ConfirmationTokenRepository extends JpaRepository<ConfirmationTokenEntity, Long> {
     Optional<ConfirmationTokenEntity> findByToken(String token);
-
-    void deleteByToken(String token);
 }

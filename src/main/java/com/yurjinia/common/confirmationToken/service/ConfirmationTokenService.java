@@ -49,8 +49,8 @@ public class ConfirmationTokenService {
                 .orElseThrow(() -> new CommonException(ErrorCode.TOKEN_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
 
-    public void deleteToken(String token) {
-        confirmationTokenRepository.deleteByToken(token);
+    public void deleteToken(ConfirmationTokenEntity token) {
+        confirmationTokenRepository.delete(token);
     }
 
 }

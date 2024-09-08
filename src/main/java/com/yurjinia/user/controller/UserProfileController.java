@@ -1,5 +1,6 @@
 package com.yurjinia.user.controller;
 
+import com.yurjinia.user.dto.UpdateUserProfileRequest;
 import com.yurjinia.user.dto.UserProfileDTO;
 import com.yurjinia.user.dto.UsernameDTO;
 import com.yurjinia.user.service.UserProfileService;
@@ -44,6 +45,14 @@ public class UserProfileController {
         userProfileService.updateAvatar(userEmail, image);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping()
+    public ResponseEntity<UserProfileDTO> updateUserProfile(@PathVariable String userEmail,
+                                                            @RequestBody UpdateUserProfileRequest updateUserProfileRequest) {
+        UserProfileDTO userProfileDTO = userProfileService.updateUserProfile(userEmail, updateUserProfileRequest);
+
+        return ResponseEntity.ok(userProfileDTO);
     }
 
     @DeleteMapping("/avatar")
