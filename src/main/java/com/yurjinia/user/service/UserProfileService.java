@@ -6,7 +6,6 @@ import com.yurjinia.common.exception.ErrorCode;
 import com.yurjinia.common.s3.service.AWSS3Service;
 import com.yurjinia.user.dto.UpdateUserProfileRequest;
 import com.yurjinia.user.dto.UserProfileDTO;
-import com.yurjinia.user.dto.UsernameDTO;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.entity.UserProfileEntity;
 import com.yurjinia.user.repository.UserProfileRepository;
@@ -18,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -37,12 +37,12 @@ public class UserProfileService {
     private final UserProfileMapper userProfileMapper;
     private final UserProfileRepository userProfileRepository;
 
-    public void changeUsername(String userEmail, UsernameDTO usernameDTO) {
-        validateIfUsernameExists(usernameDTO.getUsername());
+    public void changeUsername(String userEmail, String userName) {
+        validateIfUsernameExists(userName);
 
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
 
-        userProfileEntity.setUsername(usernameDTO.getUsername());
+        userProfileEntity.setUsername(userName);
         userProfileRepository.save(userProfileEntity);
         userProfileMapper.toDto(userProfileEntity);
     }
@@ -68,6 +68,10 @@ public class UserProfileService {
     }
 
     public void updateAvatar(String userEmail, MultipartFile image) {
+        if (Objects.isNull(image)) {
+            return;
+        }
+
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
         UserEntity userEntity = userProfileEntity.getUser();
         String key = mainPackage + userEntity.getEmail() + FORWARD_SLASH + defaultAvatarName;
@@ -91,11 +95,13 @@ public class UserProfileService {
         userProfileMapper.toDto(userProfileEntity);
     }
 
-    public UserProfileDTO updateUserProfile(String userEmail, UpdateUserProfileRequest updateUserProfileRequest) {
+    public UserProfileDTO updateUserProfile(String userEmail, MultipartFile image, UpdateUserProfileRequest updateUserProfileRequest) {
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
 
         updateFieldIfNotBlank(updateUserProfileRequest.getFirstName(), userProfileEntity::setFirstName);
         updateFieldIfNotBlank(updateUserProfileRequest.getLastName(), userProfileEntity::setLastName);
+        changeUsername(userEmail, updateUserProfileRequest.getUsername());
+        updateAvatar(userEmail, image);
         userProfileRepository.save(userProfileEntity);
 
         return userProfileMapper.toDto(userProfileEntity);
