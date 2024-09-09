@@ -102,8 +102,8 @@ public class UserProfileService {
         updateFieldIfNotBlank(updateUserProfileRequest.getLastName(), userProfileEntity::setLastName);
         changeUsername(userEmail, updateUserProfileRequest.getUsername());
         updateAvatar(userEmail, image);
-        userProfileRepository.save(userProfileEntity);
 
+        userProfileRepository.save(userProfileEntity);
         return userProfileMapper.toDto(userProfileEntity);
     }
 

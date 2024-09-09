@@ -32,14 +32,7 @@ public class UserProfileController {
         return userProfileService.getUserProfile(userEmail);
     }
 
-    @PutMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> updateAvatar(@PathVariable String userEmail, @RequestPart(value = "image") MultipartFile image) {
-        userProfileService.updateAvatar(userEmail, image);
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping
+    @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserProfileDTO> updateUserProfile(@PathVariable String userEmail,
                                                             @RequestPart(value = "image", required = false) MultipartFile image,
                                                             @Valid @RequestPart("updateUserProfileRequest") UpdateUserProfileRequest updateUserProfileRequest) {
