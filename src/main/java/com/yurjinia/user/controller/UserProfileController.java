@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,7 +34,7 @@ public class UserProfileController {
     @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserProfileDTO> updateUserProfile(@PathVariable String userEmail,
                                                             @RequestPart(value = "image", required = false) MultipartFile image,
-                                                            @Valid @RequestPart("updateUserProfileRequest") UpdateUserProfileRequest updateUserProfileRequest) {
+                                                            @Valid @RequestPart(value = "updateUserProfileRequest", required = false) UpdateUserProfileRequest updateUserProfileRequest) {
         UserProfileDTO userProfileDTO = userProfileService.updateUserProfile(userEmail, image, updateUserProfileRequest);
 
         return ResponseEntity.ok(userProfileDTO);

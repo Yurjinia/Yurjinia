@@ -98,9 +98,12 @@ public class UserProfileService {
     public UserProfileDTO updateUserProfile(String userEmail, MultipartFile image, UpdateUserProfileRequest updateUserProfileRequest) {
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
 
-        updateFieldIfNotBlank(updateUserProfileRequest.getFirstName(), userProfileEntity::setFirstName);
-        updateFieldIfNotBlank(updateUserProfileRequest.getLastName(), userProfileEntity::setLastName);
-        changeUsername(userEmail, updateUserProfileRequest.getUsername());
+        if (updateUserProfileRequest != null) {
+            updateFieldIfNotBlank(updateUserProfileRequest.getFirstName(), userProfileEntity::setFirstName);
+            updateFieldIfNotBlank(updateUserProfileRequest.getLastName(), userProfileEntity::setLastName);
+            changeUsername(userEmail, updateUserProfileRequest.getUsername());
+        }
+
         updateAvatar(userEmail, image);
 
         userProfileRepository.save(userProfileEntity);
