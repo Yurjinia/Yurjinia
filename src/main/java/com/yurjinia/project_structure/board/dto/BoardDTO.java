@@ -18,6 +18,7 @@ public class BoardDTO {
     @NotBlank
     @UpperCase
     private String boardCode;
+
     private List<ColumnDTO> columns;
 
 }

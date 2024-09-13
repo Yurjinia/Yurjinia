@@ -1,5 +1,6 @@
 package com.yurjinia.project_structure.column.service.mapper;
 
+import com.yurjinia.project_structure.column.controller.request.CreateColumnRequest;
 import com.yurjinia.project_structure.column.dto.ColumnDTO;
 import com.yurjinia.project_structure.column.entity.ColumnEntity;
 import com.yurjinia.project_structure.ticket.dto.TicketDTO;
@@ -17,20 +18,24 @@ public class ColumnMapper {
     private final TicketMapper ticketMapper;
 
     public ColumnDTO toDTO(ColumnEntity columnEntity) {
-        return ColumnDTO.builder()
+        ColumnDTO columnDTO = ColumnDTO.builder()
                 .name(columnEntity.getName())
                 .columnPosition(columnEntity.getColumnPosition())
-                .tickets(toTicketsDTOs(columnEntity.getTickets()))
                 .build();
+        if (columnEntity.getTickets() != null) {
+            columnDTO.setTickets(toTicketsDTOs(columnEntity.getTickets()));
+        }
+        return columnDTO;
     }
 
-    public ColumnEntity toEntity(ColumnDTO dto) {
+    public ColumnEntity toEntity(CreateColumnRequest createColumnRequest) {
         return ColumnEntity.builder()
-                .name(dto.getName())
+                .name(createColumnRequest.getName())
                 .build();
     }
 
     private List<TicketDTO> toTicketsDTOs(List<TicketEntity> ticketEntities) {
         return ticketEntities.stream().map(ticketMapper::toDTO).toList();
     }
+
 }

@@ -1,4 +1,4 @@
-package com.yurjinia.user.dto;
+package com.yurjinia.user.controller.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

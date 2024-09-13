@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class UpdateTicketPositionRequest {
-    String columnName;
-    String ticketCode;
-    int ticketPosition;
+    private String columnName;
+    private String ticketCode;
+    private int ticketPosition;
 }

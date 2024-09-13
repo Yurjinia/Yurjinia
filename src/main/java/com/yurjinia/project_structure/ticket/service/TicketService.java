@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 @Service
@@ -45,14 +46,14 @@ public class TicketService {
         ColumnEntity columnEntity = columnService.getColumnByName(projectCode, boardCode, columnName);
         TicketEntity ticketEntity = ticketMapper.toEntity(createTicketRequest);
         UserEntity userEntity = userService.getByEmail(userEmail);
-        int uniqTicketCode = boardEntity.getUniqTicketCode();
+        int uniqTicketCode = boardEntity.getUniqueTicketCode();
 
         ticketEntity.setCode(generateUniqueTaskCode(boardCode, uniqTicketCode));
         ticketEntity.setBoard(boardEntity);
         ticketEntity.setColumn(columnEntity);
         ticketEntity.setReporter(userEntity);
         ticketEntity.setPosition((long) columnEntity.getTickets().size());
-        boardEntity.setUniqTicketCode(++uniqTicketCode);
+        boardEntity.setUniqueTicketCode(++uniqTicketCode);
 
         boardService.save(boardEntity);
         ticketRepository.save(ticketEntity);
@@ -90,22 +91,11 @@ public class TicketService {
     public TicketDTO updateTicketMetaData(String projectCode, String boardCode, String ticketCode, UpdateTicketMetaDataRequest updateTicketMetaDataRequest) {
         TicketEntity ticketEntity = getTicketEntity(projectCode, boardCode, ticketCode);
 
-        if (StringUtils.isNotBlank(updateTicketMetaDataRequest.getDescription())) {
-            ticketEntity.setDescription(updateTicketMetaDataRequest.getDescription());
-        }
-        if (StringUtils.isNotBlank(updateTicketMetaDataRequest.getTitle())) {
-            ticketEntity.setTitle(updateTicketMetaDataRequest.getTitle());
-        }
-        if (Objects.nonNull(updateTicketMetaDataRequest.getType())) {
-            ticketEntity.setType(updateTicketMetaDataRequest.getType());
-        }
-        if (Objects.nonNull(updateTicketMetaDataRequest.getStartDate())) {
-            ticketEntity.setStartDate(updateTicketMetaDataRequest.getStartDate());
-        }
-        if (Objects.nonNull(updateTicketMetaDataRequest.getEndDate())) {
-            ticketEntity.setEndDate(updateTicketMetaDataRequest.getEndDate());
-        }
-
+        updateIfNotBlank(updateTicketMetaDataRequest.getDescription(), ticketEntity::setDescription);
+        updateIfNotBlank(updateTicketMetaDataRequest.getTitle(), ticketEntity::setTitle);
+        updateIfNotNull(updateTicketMetaDataRequest.getType(), ticketEntity::setType);
+        updateIfNotNull(updateTicketMetaDataRequest.getStartDate(), ticketEntity::setStartDate);
+        updateIfNotNull(updateTicketMetaDataRequest.getEndDate(), ticketEntity::setEndDate);
 
         return ticketMapper.toDTO(ticketEntity);
     }
@@ -133,7 +123,19 @@ public class TicketService {
     }
 
     private String generateUniqueTaskCode(String boardCode, int uniqTicketCode) {
-        return boardCode + "-" + ++uniqTicketCode;
+        return boardCode + "-" + (uniqTicketCode + 1);
+    }
+
+    private void updateIfNotBlank(String newValue, Consumer<String> updater) {
+        if (StringUtils.isNotBlank(newValue)) {
+            updater.accept(newValue);
+        }
+    }
+
+    private <T> void updateIfNotNull(T newValue, Consumer<T> updater) {
+        if (Objects.nonNull(newValue)) {
+            updater.accept(newValue);
+        }
     }
 
 }

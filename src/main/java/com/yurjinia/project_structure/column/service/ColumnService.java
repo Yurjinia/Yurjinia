@@ -5,13 +5,13 @@ import com.yurjinia.common.exception.ErrorCode;
 import com.yurjinia.project_structure.board.dto.BoardDTO;
 import com.yurjinia.project_structure.board.entity.BoardEntity;
 import com.yurjinia.project_structure.board.service.BoardService;
+import com.yurjinia.project_structure.column.controller.request.CreateColumnRequest;
+import com.yurjinia.project_structure.column.controller.request.UpdateColumnPositionRequest;
+import com.yurjinia.project_structure.column.controller.request.UpdateColumnRequest;
 import com.yurjinia.project_structure.column.dto.ColumnDTO;
-import com.yurjinia.project_structure.column.dto.UpdateColumnPositionRequest;
-import com.yurjinia.project_structure.column.dto.UpdateColumnRequest;
 import com.yurjinia.project_structure.column.entity.ColumnEntity;
 import com.yurjinia.project_structure.column.repository.ColumnRepository;
 import com.yurjinia.project_structure.column.service.mapper.ColumnMapper;
-import com.yurjinia.project_structure.project.service.ProjectService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -19,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -30,10 +29,10 @@ public class ColumnService {
     private final ColumnRepository columnRepository;
 
     @Transactional()
-    public void createColumn(String projectCode, String boardCode, ColumnDTO columnDTO) {
-        validateIfColumnNotExist(columnDTO.getName(), boardCode, projectCode);
+    public ColumnDTO createColumn(String projectCode, String boardCode, CreateColumnRequest createColumnRequest) {
+        validateIfColumnNotExist(createColumnRequest.getName(), boardCode, projectCode);
 
-        ColumnEntity columnEntity = columnMapper.toEntity(columnDTO);
+        ColumnEntity columnEntity = columnMapper.toEntity(createColumnRequest);
         BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
         long nextPosition = boardEntity.getColumns().size();
 
@@ -41,6 +40,8 @@ public class ColumnService {
         columnEntity.setBoard(boardEntity);
 
         columnRepository.save(columnEntity);
+
+        return columnMapper.toDTO(columnEntity);
     }
 
     public ColumnDTO updateColumn(String projectCode, String boardCode, String columnName, UpdateColumnRequest updateColumnRequest) {

@@ -10,6 +10,8 @@ public enum ErrorCode {
     INVALID_EMAIL("Invalid email"),
     INVALID_USERNAME("Invalid username"),
     INVALID_PASSWORD("Invalid password"),
+    PASSWORD_IS_NOT_MATCHED("Password matches old password"),
+    PASSWORD_MATCHES_OLD_PASSWORD("Password matches old password"),
     INVALID_SIGN_UP_REQUEST("Invalid sign up request"),
     INVALID_LOGIN_REQUEST("Invalid login request"),
     USER_NAME_ALREADY_EXISTS("Username already exists"),
@@ -39,9 +41,7 @@ public enum ErrorCode {
     BOARD_NOT_FOUND("Board not found"),
     COLUMN_ALREADY_EXISTS("Column already exists"),
     COLUMN_NOT_FOUND("Column not found"),
-    TICKET_NOT_FOUND("Ticket not found"),
-    PASSWORD_MATCHES_OLD_PASSWORD("Password matches old password"),
-    PASSWORD_IS_NOT_MATCHED("Password matches old password");
+    TICKET_NOT_FOUND("Ticket not found");
 
 
     //TODO: Add HttpStatus to the error code

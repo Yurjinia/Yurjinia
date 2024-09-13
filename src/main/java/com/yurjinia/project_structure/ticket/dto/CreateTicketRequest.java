@@ -14,7 +14,4 @@ public class CreateTicketRequest {
     @Enumerated(EnumType.STRING)
     private TicketType type;
 
-    /*@ManyToOne
-    @JoinColumn(name = "status_id", nullable = false)
-    private TicketStatusEntity status;*/
 }

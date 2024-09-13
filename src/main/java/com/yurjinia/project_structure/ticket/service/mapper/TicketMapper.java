@@ -3,6 +3,7 @@ package com.yurjinia.project_structure.ticket.service.mapper;
 import com.yurjinia.project_structure.comment.service.mapper.CommentMapper;
 import com.yurjinia.project_structure.ticket.dto.CreateTicketRequest;
 import com.yurjinia.project_structure.ticket.dto.TicketDTO;
+import com.yurjinia.project_structure.ticket.dto.TicketStatusDTO;
 import com.yurjinia.project_structure.ticket.entity.TicketEntity;
 import com.yurjinia.user.dto.UserProfileDTO;
 import com.yurjinia.user.entity.UserEntity;
@@ -44,10 +45,14 @@ public class TicketMapper {
             ticketDTO.setComments(commentMapper.toDtos(ticketEntity.getComments()));
         }
 
+        if (ticketEntity.getStatus() != null) {
+            ticketDTO.setStatus(TicketStatusDTO.builder().name(ticketEntity.getStatus().getName()).build());
+
+        }
+
         ticketDTO.setTitle(ticketEntity.getTitle());
         ticketDTO.setType(ticketEntity.getType());
         ticketDTO.setCode(ticketEntity.getCode());
-        ticketDTO.setStatus(ticketEntity.getStatus());
         ticketDTO.setDescription(ticketEntity.getDescription());
         ticketDTO.setStartDate(ticketEntity.getStartDate());
         ticketDTO.setEndDate(ticketEntity.getEndDate());
