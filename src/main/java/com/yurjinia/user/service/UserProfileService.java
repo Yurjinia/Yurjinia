@@ -19,9 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import static com.yurjinia.common.application.constants.TextConstants.FORWARD_SLASH;
+import static com.yurjinia.user.utils.UserProfileHelper.updateMetaData;
 
 @Service
 @RequiredArgsConstructor
@@ -36,16 +36,6 @@ public class UserProfileService {
     private final AWSS3Service awss3Service;
     private final UserProfileMapper userProfileMapper;
     private final UserProfileRepository userProfileRepository;
-
-    private void changeUsername(String userEmail, String username) {
-        validateIfUsernameExists(username);
-
-        UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
-
-        userProfileEntity.setUsername(username);
-        userProfileRepository.save(userProfileEntity);
-        userProfileMapper.toDto(userProfileEntity);
-    }
 
     public Optional<String> uploadAvatar(UserEntity userEntity, MultipartFile image) {
         String key = mainPackage + userEntity.getEmail() + FORWARD_SLASH + defaultAvatarName;
@@ -67,19 +57,6 @@ public class UserProfileService {
         return userProfileMapper.toDto(getUserProfileByEmail(userEmail));
     }
 
-    public void updateAvatar(String userEmail, MultipartFile image) {
-        UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
-        UserEntity userEntity = userProfileEntity.getUser();
-        String key = mainPackage + userEntity.getEmail() + FORWARD_SLASH + defaultAvatarName;
-
-        String imageURL = awss3Service.uploadFile(image, key);
-        userProfileEntity.setAvatarId(imageURL);
-
-        userProfileRepository.save(userProfileEntity);
-
-        userProfileMapper.toDto(userProfileEntity);
-    }
-
     public void deleteAvatar(String userEmail) {
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
 
@@ -94,15 +71,8 @@ public class UserProfileService {
     public UserProfileDTO updateUserProfile(String userEmail, MultipartFile image, UpdateUserProfileRequest updateUserProfileRequest) {
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
 
-        if (updateUserProfileRequest != null) {
-            updateStringIfNotBlank(updateUserProfileRequest.getFirstName(), userProfileEntity::setFirstName);
-            updateStringIfNotBlank(updateUserProfileRequest.getLastName(), userProfileEntity::setLastName);
-            changeUsername(userEmail, updateUserProfileRequest.getUsername());
-        }
-
-        if (Objects.nonNull(image)) {
-            updateAvatar(userEmail, image);
-        }
+        updateProfileMetaData(userEmail, updateUserProfileRequest, userProfileEntity);
+        updateProfileAvatar(userEmail, image);
 
         userProfileRepository.save(userProfileEntity);
         return mapToDto(userProfileEntity);
@@ -116,15 +86,46 @@ public class UserProfileService {
         return userProfileMapper.toDto(userProfileEntity);
     }
 
+    private void updateProfileMetaData(String userEmail, UpdateUserProfileRequest updateUserProfileRequest, UserProfileEntity userProfileEntity) {
+        if (updateUserProfileRequest != null) {
+            updateMetaData(updateUserProfileRequest.getFirstName(), userProfileEntity::setFirstName);
+            updateMetaData(updateUserProfileRequest.getLastName(), userProfileEntity::setLastName);
+            changeUsername(userEmail, updateUserProfileRequest.getUsername());
+        }
+    }
+
+    private void updateProfileAvatar(String userEmail, MultipartFile image) {
+        if (Objects.nonNull(image)) {
+            updateAvatar(userEmail, image);
+        }
+    }
+
+    private void changeUsername(String userEmail, String username) {
+        validateIfUsernameExists(username);
+
+        UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
+
+        userProfileEntity.setUsername(username);
+        userProfileRepository.save(userProfileEntity);
+        userProfileMapper.toDto(userProfileEntity);
+    }
+
+    private void updateAvatar(String userEmail, MultipartFile image) {
+        UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
+        UserEntity userEntity = userProfileEntity.getUser();
+        String key = mainPackage + userEntity.getEmail() + FORWARD_SLASH + defaultAvatarName;
+
+        String imageURL = awss3Service.uploadFile(image, key);
+        userProfileEntity.setAvatarId(imageURL);
+
+        userProfileRepository.save(userProfileEntity);
+
+        userProfileMapper.toDto(userProfileEntity);
+    }
+
     private UserProfileEntity getUserProfileByEmail(String email) {
         return userProfileRepository.findByUserEmail(email)
                 .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
-    }
-
-    private void updateStringIfNotBlank(String newValue, Consumer<String> updater) {
-        if (StringUtils.isNotBlank(newValue)) {
-            updater.accept(newValue);
-        }
     }
 
 }
