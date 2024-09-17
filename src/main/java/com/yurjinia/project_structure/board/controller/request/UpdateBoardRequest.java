@@ -1,4 +1,4 @@
-package com.yurjinia.project_structure.board.dto;
+package com.yurjinia.project_structure.board.controller.request;
 
 import com.yurjinia.project_structure.project.validation.UpperCase;
 import lombok.Getter;

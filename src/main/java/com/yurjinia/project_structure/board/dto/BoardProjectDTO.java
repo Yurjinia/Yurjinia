@@ -1,4 +1,4 @@
-package com.yurjinia.user.dto;
+package com.yurjinia.project_structure.board.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDTO {
-    private String email;
-    private UserProfileDTO userProfile;
+public class BoardProjectDTO {
+    private String name;
+    private String code;
 }

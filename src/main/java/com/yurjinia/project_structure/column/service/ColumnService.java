@@ -2,6 +2,7 @@ package com.yurjinia.project_structure.column.service;
 
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
+import com.yurjinia.common.utils.MapperUtil;
 import com.yurjinia.project_structure.board.dto.BoardDTO;
 import com.yurjinia.project_structure.board.entity.BoardEntity;
 import com.yurjinia.project_structure.board.service.BoardService;
@@ -11,7 +12,6 @@ import com.yurjinia.project_structure.column.controller.request.UpdateColumnRequ
 import com.yurjinia.project_structure.column.dto.ColumnDTO;
 import com.yurjinia.project_structure.column.entity.ColumnEntity;
 import com.yurjinia.project_structure.column.repository.ColumnRepository;
-import com.yurjinia.project_structure.column.service.mapper.ColumnMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +24,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ColumnService {
 
-    private final ColumnMapper columnMapper;
     private final BoardService boardService;
     private final ColumnRepository columnRepository;
 
@@ -32,7 +31,7 @@ public class ColumnService {
     public ColumnDTO createColumn(String projectCode, String boardCode, CreateColumnRequest createColumnRequest) {
         validateIfColumnNotExist(createColumnRequest.getName(), boardCode, projectCode);
 
-        ColumnEntity columnEntity = columnMapper.toEntity(createColumnRequest);
+        ColumnEntity columnEntity = MapperUtil.map(createColumnRequest, ColumnEntity.class);
         BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
         long nextPosition = boardEntity.getColumns().size();
 
@@ -41,7 +40,7 @@ public class ColumnService {
 
         columnRepository.save(columnEntity);
 
-        return columnMapper.toDTO(columnEntity);
+        return MapperUtil.map(columnEntity, ColumnDTO.class);
     }
 
     public ColumnDTO updateColumn(String projectCode, String boardCode, String columnName, UpdateColumnRequest updateColumnRequest) {
@@ -54,7 +53,7 @@ public class ColumnService {
         }
 
         columnRepository.save(columnEntity);
-        return columnMapper.toDTO(columnEntity);
+        return MapperUtil.map(columnEntity, ColumnDTO.class);
     }
 
     public List<ColumnDTO> updateColumnPosition(String projectCode, String boardCode, UpdateColumnPositionRequest request) {
@@ -67,7 +66,7 @@ public class ColumnService {
                 .orElseThrow(() -> new CommonException(ErrorCode.COLUMN_NOT_FOUND, HttpStatus.NOT_FOUND));
 
         columns.remove(currentColumn);
-        columns.add((int) request.getColumnPosition(), currentColumn);
+        columns.add(request.getColumnPosition(), currentColumn);
 
         for (int i = 0; i < columns.size(); i++) {
             ColumnEntity column = columns.get(i);
@@ -77,7 +76,7 @@ public class ColumnService {
         columnRepository.saveAll(columns);
 
         return columns.stream()
-                .map(columnMapper::toDTO)
+                .map(column -> MapperUtil.map(column, ColumnDTO.class))
                 .toList();
     }
 
@@ -85,7 +84,7 @@ public class ColumnService {
         BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
 
         return boardEntity.getColumns().stream()
-                .map(columnMapper::toDTO)
+                .map(column -> MapperUtil.map(column, ColumnDTO.class))
                 .toList();
     }
 
@@ -107,7 +106,7 @@ public class ColumnService {
         List<BoardDTO> projectBoards = boardService.getProjectBoards(projectCode);
 
         BoardDTO board = projectBoards.stream()
-                .filter(b -> b.getBoardCode().equals(boardCode))
+                .filter(b -> b.getCode().equals(boardCode))
                 .findFirst()
                 .orElseThrow(() -> new CommonException(ErrorCode.BOARD_NOT_FOUND, HttpStatus.NOT_FOUND, List.of("Board with code " + boardCode + " not found in project " + projectCode)));
 

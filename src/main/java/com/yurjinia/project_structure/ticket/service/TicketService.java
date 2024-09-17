@@ -2,6 +2,7 @@ package com.yurjinia.project_structure.ticket.service;
 
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
+import com.yurjinia.common.utils.MapperUtil;
 import com.yurjinia.project_structure.board.entity.BoardEntity;
 import com.yurjinia.project_structure.board.service.BoardService;
 import com.yurjinia.project_structure.column.entity.ColumnEntity;
@@ -12,7 +13,6 @@ import com.yurjinia.project_structure.ticket.dto.UpdateTicketMetaDataRequest;
 import com.yurjinia.project_structure.ticket.dto.UpdateTicketPositionRequest;
 import com.yurjinia.project_structure.ticket.entity.TicketEntity;
 import com.yurjinia.project_structure.ticket.repository.TicketRepository;
-import com.yurjinia.project_structure.ticket.service.mapper.TicketMapper;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.UserService;
 import jakarta.transaction.Transactional;
@@ -32,7 +32,6 @@ public class TicketService {
 
     private final UserService userService;
     private final BoardService boardService;
-    private final TicketMapper ticketMapper;
     private final ColumnService columnService;
     private final TicketRepository ticketRepository;
 
@@ -44,7 +43,7 @@ public class TicketService {
                                   CreateTicketRequest createTicketRequest) {
         BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
         ColumnEntity columnEntity = columnService.getColumnByName(projectCode, boardCode, columnName);
-        TicketEntity ticketEntity = ticketMapper.toEntity(createTicketRequest);
+        TicketEntity ticketEntity = MapperUtil.map(createTicketRequest, TicketEntity.class);
         UserEntity userEntity = userService.getByEmail(userEmail);
         int uniqTicketCode = boardEntity.getUniqueTicketCode();
 
@@ -57,14 +56,13 @@ public class TicketService {
 
         boardService.save(boardEntity);
         ticketRepository.save(ticketEntity);
-
-        return ticketMapper.toDTO(ticketEntity);
+        return MapperUtil.map(ticketEntity, TicketDTO.class);
     }
 
     public TicketDTO getTicket(String projectCode, String boardCode, String ticketCode) {
         TicketEntity ticketEntity = getTicketEntity(projectCode, boardCode, ticketCode);
 
-        return ticketMapper.toDTO(ticketEntity);
+        return MapperUtil.map(ticketEntity, TicketDTO.class);
     }
 
     @Transactional
@@ -84,7 +82,8 @@ public class TicketService {
                 .forEach(i -> tickets.get(i).setPosition((long) i));
 
         ticketRepository.saveAll(tickets);
-        return ticketMapper.toDTO(currentTicket);
+        return MapperUtil.map(currentTicket, TicketDTO.class);
+
     }
 
     @Transactional
@@ -97,7 +96,7 @@ public class TicketService {
         updateIfNotNull(updateTicketMetaDataRequest.getStartDate(), ticketEntity::setStartDate);
         updateIfNotNull(updateTicketMetaDataRequest.getEndDate(), ticketEntity::setEndDate);
 
-        return ticketMapper.toDTO(ticketEntity);
+        return MapperUtil.map(ticketEntity, TicketDTO.class);
     }
 
     @Transactional

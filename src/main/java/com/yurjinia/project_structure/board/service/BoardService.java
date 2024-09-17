@@ -2,11 +2,12 @@ package com.yurjinia.project_structure.board.service;
 
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
+import com.yurjinia.common.utils.MapperUtil;
+import com.yurjinia.project_structure.board.controller.request.CreateBoardRequest;
+import com.yurjinia.project_structure.board.controller.request.UpdateBoardRequest;
 import com.yurjinia.project_structure.board.dto.BoardDTO;
-import com.yurjinia.project_structure.board.dto.UpdateBoardRequest;
 import com.yurjinia.project_structure.board.entity.BoardEntity;
 import com.yurjinia.project_structure.board.repository.BoardRepository;
-import com.yurjinia.project_structure.board.service.mapper.BoardMapper;
 import com.yurjinia.project_structure.project.entity.ProjectEntity;
 import com.yurjinia.project_structure.project.service.ProjectService;
 import jakarta.transaction.Transactional;
@@ -16,19 +17,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
 public class BoardService {
 
-    private final BoardMapper boardMapper;
     private final ProjectService projectService;
     private final BoardRepository boardRepository;
 
     @Transactional
-    public void createBoard(BoardDTO boardDTO, String projectCode) {
-        validateIfBoardNotExist(boardDTO.getBoardName(), boardDTO.getBoardCode(), projectCode);
-        BoardEntity boardEntity = boardMapper.toEntity(boardDTO);
+    public void createBoard(CreateBoardRequest createBoardRequest, String projectCode) {
+        validateIfBoardNotExist(createBoardRequest.getName(), createBoardRequest.getCode(), projectCode);
+        BoardEntity boardEntity = MapperUtil.map(createBoardRequest, BoardEntity.class);
         boardEntity.setProject(projectService.getProject(projectCode));
         boardRepository.save(boardEntity);
     }
@@ -38,21 +39,16 @@ public class BoardService {
         validateIfBoardNotExist(updateBoardRequest.getBoardName(), updateBoardRequest.getBoardCode(), projectCode);
         BoardEntity boardEntity = getBoard(boardCode, projectCode);
 
-        if (StringUtils.isNotBlank(updateBoardRequest.getBoardName())) {
-            boardEntity.setName(updateBoardRequest.getBoardName());
-        }
-
-        if (StringUtils.isNotBlank(updateBoardRequest.getBoardCode())) {
-            boardEntity.setCode(updateBoardRequest.getBoardCode());
-        }
+        updateIfNotBlank(updateBoardRequest.getBoardName(), boardEntity::setName);
+        updateIfNotBlank(updateBoardRequest.getBoardCode(), boardEntity::setCode);
 
         boardRepository.save(boardEntity);
-        return boardMapper.toDTO(boardEntity);
+        return MapperUtil.map(boardEntity, BoardDTO.class);
     }
 
     public List<BoardDTO> getProjectBoards(String projectCode) {
         ProjectEntity project = projectService.getProject(projectCode);
-        return project.getBoards().stream().map(boardMapper::toDTO).toList();
+        return project.getBoards().stream().map(boardEntity -> MapperUtil.map(boardEntity, BoardDTO.class)).toList();
     }
 
     public void deleteBoard(String boardCode, String projectCode) {
@@ -72,6 +68,12 @@ public class BoardService {
         if (boardRepository.existsByNameOrCodeAndProject(boardName, boardCode, projectCode)) {
             throw new CommonException(ErrorCode.BOARD_ALREADY_EXISTS, HttpStatus.CONFLICT,
                     List.of("Board by name " + boardName + " or code " + boardCode + " already exists"));
+        }
+    }
+
+    private void updateIfNotBlank(String newValue, Consumer<String> updater) {
+        if (StringUtils.isNotBlank(newValue)) {
+            updater.accept(newValue);
         }
     }
 

@@ -2,13 +2,13 @@ package com.yurjinia.project_structure.project.service;
 
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
+import com.yurjinia.common.utils.MapperUtil;
 import com.yurjinia.project_structure.project.dto.CreateProjectRequest;
 import com.yurjinia.project_structure.project.dto.InviteToProjectRequest;
 import com.yurjinia.project_structure.project.dto.ProjectDTO;
 import com.yurjinia.project_structure.project.dto.UpdateProjectRequest;
 import com.yurjinia.project_structure.project.entity.ProjectEntity;
 import com.yurjinia.project_structure.project.repository.ProjectRepository;
-import com.yurjinia.project_structure.project.service.mapper.ProjectMapper;
 import com.yurjinia.user.dto.UserDTO;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.UserService;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.yurjinia.common.exception.ErrorCode.PROJECT_NOT_FOUND;
@@ -29,16 +30,14 @@ import static com.yurjinia.common.exception.ErrorCode.PROJECT_NOT_FOUND;
 public class ProjectService {
 
     private final UserService userService;
-    private final ProjectMapper projectMapper;
     private final ProjectRepository projectRepository;
 
     public List<ProjectDTO> getUserProjects(String userEmail) {
         UserEntity user = userService.getByEmail(userEmail);
-        UserDTO ownerDto = userService.mapToDto(user);
 
         return user.getProjects()
                 .stream()
-                .map(projectEntity -> projectMapper.toDto(projectEntity, ownerDto))
+                .map(projectEntity -> MapperUtil.map(projectEntity, ProjectDTO.class))
                 .toList();
     }
 
@@ -59,7 +58,8 @@ public class ProjectService {
         validateOwnerNotInUserList(userEmail, createProjectRequest.getUserEmails());
 
         UserEntity owner = userService.getByEmail(userEmail);
-        ProjectEntity projectEntity = projectMapper.toEntity(createProjectRequest, owner);
+        ProjectEntity projectEntity = MapperUtil.map(createProjectRequest, ProjectEntity.class);
+        projectEntity.setOwner(owner);
 
         if (projectEntity.getUsers().contains(owner)) {
             throw new CommonException(ErrorCode.USER_ALREADY_IN_PROJECT, HttpStatus.CONFLICT, List.of("User " + owner.getEmail() + " is already in the project"));
@@ -75,18 +75,12 @@ public class ProjectService {
 
         validateIfProjectNotConflicts(updateProjectRequest, projectCode);
 
-        if (StringUtils.isNotBlank(updateProjectRequest.getProjectName())) {
-            existingProject.setName(updateProjectRequest.getProjectName());
-        }
-
-        if (StringUtils.isNotBlank(updateProjectRequest.getProjectCode())) {
-            existingProject.setCode(updateProjectRequest.getProjectCode());
-        }
+        updateIfNotBlank(updateProjectRequest.getProjectName(), existingProject::setName);
+        updateIfNotBlank(updateProjectRequest.getProjectCode(), existingProject::setCode);
 
         ProjectEntity updatedProject = projectRepository.save(existingProject);
 
-        UserDTO ownerDto = userService.mapToDto(updatedProject.getOwner());
-        return projectMapper.toDto(updatedProject, ownerDto);
+        return MapperUtil.map(updatedProject, ProjectDTO.class);
     }
 
     @Transactional
@@ -190,6 +184,12 @@ public class ProjectService {
                 throw new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND,
                         List.of("Users with emails " + missingEmails + " were not found."));
             }
+        }
+    }
+
+    private void updateIfNotBlank(String newValue, Consumer<String> updater) {
+        if (StringUtils.isNotBlank(newValue)) {
+            updater.accept(newValue);
         }
     }
 

@@ -1,6 +1,6 @@
 package com.yurjinia.project_structure.column.dto;
 
-import com.yurjinia.project_structure.ticket.dto.TicketDTO;
+import com.yurjinia.project_structure.ticket.dto.ColumnTicketDTO;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +21,6 @@ public class ColumnDTO {
     private String name;
 
     private long columnPosition;
-
-    private List<TicketDTO> tickets;
+    private List<ColumnTicketDTO> tickets;
 
 }
