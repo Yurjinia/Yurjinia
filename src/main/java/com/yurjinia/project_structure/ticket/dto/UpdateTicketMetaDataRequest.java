@@ -9,7 +9,6 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 @Getter
-@Setter
 public class UpdateTicketMetaDataRequest {
 
     private String title;

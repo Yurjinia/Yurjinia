@@ -17,9 +17,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class TicketDTO {
 
     private String title;

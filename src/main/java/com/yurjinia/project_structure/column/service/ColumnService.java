@@ -2,7 +2,8 @@ package com.yurjinia.project_structure.column.service;
 
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
-import com.yurjinia.common.utils.MapperUtil;
+import com.yurjinia.common.utils.MapperUtils;
+import com.yurjinia.common.utils.MetadataUtils;
 import com.yurjinia.project_structure.board.dto.BoardDTO;
 import com.yurjinia.project_structure.board.entity.BoardEntity;
 import com.yurjinia.project_structure.board.service.BoardService;
@@ -14,11 +15,11 @@ import com.yurjinia.project_structure.column.entity.ColumnEntity;
 import com.yurjinia.project_structure.column.repository.ColumnRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -27,11 +28,11 @@ public class ColumnService {
     private final BoardService boardService;
     private final ColumnRepository columnRepository;
 
-    @Transactional()
+    @Transactional
     public ColumnDTO createColumn(String projectCode, String boardCode, CreateColumnRequest createColumnRequest) {
         validateIfColumnNotExist(createColumnRequest.getName(), boardCode, projectCode);
 
-        ColumnEntity columnEntity = MapperUtil.map(createColumnRequest, ColumnEntity.class);
+        ColumnEntity columnEntity = MapperUtils.map(createColumnRequest, ColumnEntity.class);
         BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
         long nextPosition = boardEntity.getColumns().size();
 
@@ -40,7 +41,7 @@ public class ColumnService {
 
         columnRepository.save(columnEntity);
 
-        return MapperUtil.map(columnEntity, ColumnDTO.class);
+        return MapperUtils.map(columnEntity, ColumnDTO.class);
     }
 
     public ColumnDTO updateColumn(String projectCode, String boardCode, String columnName, UpdateColumnRequest updateColumnRequest) {
@@ -48,12 +49,10 @@ public class ColumnService {
 
         ColumnEntity columnEntity = getColumnByName(projectCode, boardCode, columnName);
 
-        if (StringUtils.isNotBlank(updateColumnRequest.getColumnName())) {
-            columnEntity.setName(updateColumnRequest.getColumnName());
-        }
+        MetadataUtils.updateMetadata(updateColumnRequest.getColumnName(), columnEntity::setName);
 
         columnRepository.save(columnEntity);
-        return MapperUtil.map(columnEntity, ColumnDTO.class);
+        return MapperUtils.map(columnEntity, ColumnDTO.class);
     }
 
     public List<ColumnDTO> updateColumnPosition(String projectCode, String boardCode, UpdateColumnPositionRequest request) {
@@ -68,15 +67,12 @@ public class ColumnService {
         columns.remove(currentColumn);
         columns.add(request.getColumnPosition(), currentColumn);
 
-        for (int i = 0; i < columns.size(); i++) {
-            ColumnEntity column = columns.get(i);
-            column.setColumnPosition((long) i);
-        }
+        IntStream.range(0, columns.size()).forEach(i -> columns.get(i).setColumnPosition((long) i));
 
         columnRepository.saveAll(columns);
 
         return columns.stream()
-                .map(column -> MapperUtil.map(column, ColumnDTO.class))
+                .map(column -> MapperUtils.map(column, ColumnDTO.class))
                 .toList();
     }
 
@@ -84,7 +80,7 @@ public class ColumnService {
         BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
 
         return boardEntity.getColumns().stream()
-                .map(column -> MapperUtil.map(column, ColumnDTO.class))
+                .map(column -> MapperUtils.map(column, ColumnDTO.class))
                 .toList();
     }
 

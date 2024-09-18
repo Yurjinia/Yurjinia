@@ -2,7 +2,8 @@ package com.yurjinia.project_structure.project.service;
 
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
-import com.yurjinia.common.utils.MapperUtil;
+import com.yurjinia.common.utils.MapperUtils;
+import com.yurjinia.common.utils.MetadataUtils;
 import com.yurjinia.project_structure.project.dto.CreateProjectRequest;
 import com.yurjinia.project_structure.project.dto.InviteToProjectRequest;
 import com.yurjinia.project_structure.project.dto.ProjectDTO;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.yurjinia.common.exception.ErrorCode.PROJECT_NOT_FOUND;
@@ -37,7 +37,7 @@ public class ProjectService {
 
         return user.getProjects()
                 .stream()
-                .map(projectEntity -> MapperUtil.map(projectEntity, ProjectDTO.class))
+                .map(projectEntity -> MapperUtils.map(projectEntity, ProjectDTO.class))
                 .toList();
     }
 
@@ -58,7 +58,7 @@ public class ProjectService {
         validateOwnerNotInUserList(userEmail, createProjectRequest.getUserEmails());
 
         UserEntity owner = userService.getByEmail(userEmail);
-        ProjectEntity projectEntity = MapperUtil.map(createProjectRequest, ProjectEntity.class);
+        ProjectEntity projectEntity = MapperUtils.map(createProjectRequest, ProjectEntity.class);
         projectEntity.setOwner(owner);
 
         if (projectEntity.getUsers().contains(owner)) {
@@ -75,12 +75,12 @@ public class ProjectService {
 
         validateIfProjectNotConflicts(updateProjectRequest, projectCode);
 
-        updateIfNotBlank(updateProjectRequest.getProjectName(), existingProject::setName);
-        updateIfNotBlank(updateProjectRequest.getProjectCode(), existingProject::setCode);
+        MetadataUtils.updateMetadata(updateProjectRequest.getProjectName(), existingProject::setName);
+        MetadataUtils.updateMetadata(updateProjectRequest.getProjectCode(), existingProject::setCode);
 
         ProjectEntity updatedProject = projectRepository.save(existingProject);
 
-        return MapperUtil.map(updatedProject, ProjectDTO.class);
+        return MapperUtils.map(updatedProject, ProjectDTO.class);
     }
 
     @Transactional
@@ -184,12 +184,6 @@ public class ProjectService {
                 throw new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND,
                         List.of("Users with emails " + missingEmails + " were not found."));
             }
-        }
-    }
-
-    private void updateIfNotBlank(String newValue, Consumer<String> updater) {
-        if (StringUtils.isNotBlank(newValue)) {
-            updater.accept(newValue);
         }
     }
 

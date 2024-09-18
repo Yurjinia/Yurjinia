@@ -42,8 +42,7 @@ public class BoardEntity {
     private String name;
 
     @Column(unique = true)
-    @Builder.Default
-    private Integer uniqueTicketCode = 0;
+    private int uniqueTicketCode;
 
     @OneToMany(mappedBy = "board")
     @OrderBy("columnPosition ASC")

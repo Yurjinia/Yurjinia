@@ -4,7 +4,7 @@ import lombok.experimental.UtilityClass;
 import org.modelmapper.ModelMapper;
 
 @UtilityClass
-public class MapperUtil {
+public class MapperUtils {
 
     private final static ModelMapper modelMapper = new ModelMapper();
 

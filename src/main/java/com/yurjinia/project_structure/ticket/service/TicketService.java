@@ -2,7 +2,8 @@ package com.yurjinia.project_structure.ticket.service;
 
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
-import com.yurjinia.common.utils.MapperUtil;
+import com.yurjinia.common.utils.MapperUtils;
+import com.yurjinia.common.utils.MetadataUtils;
 import com.yurjinia.project_structure.board.entity.BoardEntity;
 import com.yurjinia.project_structure.board.service.BoardService;
 import com.yurjinia.project_structure.column.entity.ColumnEntity;
@@ -17,13 +18,10 @@ import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 @Service
@@ -43,7 +41,7 @@ public class TicketService {
                                   CreateTicketRequest createTicketRequest) {
         BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
         ColumnEntity columnEntity = columnService.getColumnByName(projectCode, boardCode, columnName);
-        TicketEntity ticketEntity = MapperUtil.map(createTicketRequest, TicketEntity.class);
+        TicketEntity ticketEntity = MapperUtils.map(createTicketRequest, TicketEntity.class);
         UserEntity userEntity = userService.getByEmail(userEmail);
         int uniqTicketCode = boardEntity.getUniqueTicketCode();
 
@@ -56,13 +54,13 @@ public class TicketService {
 
         boardService.save(boardEntity);
         ticketRepository.save(ticketEntity);
-        return MapperUtil.map(ticketEntity, TicketDTO.class);
+        return MapperUtils.map(ticketEntity, TicketDTO.class);
     }
 
     public TicketDTO getTicket(String projectCode, String boardCode, String ticketCode) {
         TicketEntity ticketEntity = getTicketEntity(projectCode, boardCode, ticketCode);
 
-        return MapperUtil.map(ticketEntity, TicketDTO.class);
+        return MapperUtils.map(ticketEntity, TicketDTO.class);
     }
 
     @Transactional
@@ -82,21 +80,22 @@ public class TicketService {
                 .forEach(i -> tickets.get(i).setPosition((long) i));
 
         ticketRepository.saveAll(tickets);
-        return MapperUtil.map(currentTicket, TicketDTO.class);
-
+        return MapperUtils.map(currentTicket, TicketDTO.class);
     }
 
     @Transactional
     public TicketDTO updateTicketMetaData(String projectCode, String boardCode, String ticketCode, UpdateTicketMetaDataRequest updateTicketMetaDataRequest) {
         TicketEntity ticketEntity = getTicketEntity(projectCode, boardCode, ticketCode);
 
-        updateIfNotBlank(updateTicketMetaDataRequest.getDescription(), ticketEntity::setDescription);
-        updateIfNotBlank(updateTicketMetaDataRequest.getTitle(), ticketEntity::setTitle);
-        updateIfNotNull(updateTicketMetaDataRequest.getType(), ticketEntity::setType);
-        updateIfNotNull(updateTicketMetaDataRequest.getStartDate(), ticketEntity::setStartDate);
-        updateIfNotNull(updateTicketMetaDataRequest.getEndDate(), ticketEntity::setEndDate);
 
-        return MapperUtil.map(ticketEntity, TicketDTO.class);
+        MetadataUtils.updateMetadata(updateTicketMetaDataRequest.getDescription(), ticketEntity::setDescription);
+        MetadataUtils.updateMetadata(updateTicketMetaDataRequest.getTitle(), ticketEntity::setTitle);
+        MetadataUtils.updateMetadata(updateTicketMetaDataRequest.getType(), ticketEntity::setType);
+        MetadataUtils.updateMetadata(updateTicketMetaDataRequest.getStartDate(), ticketEntity::setStartDate);
+        MetadataUtils.updateMetadata(updateTicketMetaDataRequest.getEndDate(), ticketEntity::setEndDate);
+
+        ticketRepository.save(ticketEntity);
+        return MapperUtils.map(ticketEntity, TicketDTO.class);
     }
 
     @Transactional
@@ -123,18 +122,6 @@ public class TicketService {
 
     private String generateUniqueTaskCode(String boardCode, int uniqTicketCode) {
         return boardCode + "-" + (uniqTicketCode + 1);
-    }
-
-    private void updateIfNotBlank(String newValue, Consumer<String> updater) {
-        if (StringUtils.isNotBlank(newValue)) {
-            updater.accept(newValue);
-        }
-    }
-
-    private <T> void updateIfNotNull(T newValue, Consumer<T> updater) {
-        if (Objects.nonNull(newValue)) {
-            updater.accept(newValue);
-        }
     }
 
 }

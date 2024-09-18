@@ -1,10 +1,10 @@
 package com.yurjinia.project_structure.ticket.dto;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@Builder
+@Getter
+@Setter
 public class TicketStatusDTO {
     private String name;
 }

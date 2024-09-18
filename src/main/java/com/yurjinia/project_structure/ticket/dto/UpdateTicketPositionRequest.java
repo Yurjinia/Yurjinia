@@ -1,8 +1,8 @@
 package com.yurjinia.project_structure.ticket.dto;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class UpdateTicketPositionRequest {
     private String columnName;
     private String ticketCode;

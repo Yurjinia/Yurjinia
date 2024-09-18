@@ -5,15 +5,11 @@ import com.yurjinia.project_structure.ticket.entity.TicketType;
 import com.yurjinia.user.dto.UserDTO;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
+@Setter
 public class ColumnTicketDTO {
 
     private String title;
