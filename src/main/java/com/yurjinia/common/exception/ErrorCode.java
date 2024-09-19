@@ -28,6 +28,7 @@ public enum ErrorCode {
     TOKEN_EXPIRED("Token expired"),
     DELETE_FILE_ERROR("Failed to delete file"),
     BAD_REQUEST("Bad request"),
+    MATCHES_OLD_PASSWORD("Password matches old password"),
     BUILD_EMAIL_ERROR("Failed to build email"),
     TEMPLATE_FILE_NOT_FOUND("Template file not found"),
     USER_ALREADY_EXISTS("User already exists"),
@@ -39,7 +40,8 @@ public enum ErrorCode {
     BOARD_ALREADY_EXISTS("Board already exists"),
     BOARD_NOT_FOUND("Board not found"),
     COLUMN_ALREADY_EXISTS("Column already exists"),
-    COLUMN_NOT_FOUND("Column not found");
+    COLUMN_NOT_FOUND("Column not found"),
+    TICKET_NOT_FOUND("Ticket not found");
 
 
     //TODO: Add HttpStatus to the error code

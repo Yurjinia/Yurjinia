@@ -1,19 +1,17 @@
 package com.yurjinia.project_structure.board.dto;
 
-import com.yurjinia.project_structure.column.dto.ColumnDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.util.List;
-
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BoardDTO {
+public class BoardProjectDTO {
     private String name;
     private String code;
-    private List<ColumnDTO> columns;
 }
