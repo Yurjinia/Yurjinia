@@ -1,22 +1,26 @@
 package com.yurjinia.project_structure.ticket.dto;
 
+import com.yurjinia.project_structure.ticket.entity.TicketPriority;
 import com.yurjinia.project_structure.ticket.entity.TicketType;
+import com.yurjinia.user.dto.UserDTO;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
-
 @Getter
-public class UpdateTicketMetaDataRequest {
+@Setter
+public class ColumnTicketDTO {
 
     private String title;
-    private String description;
-    private LocalDate startDate;
-    private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
     private TicketType type;
+
+    private String code;
+    private TicketStatusDTO status;
+    private UserDTO assignee;
+    private TicketPriority priority;
+    private Long position;
 
 }

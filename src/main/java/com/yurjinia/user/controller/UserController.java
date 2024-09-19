@@ -1,39 +1,33 @@
 package com.yurjinia.user.controller;
 
-import com.yurjinia.project_structure.project.dto.CreateProjectRequest;
-import com.yurjinia.project_structure.project.dto.ProjectDTO;
-import com.yurjinia.project_structure.project.service.ProjectService;
-import jakarta.validation.Valid;
+import com.yurjinia.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users/{userEmail}")
 public class UserController {
 
-    private final ProjectService projectService;
+    private final UserService userService;
 
-    @GetMapping("/projects")
-    public ResponseEntity<List<ProjectDTO>> getUserProjects(@PathVariable String userEmail) {
-        List<ProjectDTO> projects = projectService.getUserProjects(userEmail);
-        return ResponseEntity.ok(projects);
+    /*
+    ToDo: Refer to next JIRA with having more clarification about the reasons of
+         why the code was commented, and when it's going to be uncommented:
+         https://pashka1clash.atlassian.net/browse/YUR-114
+    @PutMapping(value = "/{newUserEmail}")
+    public ResponseEntity<Void> updateUserEmail(@PathVariable String userEmail, @Valid @RequestBody UpdateUserEmailRequest updateUserEmailRequest) {
+        userService.updateUserEmail(userEmail, updateUserEmailRequest);
+
+        return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/projects")
-    public ResponseEntity<Void> createProject(@PathVariable String userEmail,
-                                              @Valid @RequestBody CreateProjectRequest createProjectRequest) {
-        projectService.createProject(userEmail, createProjectRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
+
+    @GetMapping("/confirm")
+    public ResponseEntity<Void> confirmUserEmail(@PathVariable String userEmail, @RequestParam("token") String token) {
+        userService.confirmUserEmail(userEmail, token);
+        return ResponseEntity.noContent().build();
+    }*/
 
 }

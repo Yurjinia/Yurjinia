@@ -1,4 +1,4 @@
-package com.yurjinia.user.dto;
+package com.yurjinia.project_structure.board.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,8 +11,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AssigneeResponse {
-    private String email;
-    private String username;
-    private String avatarId;
+public class BoardProjectDTO {
+    private String name;
+    private String code;
 }

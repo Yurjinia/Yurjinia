@@ -10,6 +10,8 @@ public enum ErrorCode {
     INVALID_EMAIL("Invalid email"),
     INVALID_USERNAME("Invalid username"),
     INVALID_PASSWORD("Invalid password"),
+    PASSWORD_IS_NOT_MATCHED("Password is not matched"),
+    PASSWORD_MATCHES_OLD_PASSWORD("Password matches old password"),
     INVALID_SIGN_UP_REQUEST("Invalid sign up request"),
     INVALID_LOGIN_REQUEST("Invalid login request"),
     USER_NAME_ALREADY_EXISTS("Username already exists"),

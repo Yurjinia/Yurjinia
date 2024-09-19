@@ -3,7 +3,6 @@ package com.yurjinia.common.handlers;
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
 import com.yurjinia.common.security.jwt.constants.JwtConstants;
-import com.yurjinia.common.security.jwt.service.JwtBlacklistService;
 import com.yurjinia.common.security.jwt.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

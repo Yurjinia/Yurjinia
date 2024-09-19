@@ -2,6 +2,8 @@ package com.yurjinia.project_structure.ticket.service;
 
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
+import com.yurjinia.common.utils.MapperUtils;
+import com.yurjinia.common.utils.MetadataUtils;
 import com.yurjinia.project_structure.board.entity.BoardEntity;
 import com.yurjinia.project_structure.board.service.BoardService;
 import com.yurjinia.project_structure.column.entity.ColumnEntity;
@@ -12,17 +14,14 @@ import com.yurjinia.project_structure.ticket.dto.UpdateTicketMetaDataRequest;
 import com.yurjinia.project_structure.ticket.dto.UpdateTicketPositionRequest;
 import com.yurjinia.project_structure.ticket.entity.TicketEntity;
 import com.yurjinia.project_structure.ticket.repository.TicketRepository;
-import com.yurjinia.project_structure.ticket.service.mapper.TicketMapper;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.IntStream;
 
 @Service
@@ -31,7 +30,6 @@ public class TicketService {
 
     private final UserService userService;
     private final BoardService boardService;
-    private final TicketMapper ticketMapper;
     private final ColumnService columnService;
     private final TicketRepository ticketRepository;
 
@@ -43,27 +41,26 @@ public class TicketService {
                                   CreateTicketRequest createTicketRequest) {
         BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
         ColumnEntity columnEntity = columnService.getColumnByName(projectCode, boardCode, columnName);
-        TicketEntity ticketEntity = ticketMapper.toEntity(createTicketRequest);
-        UserEntity userEntity = userService.getByEmail(userEmail);
-        int uniqTicketCode = boardEntity.getUniqTicketCode();
+        TicketEntity ticketEntity = MapperUtils.map(createTicketRequest, TicketEntity.class);
+        UserEntity userEntity = userService.getUserByEmail(userEmail);
+        int uniqTicketCode = boardEntity.getUniqueTicketCode();
 
         ticketEntity.setCode(generateUniqueTaskCode(boardCode, uniqTicketCode));
         ticketEntity.setBoard(boardEntity);
         ticketEntity.setColumn(columnEntity);
         ticketEntity.setReporter(userEntity);
         ticketEntity.setPosition((long) columnEntity.getTickets().size());
-        boardEntity.setUniqTicketCode(++uniqTicketCode);
+        boardEntity.setUniqueTicketCode(++uniqTicketCode);
 
         boardService.save(boardEntity);
         ticketRepository.save(ticketEntity);
-
-        return ticketMapper.toDTO(ticketEntity);
+        return MapperUtils.map(ticketEntity, TicketDTO.class);
     }
 
     public TicketDTO getTicket(String projectCode, String boardCode, String ticketCode) {
         TicketEntity ticketEntity = getTicketEntity(projectCode, boardCode, ticketCode);
 
-        return ticketMapper.toDTO(ticketEntity);
+        return MapperUtils.map(ticketEntity, TicketDTO.class);
     }
 
     @Transactional
@@ -83,31 +80,22 @@ public class TicketService {
                 .forEach(i -> tickets.get(i).setPosition((long) i));
 
         ticketRepository.saveAll(tickets);
-        return ticketMapper.toDTO(currentTicket);
+        return MapperUtils.map(currentTicket, TicketDTO.class);
     }
 
     @Transactional
     public TicketDTO updateTicketMetaData(String projectCode, String boardCode, String ticketCode, UpdateTicketMetaDataRequest updateTicketMetaDataRequest) {
         TicketEntity ticketEntity = getTicketEntity(projectCode, boardCode, ticketCode);
 
-        if (StringUtils.isNotBlank(updateTicketMetaDataRequest.getDescription())) {
-            ticketEntity.setDescription(updateTicketMetaDataRequest.getDescription());
-        }
-        if (StringUtils.isNotBlank(updateTicketMetaDataRequest.getTitle())) {
-            ticketEntity.setTitle(updateTicketMetaDataRequest.getTitle());
-        }
-        if (Objects.nonNull(updateTicketMetaDataRequest.getType())) {
-            ticketEntity.setType(updateTicketMetaDataRequest.getType());
-        }
-        if (Objects.nonNull(updateTicketMetaDataRequest.getStartDate())) {
-            ticketEntity.setStartDate(updateTicketMetaDataRequest.getStartDate());
-        }
-        if (Objects.nonNull(updateTicketMetaDataRequest.getEndDate())) {
-            ticketEntity.setEndDate(updateTicketMetaDataRequest.getEndDate());
-        }
 
+        MetadataUtils.updateMetadata(updateTicketMetaDataRequest.getDescription(), ticketEntity::setDescription);
+        MetadataUtils.updateMetadata(updateTicketMetaDataRequest.getTitle(), ticketEntity::setTitle);
+        MetadataUtils.updateMetadata(updateTicketMetaDataRequest.getType(), ticketEntity::setType);
+        MetadataUtils.updateMetadata(updateTicketMetaDataRequest.getStartDate(), ticketEntity::setStartDate);
+        MetadataUtils.updateMetadata(updateTicketMetaDataRequest.getEndDate(), ticketEntity::setEndDate);
 
-        return ticketMapper.toDTO(ticketEntity);
+        ticketRepository.save(ticketEntity);
+        return MapperUtils.map(ticketEntity, TicketDTO.class);
     }
 
     @Transactional
@@ -133,7 +121,7 @@ public class TicketService {
     }
 
     private String generateUniqueTaskCode(String boardCode, int uniqTicketCode) {
-        return boardCode + "-" + ++uniqTicketCode;
+        return boardCode + "-" + (uniqTicketCode + 1);
     }
 
 }
