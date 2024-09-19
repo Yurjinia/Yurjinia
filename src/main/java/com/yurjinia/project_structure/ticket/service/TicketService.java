@@ -113,7 +113,7 @@ public class TicketService {
         ticketRepository.delete(ticketEntity);
     }
 
-    public TicketEntity getTicketEntity(String projectCode, String boardCode, String ticketCode) {
+    private TicketEntity getTicketEntity(String projectCode, String boardCode, String ticketCode) {
         BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
 
         return ticketRepository.findByCodeAndBoard(ticketCode, boardEntity)
