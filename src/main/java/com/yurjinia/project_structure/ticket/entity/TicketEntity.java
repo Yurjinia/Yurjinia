@@ -58,8 +58,8 @@ public class TicketEntity {
     @Column(nullable = false)
     private String description;
 
-    @OrderBy("created ASC")
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("created DESC")
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentEntity> comments;
 
     @Column
