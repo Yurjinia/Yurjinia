@@ -33,7 +33,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
 
     public List<ProjectDTO> getUserProjects(String userEmail) {
-        UserEntity user = userService.getByEmail(userEmail);
+        UserEntity user = userService.getUserByEmail(userEmail);
 
         return user.getProjects()
                 .stream()
@@ -57,7 +57,7 @@ public class ProjectService {
         validateAllUsersExist(createProjectRequest.getUserEmails());
         validateOwnerNotInUserList(userEmail, createProjectRequest.getUserEmails());
 
-        UserEntity owner = userService.getByEmail(userEmail);
+        UserEntity owner = userService.getUserByEmail(userEmail);
         ProjectEntity projectEntity = MapperUtils.map(createProjectRequest, ProjectEntity.class);
         projectEntity.setOwner(owner);
 

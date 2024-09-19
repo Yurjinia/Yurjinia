@@ -77,9 +77,7 @@ public class ColumnService {
     }
 
     public List<ColumnDTO> getColumns(String projectCode, String boardCode) {
-        BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
-
-        return boardEntity.getColumns().stream()
+        return boardService.getBoard(boardCode, projectCode).getColumns().stream()
                 .map(column -> MapperUtils.map(column, ColumnDTO.class))
                 .toList();
     }
@@ -91,9 +89,7 @@ public class ColumnService {
     }
 
     public ColumnEntity getColumnByName(String projectCode, String boardCode, String columnName) {
-        BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
-
-        return boardEntity.getColumns().stream()
+        return boardService.getBoard(boardCode, projectCode).getColumns().stream()
                 .filter(columnEntity -> columnEntity.getName().equals(columnName)).findFirst()
                 .orElseThrow(() -> new CommonException(ErrorCode.COLUMN_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
