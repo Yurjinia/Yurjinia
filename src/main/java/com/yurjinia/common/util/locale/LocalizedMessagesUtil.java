@@ -1,25 +1,23 @@
 package com.yurjinia.common.util.locale;
 
+import lombok.experimental.UtilityClass;
+
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-public class LocalizedMessages {
+@UtilityClass
+public class LocalizedMessagesUtil {
 
     public static Optional<String> getMessageForLocale(String messageKey, Locale locale, Object... params) {
-        // Завантажуємо різні ресурси
-        ResourceBundle commonBundle = ResourceBundle.getBundle("i18n/common-messages", locale);
         ResourceBundle appBundle = ResourceBundle.getBundle("i18n/messages", locale);
 
-        // Перевіряємо чи існує ключ у ресурсах
         if (appBundle.containsKey(messageKey)) {
             return getMessage(messageKey, appBundle, params);
-        } else if (commonBundle.containsKey(messageKey)) {
-            return getMessage(messageKey, commonBundle, params);
-        } else {
-            return Optional.empty();
         }
+
+        return Optional.empty();
     }
 
     private static Optional<String> getMessage(String messageKey, ResourceBundle bundle, Object[] params) {

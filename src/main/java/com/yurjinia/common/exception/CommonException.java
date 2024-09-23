@@ -1,6 +1,6 @@
 package com.yurjinia.common.exception;
 
-import com.yurjinia.common.util.locale.LocalizedMessages;
+import com.yurjinia.common.util.locale.LocalizedMessagesUtil;
 import lombok.Data;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
@@ -29,16 +29,16 @@ public class CommonException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return getMessageForLocale(Locale.ENGLISH);  // Повертає повідомлення за замовчуванням на англійській мові
+        return getMessageForLocale(Locale.ENGLISH);
     }
 
     @Override
     public String getLocalizedMessage() {
-        return getMessageForLocale(LocaleContextHolder.getLocale());  // Повертає повідомлення на основі поточної локалі
+        return getMessageForLocale(LocaleContextHolder.getLocale());
     }
 
     private String getMessageForLocale(Locale locale) {
-        return LocalizedMessages
+        return LocalizedMessagesUtil
                 .getMessageForLocale(errorCode.name(), locale, params.toArray(new String[]{}))
                 .orElse("Localized message for code " + errorCode.name() + " was not found for " + locale.getDisplayName() + " locale");
     }

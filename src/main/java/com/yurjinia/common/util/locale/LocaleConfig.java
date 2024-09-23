@@ -12,7 +12,7 @@ public class LocaleConfig {
     @Bean
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-        messageSource.addBasenames("classpath:i18n/messages", "classpath:i18n/common-messages");
+        messageSource.addBasenames("classpath:i18n/messages");
         messageSource.setDefaultEncoding("UTF-8");
         return messageSource;
     }
