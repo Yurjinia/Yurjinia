@@ -1,4 +1,4 @@
-package com.yurjinia.project_structure.task.entity;
+package com.yurjinia.project_structure.ticket.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,7 +17,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "task_status")
-public class TaskStatusEntity {
+public class TicketStatusEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

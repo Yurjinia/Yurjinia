@@ -1,4 +1,4 @@
-package com.yurjinia.project_structure.task.entity;
+package com.yurjinia.project_structure.ticket.entity;
 
 import com.yurjinia.project_structure.board.entity.BoardEntity;
 import com.yurjinia.project_structure.column.entity.ColumnEntity;
@@ -15,20 +15,28 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "task")
-public class TaskEntity {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "ticket")
+public class TicketEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,19 +46,20 @@ public class TaskEntity {
     private String code;
 
     @Column(nullable = false)
-    private String name;
+    private String title;
 
     @Enumerated(EnumType.STRING)
-    private TaskType type;
+    private TicketType type;
 
     @ManyToOne
     @JoinColumn(name = "status_id", nullable = false)
-    private TaskStatusEntity status;
+    private TicketStatusEntity status;
 
     @Column(nullable = false)
     private String description;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("created DESC")
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentEntity> comments;
 
     @Column
@@ -68,13 +77,16 @@ public class TaskEntity {
     private UserEntity reporter;
 
     @Enumerated(EnumType.STRING)
-    private TaskPriority priority;
+    private TicketPriority priority;
 
     @Column(nullable = false)
-    private LocalDate created;
+    private LocalDateTime created;
 
     @Column(nullable = false)
-    private LocalDate updated;
+    private LocalDateTime updated;
+
+    @Column(nullable = false)
+    private Long position;
 
     @ManyToOne
     @JoinColumn(name = "column_id")
@@ -86,13 +98,13 @@ public class TaskEntity {
 
     @PrePersist
     protected void onCreate() {
-        this.created = LocalDate.now();
-        this.updated = LocalDate.now();
+        this.created = LocalDateTime.now();
+        this.updated = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        this.updated = LocalDate.now();
+        this.updated = LocalDateTime.now();
     }
 
 }

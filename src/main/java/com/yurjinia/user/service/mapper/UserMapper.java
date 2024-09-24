@@ -26,7 +26,7 @@ public class UserMapper {
     public UserDTO toDto(UserEntity userEntity, UserProfileDTO userProfileDTO) {
         return UserDTO.builder()
                 .email(userEntity.getEmail())
-                .profileDTO(userProfileDTO)
+                .userProfile(userProfileDTO)
                 .build();
     }
 

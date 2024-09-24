@@ -13,5 +13,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserDTO {
     private String email;
-    private UserProfileDTO profileDTO;
+    private UserProfileDTO userProfile;
 }

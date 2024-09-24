@@ -1,7 +1,7 @@
 package com.yurjinia.project_structure.column.entity;
 
 import com.yurjinia.project_structure.board.entity.BoardEntity;
-import com.yurjinia.project_structure.task.entity.TaskEntity;
+import com.yurjinia.project_structure.ticket.entity.TicketEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -48,7 +48,7 @@ public class ColumnEntity {
     private BoardEntity board;
 
     @OneToMany(mappedBy = "column")
-    private List<TaskEntity> tasks;
+    private List<TicketEntity> tickets;
 
     @Column(nullable = false)
     private LocalDateTime created;
