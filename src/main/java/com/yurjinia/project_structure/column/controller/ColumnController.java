@@ -1,12 +1,11 @@
 package com.yurjinia.project_structure.column.controller;
 
-import com.yurjinia.project_structure.column.dto.ColumnDTO;
 import com.yurjinia.project_structure.column.controller.request.CreateColumnRequest;
 import com.yurjinia.project_structure.column.controller.request.UpdateColumnPositionRequest;
 import com.yurjinia.project_structure.column.controller.request.UpdateColumnRequest;
+import com.yurjinia.project_structure.column.dto.ColumnDTO;
 import com.yurjinia.project_structure.column.service.ColumnService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,11 +26,11 @@ public class ColumnController {
     private final ColumnService columnService;
 
     @PostMapping
-    public ResponseEntity<Void> createColumn(@PathVariable String projectCode,
-                                             @PathVariable String boardCode,
-                                             @RequestBody CreateColumnRequest createColumnRequest) {
-        columnService.createColumn(projectCode, boardCode, createColumnRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<ColumnDTO> createColumn(@PathVariable String projectCode,
+                                                  @PathVariable String boardCode,
+                                                  @RequestBody CreateColumnRequest createColumnRequest) {
+        ColumnDTO columnDTO = columnService.createColumn(projectCode, boardCode, createColumnRequest);
+        return ResponseEntity.ok(columnDTO);
     }
 
     @GetMapping
