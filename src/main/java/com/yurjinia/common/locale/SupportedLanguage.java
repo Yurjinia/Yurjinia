@@ -1,4 +1,4 @@
-package com.yurjinia.common.util.locale;
+package com.yurjinia.common.locale;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,8 @@ import java.util.Locale;
 @AllArgsConstructor
 public enum SupportedLanguage {
 
-    UKRAINIAN("uk", new Locale("uk")),
-    ENGLISH("en", Locale.ENGLISH);
+    ENGLISH("en", Locale.ENGLISH),
+    UKRAINIAN("uk", Locale.of("uk"));
 
     private final String code;
     private final Locale locale;
@@ -21,6 +21,7 @@ public enum SupportedLanguage {
                 return lang.getLocale();
             }
         }
+
         return Locale.ENGLISH;
     }
 

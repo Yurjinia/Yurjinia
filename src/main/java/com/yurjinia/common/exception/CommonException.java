@@ -1,7 +1,8 @@
 package com.yurjinia.common.exception;
 
-import com.yurjinia.common.util.locale.LocalizedMessagesUtil;
+import com.yurjinia.common.utils.MessageUtils;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class CommonException extends RuntimeException {
 
     private ErrorCode errorCode;
@@ -38,7 +40,7 @@ public class CommonException extends RuntimeException {
     }
 
     private String getMessageForLocale(Locale locale) {
-        return LocalizedMessagesUtil
+        return MessageUtils
                 .getMessageForLocale(errorCode.name(), locale, params)
                 .orElse("Localized message for code " + errorCode.name() + " was not found for " + locale.getDisplayName() + " locale");
     }
