@@ -39,7 +39,8 @@ public class CommonException extends RuntimeException {
 
     private String getMessageForLocale(Locale locale) {
         return LocalizedMessagesUtil
-                .getMessageForLocale(errorCode.name(), locale, params.toArray(new String[]{}))
+                .getMessageForLocale(errorCode.name(), locale, params)
                 .orElse("Localized message for code " + errorCode.name() + " was not found for " + locale.getDisplayName() + " locale");
     }
+
 }
