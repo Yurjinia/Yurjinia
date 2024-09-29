@@ -1,12 +1,16 @@
 package com.yurjinia.common.exception;
 
+import com.yurjinia.common.utils.MessageUtils;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class CommonException extends RuntimeException {
 
     private ErrorCode errorCode;
@@ -14,16 +18,31 @@ public class CommonException extends RuntimeException {
     private HttpStatus status;
 
     public CommonException(ErrorCode errorCode, HttpStatus status) {
-        setErrorCode(errorCode);
-        setStatus(status);
-        this.params = List.of(errorCode.getDescription());
+        this.errorCode = errorCode;
+        this.status = status;
+        this.params = List.of();
     }
 
     public CommonException(ErrorCode errorCode, HttpStatus status, List<String> params) {
-        this.params = new ArrayList<>();
-        setErrorCode(errorCode);
-        setParams(params);
-        setStatus(status);
+        this.errorCode = errorCode;
+        this.status = status;
+        this.params = params;
+    }
+
+    @Override
+    public String getMessage() {
+        return getMessageForLocale(Locale.ENGLISH);
+    }
+
+    @Override
+    public String getLocalizedMessage() {
+        return getMessageForLocale(LocaleContextHolder.getLocale());
+    }
+
+    private String getMessageForLocale(Locale locale) {
+        return MessageUtils
+                .getMessageForLocale(errorCode.name(), locale, params)
+                .orElse("Localized message for code " + errorCode.name() + " was not found for " + locale.getDisplayName() + " locale");
     }
 
 }

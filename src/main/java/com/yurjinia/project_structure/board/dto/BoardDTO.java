@@ -1,19 +1,19 @@
 package com.yurjinia.project_structure.board.dto;
 
-import com.yurjinia.project_structure.project.validation.UpperCase;
-import jakarta.validation.constraints.NotBlank;
+import com.yurjinia.project_structure.column.dto.ColumnDTO;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
+import java.util.List;
+
+@Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class BoardDTO {
-
-    @NotBlank
-    private String boardName;
-
-    @NotBlank
-    @UpperCase
-    private String boardCode;
-
+    private String name;
+    private String code;
+    private List<ColumnDTO> columns;
 }

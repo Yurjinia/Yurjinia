@@ -1,7 +1,8 @@
 package com.yurjinia.project_structure.board.controller;
 
+import com.yurjinia.project_structure.board.controller.request.CreateBoardRequest;
+import com.yurjinia.project_structure.board.controller.request.UpdateBoardRequest;
 import com.yurjinia.project_structure.board.dto.BoardDTO;
-import com.yurjinia.project_structure.board.dto.UpdateBoardRequest;
 import com.yurjinia.project_structure.board.service.BoardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +27,8 @@ public class BoardController {
     private final BoardService boardService;
 
     @PostMapping
-    public ResponseEntity<Void> createBoard(@PathVariable String projectCode, @Valid @RequestBody BoardDTO boardDTO) {
-        boardService.createBoard(boardDTO, projectCode);
+    public ResponseEntity<Void> createBoard(@PathVariable String projectCode, @Valid @RequestBody CreateBoardRequest createBoardRequest) {
+        boardService.createBoard(createBoardRequest, projectCode);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
