@@ -2,6 +2,7 @@ package com.yurjinia.project_structure.project.service;
 
 import com.yurjinia.common.exception.CommonException;
 import com.yurjinia.common.exception.ErrorCode;
+import com.yurjinia.common.kafka.KafkaProducer;
 import com.yurjinia.common.utils.MapperUtils;
 import com.yurjinia.common.utils.MetadataUtils;
 import com.yurjinia.project_structure.project.dto.CreateProjectRequest;
@@ -30,6 +31,7 @@ import static com.yurjinia.common.exception.ErrorCode.PROJECT_NOT_FOUND;
 public class ProjectService {
 
     private final UserService userService;
+    private final KafkaProducer kafkaProducer;
     private final ProjectRepository projectRepository;
 
     public List<ProjectDTO> getUserProjects(String userEmail) {
@@ -135,6 +137,7 @@ public class ProjectService {
         projectEntity.getUsers().add(user);
         user.getProjects().add(projectEntity);
 
+        kafkaProducer.send("yurjinia", MapperUtils.map(projectEntity, ProjectDTO.class));
         projectRepository.save(projectEntity);
         userService.save(user);
     }
