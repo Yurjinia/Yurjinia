@@ -59,6 +59,10 @@ spring:
       port: ${REDIS.PORT}
       password: ${REDIS.PASSWORD}
       connect-timeout: 5000
+  kafka:
+    bootstrap-servers: localhost:29092  # IP або хост Kafka
+    consumer:
+      group-id: test # Група споживачів Kafka
 
 aws:
   s3:
