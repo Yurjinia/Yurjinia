@@ -81,21 +81,21 @@ public class AuthService {
         }
     }
 
-    public JwtAuthenticationResponse loginOAuth(LoginRequest request) {
+    public JwtAuthenticationResponse googleLogin(LoginRequest request) {
         final var jwt = jwtService.generateToken(request.getEmail());
         return new JwtAuthenticationResponse(jwt);
     }
 
-    public JwtAuthenticationResponse handleOAuthUser(GoogleLogInRequest googleLogInRequest) {
+    public JwtAuthenticationResponse handleLoginGoogleUser(GoogleLogInRequest googleLogInRequest) {
         final String email = googleLogInRequest.getEmail();
 
         if (userService.existsByEmail(email)) {
             LoginRequest loginRequest = LoginRequest.builder()
                     .email(email)
                     .build();
-            return loginOAuth(loginRequest);
+            return googleLogin(loginRequest);
         } else {
-            RegistrationRequest registrationRequest = payloadOAuthUser(email, googleLogInRequest.getFirstName(), googleLogInRequest.getLastName());
+            RegistrationRequest registrationRequest = payloadGoogleUser(email, googleLogInRequest.getFirstName(), googleLogInRequest.getLastName());
             return signUp(registrationRequest, googleLogInRequest.getAvatarId());
         }
     }
@@ -128,7 +128,7 @@ public class AuthService {
         return new JwtAuthenticationResponse(jwt);
     }
 
-    private RegistrationRequest payloadOAuthUser(String email, String firstname, String lastName) {
+    private RegistrationRequest payloadGoogleUser(String email, String firstname, String lastName) {
         return RegistrationRequest.builder()
                 .firstName(firstname)
                 .lastName(lastName)

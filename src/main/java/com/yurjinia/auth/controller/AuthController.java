@@ -52,7 +52,7 @@ public class AuthController {
     @GetMapping("/login/google")
     @Operation(summary = "Login through Google", description = "Getting user information after login via Google OAuth2.")
     public JwtAuthenticationResponse getLoginInfo(GoogleLogInRequest googleLogInRequest) {
-        return authService.handleOAuthUser(googleLogInRequest);
+        return authService.handleLoginGoogleUser(googleLogInRequest);
     }
 
     @PostMapping("/password-reset/request")
