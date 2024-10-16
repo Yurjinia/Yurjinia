@@ -62,7 +62,7 @@ spring:
   kafka:
     bootstrap-servers: localhost:29092  # IP або хост Kafka
     consumer:
-      group-id: test # Група споживачів Kafka
+      group-id: jobs # Група споживачів Kafka
 
 aws:
   s3:

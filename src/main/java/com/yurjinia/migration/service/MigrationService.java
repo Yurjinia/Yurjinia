@@ -1,6 +1,7 @@
 package com.yurjinia.migration.service;
 
 import com.github.javafaker.Faker;
+import com.yurjinia.common.kafka.KafkaProducer;
 import com.yurjinia.project_structure.board.controller.request.CreateBoardRequest;
 import com.yurjinia.project_structure.board.entity.BoardEntity;
 import com.yurjinia.project_structure.board.service.BoardService;
@@ -17,6 +18,7 @@ import com.yurjinia.user.entity.UserProfileEntity;
 import com.yurjinia.user.enums.UserRole;
 import com.yurjinia.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,10 +38,13 @@ public class MigrationService {
     private final TicketService ticketService;
     private final CommentService commentService;
     private final PasswordEncoder passwordEncoder;
+    private final KafkaProducer kafkaProducer;
 
     //@PostConstruct
     @Transactional
+    @KafkaListener(topics = "yurjinia", groupId = "jobs")
     public void createInitialData() {
+        System.out.println("Yurjinia Message resive");
         Faker faker = new Faker();
         // Step 1: Create 100 Users and Profiles
         List<UserEntity> users = new ArrayList<>();
@@ -93,6 +98,8 @@ public class MigrationService {
 
         }
 
+        kafkaProducer.send("yurjinia", "Done");
+        System.out.println("Yurjinia massege send");
     }
 
     private void createTickets(String email, String projectCode, String boardCode, String columnName) {
