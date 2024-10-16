@@ -1,5 +1,6 @@
 package com.yurjinia.auth.controller;
 
+import com.yurjinia.auth.controller.request.GoogleLogInRequest;
 import com.yurjinia.auth.controller.request.LoginRequest;
 import com.yurjinia.auth.controller.request.RegistrationRequest;
 import com.yurjinia.auth.dto.PasswordResetDTO;
@@ -12,8 +13,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,14 +45,14 @@ public class AuthController {
     }
 
     /**
-     * @param user
+     * @param googleLogInRequest
      * @path /oauth2/authorization/google (for Google authentication)
      */
     @ResponseBody
     @GetMapping("/login/google")
     @Operation(summary = "Login through Google", description = "Getting user information after login via Google OAuth2.")
-    public JwtAuthenticationResponse getLoginInfo(@AuthenticationPrincipal OAuth2User user) {
-        return authService.handleOAuthUser(user);
+    public JwtAuthenticationResponse getLoginInfo(GoogleLogInRequest googleLogInRequest) {
+        return authService.handleLoginGoogleUser(googleLogInRequest);
     }
 
     @PostMapping("/password-reset/request")
