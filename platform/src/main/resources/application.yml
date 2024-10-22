@@ -1,0 +1,78 @@
+server:
+  port: 9000
+
+spring:
+  config:
+    import: credentials.yml
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 2MB
+      max-request-size: 2MB
+  profiles:
+    active: default
+  datasource:
+    url: ${DATABASE.URL}
+    username: ${DATABASE.USERNAME}
+    password: ${DATABASE.PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL.USERNAME}
+    password: ${MAIL.PASSWORD}
+    properties:
+      mail:
+        smtp:
+          ssl:
+            trust: "*"
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+  data:
+    redis:
+      host: ${REDIS.HOST}
+      port: ${REDIS.PORT}
+      password: ${REDIS.PASSWORD}
+      connect-timeout: 5000
+  kafka:
+    bootstrap-servers: ${KAFKA.BOOTSTRAP_SERVERS}
+    consumer:
+      group-id: ${KAFKA.CONSUMER.GROUP_ID}
+
+aws:
+  s3:
+    bucket-name: ${AWS.S3.BUCKET_NAME}
+    region: ${AWS.S3.REGION}
+  credentials:
+    access-key-id: ${AWS.S3.CREDENTIALS.ACCESS_KEY_ID}
+    secret-access-key: ${AWS.S3.CREDENTIALS.SECRET_ACCESS_KEY}
+
+jwt:
+  token:
+    key: ${JWT.TOKEN.KEY}
+    expiration: 36000
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+        security.oauth2: DEBUG
+      web: DEBUG
+      com.yurjinia: TRACE
+      com.yurjinia.user.repository: ERROR
+      com.yurjinia.common.security.jwt.filters.JwtAuthenticationFilter: WARN
+    root: info
