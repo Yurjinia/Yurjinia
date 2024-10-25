@@ -19,7 +19,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -51,7 +51,6 @@ spring:
     bootstrap-servers: ${KAFKA.BOOTSTRAP_SERVERS}
     consumer:
       group-id: ${KAFKA.CONSUMER.GROUP_ID}
-
 aws:
   s3:
     bucket-name: ${AWS.S3.BUCKET_NAME}

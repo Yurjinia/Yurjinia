@@ -1,10 +1,7 @@
-package com.yurjinia.platform.common.configuration;
+package com.yurjinia.jobmanager.configuration;
 
 
-
-import com.yurjinia.platform.common.kafka.constant.KafkaConstants;
-import com.yurjinia.platform.migration.enums.JobStatus;
-import org.apache.kafka.clients.admin.NewTopic;
+import com.yurjinia.jobmanager.job.enums.JobStatus;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;
@@ -32,10 +29,6 @@ public class KafkaProducerConfiguration {
     @Bean
     public KafkaTemplate<String, JobStatus> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
-    }
-    @Bean
-    public NewTopic newTopic() {
-        return new NewTopic(KafkaConstants.TOPIC, 1, (short) 1);
     }
 
 }

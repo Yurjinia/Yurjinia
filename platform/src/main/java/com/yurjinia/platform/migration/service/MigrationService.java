@@ -1,8 +1,11 @@
 package com.yurjinia.platform.migration.service;
 
-import com.github.javafaker.Faker;
 import com.yurjinia.platform.auth.controller.request.RegistrationRequest;
+import com.yurjinia.platform.common.content.ContentGeneratorService;
 import com.yurjinia.platform.common.kafka.KafkaBrokerService;
+import com.yurjinia.platform.common.kafka.constant.KafkaConstants;
+import com.yurjinia.platform.common.utils.PayloadUtils;
+import com.yurjinia.platform.migration.enums.JobStatus;
 import com.yurjinia.platform.project_structure.board.controller.request.CreateBoardRequest;
 import com.yurjinia.platform.project_structure.board.entity.BoardEntity;
 import com.yurjinia.platform.project_structure.board.service.BoardService;
@@ -20,7 +23,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -28,76 +30,84 @@ import java.util.List;
 public class MigrationService {
 
     private final UserService userService;
-    private final ProjectService projectService;
     private final BoardService boardService;
     private final ColumnService columnService;
     private final TicketService ticketService;
+    private final ProjectService projectService;
     private final CommentService commentService;
     private final KafkaBrokerService kafkaBrokerService;
-
+    private final ContentGeneratorService contentGeneratorService;
 
     @KafkaListener(topics = "yurjinia", groupId = "jobs")
-    public void createInitialData() {
-        Faker faker = new Faker();
+    public void createInitialData(JobStatus jobStatus) {
+        if (!jobStatus.equals(JobStatus.INIT)) {
+            return;
+        }
+        System.out.println("Message resive:jobStatus: " + jobStatus);
         List<String> users = new ArrayList<>();
 
         for (int i = 1; i <= 100; i++) {
-            String password = faker.internet().password();
-            RegistrationRequest registrationRequest = RegistrationRequest.builder()
-                    .firstName(faker.name().firstName())
-                    .lastName(faker.name().lastName())
-                    .username(faker.name().username())
-                    .email(faker.internet().emailAddress())
-                    .password(password)
-                    .confirmPassword(password)
-                    .build();
+            RegistrationRequest registrationRequest = PayloadUtils.createRegistrationRequest();
+
             userService.createUser(registrationRequest, "");
             users.add(registrationRequest.getEmail());
         }
 
         for (int i = 1; i <= 10; i++) {
-            CreateProjectRequest createProjectRequest = new CreateProjectRequest();
-            createProjectRequest.setProjectCode("PROJ-" + i);
-            createProjectRequest.setProjectName("Project" + i);
-            createProjectRequest.setUserEmails(new HashSet<>());
-            projectService.createProject(users.get(i - 1), createProjectRequest);
+            String projectCode = createProject(i, users.get(i - 1));
+
             for (int j = 1; j <= 2; j++) {
-                CreateBoardRequest createBoardRequest = CreateBoardRequest.builder()
-                        .name("Board " + j)
-                        .code("BOARD-" + j)
-                        .build();
-                boardService.createBoard(createBoardRequest, createProjectRequest.getProjectCode());
-                CreateColumnRequest createColumnRequestToDo = CreateColumnRequest.builder()
-                        .name("ToDo").build();
-                columnService.createColumn(createProjectRequest.getProjectCode(), createBoardRequest.getCode(), createColumnRequestToDo);
-                CreateColumnRequest createColumnRequestInProg = CreateColumnRequest.builder()
-                        .name("In Progress").build();
-                columnService.createColumn(createProjectRequest.getProjectCode(), createBoardRequest.getCode(), createColumnRequestInProg);
-                CreateColumnRequest createColumnRequestDone = CreateColumnRequest.builder()
-                        .name("Done").build();
-                columnService.createColumn(createProjectRequest.getProjectCode(), createBoardRequest.getCode(), createColumnRequestDone);
+                String boardCode = createBoard(j, projectCode);
 
-                createTickets(users.get(i - 1), createProjectRequest.getProjectCode(), createBoardRequest.getCode(), createColumnRequestToDo.getName());
-                createTickets(users.get(i - 1), createProjectRequest.getProjectCode(), createBoardRequest.getCode(), createColumnRequestToDo.getName());
-                createTickets(users.get(i - 1), createProjectRequest.getProjectCode(), createBoardRequest.getCode(), createColumnRequestInProg.getName());
-                createTickets(users.get(i - 1), createProjectRequest.getProjectCode(), createBoardRequest.getCode(), createColumnRequestInProg.getName());
-                createTickets(users.get(i - 1), createProjectRequest.getProjectCode(), createBoardRequest.getCode(), createColumnRequestDone.getName());
+                String toDo = createColumn("ToDo", projectCode, boardCode);
+                String inProgress = createColumn("In Progress", projectCode, boardCode);
+                String done = createColumn("Done", projectCode, boardCode);
+
+                createComments(users.get(i - 1), projectCode, boardCode, List.of(toDo, inProgress, done));
+
             }
-
         }
 
-        kafkaBrokerService.send("yurjinia", "Done");
+        kafkaBrokerService.send(KafkaConstants.TOPIC, JobStatus.DONE);
+        System.out.println("Message send");
+    }
+
+    private String createProject(int projectNumber, String userEmail) {
+        CreateProjectRequest createProjectRequest = PayloadUtils.createProjectRequest(projectNumber);
+
+        projectService.createProject(userEmail, createProjectRequest);
+        return createProjectRequest.getProjectCode();
+    }
+
+    private String createBoard(int boardNumber, String projectCode) {
+        CreateBoardRequest createBoardRequest = PayloadUtils.createBoardRequest(boardNumber);
+
+        boardService.createBoard(createBoardRequest, projectCode);
+        return createBoardRequest.getCode();
+    }
+
+    private String createColumn(String columnName, String projectCode, String boardCode) {
+        CreateColumnRequest createColumnRequest = PayloadUtils.createColumnRequest(columnName);
+        columnService.createColumn(projectCode, boardCode, createColumnRequest);
+        return columnName;
+    }
+
+    private void createComments(String userEmail, String projectCode, String boardCode, List<String> columnName) {
+        createTickets(userEmail, projectCode, boardCode, columnName.getFirst());
+        createTickets(userEmail, projectCode, boardCode, columnName.getFirst());
+        createTickets(userEmail, projectCode, boardCode, columnName.get(1));
+        createTickets(userEmail, projectCode, boardCode, columnName.get(1));
+        createTickets(userEmail, projectCode, boardCode, columnName.get(2));
     }
 
     private void createTickets(String email, String projectCode, String boardCode, String columnName) {
-        Faker faker = new Faker();
         CreateTicketRequest createTicketRequest = new CreateTicketRequest();
-        createTicketRequest.setTitle(faker.commerce().productName());
+        createTicketRequest.setTitle(contentGeneratorService.generateTitle());
         ticketService.createTicket(email, projectCode, boardCode, columnName, createTicketRequest);
 
         BoardEntity board = boardService.getBoard(boardCode, projectCode);
         CreateCommentRequest createCommentRequest = new CreateCommentRequest();
-        createCommentRequest.setText(faker.harryPotter().spell());
+        createCommentRequest.setText(contentGeneratorService.generateComment());
         commentService.createComment(email, projectCode, boardCode, (board.getCode() + "-" + board.getUniqueTicketCode()), createCommentRequest);
     }
 

@@ -68,7 +68,7 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Data base -->
+        <!-- Database -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -126,6 +126,11 @@
             <groupId>com.github.javafaker</groupId>
             <artifactId>javafaker</artifactId>
             <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.2</version> <!-- Adjust to the latest stable version -->
         </dependency>
         <dependency>
             <groupId>org.modelmapper</groupId>

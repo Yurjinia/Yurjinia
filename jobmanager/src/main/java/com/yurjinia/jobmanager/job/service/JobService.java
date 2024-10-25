@@ -20,4 +20,5 @@ public class JobService {
     public Optional<JobEntity> findByJobName(String name) {
         return jobRepository.findByJobName(name);
     }
+
 }

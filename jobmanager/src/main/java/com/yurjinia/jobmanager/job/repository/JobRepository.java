@@ -9,5 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface JobRepository extends MongoRepository<JobEntity, String> {
+
     Optional<JobEntity> findByJobName(String jobId);
+
 }

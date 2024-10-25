@@ -2,7 +2,11 @@ package com.yurjinia.platform.project_structure.column.dto;
 
 import com.yurjinia.platform.project_structure.ticket.dto.ColumnTicketDTO;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 

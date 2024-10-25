@@ -10,9 +10,9 @@
     </parent>
     <groupId>com.yurjinia</groupId>
     <artifactId>jobmanager</artifactId>
-    <version>1.0</version>
-    <name>jobEntity-manager</name>
-    <description>jobEntity-manager</description>
+    <version>1.0.0</version>
+    <name>Job Manager</name>
+    <description>Job Manager @</description>
     <url/>
     <licenses>
         <license/>
@@ -31,7 +31,7 @@
     </properties>
     <dependencies>
 
-        <!-- Data base -->
+        <!-- Database -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
@@ -41,11 +41,20 @@
             <artifactId>spring-kafka</artifactId>
         </dependency>
 
+        <!--Utils-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.2</version> <!-- Adjust to the latest stable version -->
+        </dependency>
+
+
+        <!--Test-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

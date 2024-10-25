@@ -3,7 +3,11 @@ package com.yurjinia.platform.auth.controller.request;
 import com.yurjinia.platform.common.validator.EmailValidate;
 import com.yurjinia.platform.common.validator.PasswordValidate;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
 @Getter
