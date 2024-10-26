@@ -1,5 +1,6 @@
 package com.yurjinia.platform.common.configuration;
 
+import com.github.javafaker.Faker;
 import com.yurjinia.platform.common.exception.CommonException;
 import com.yurjinia.platform.common.exception.ErrorCode;
 import com.yurjinia.platform.user.repository.UserRepository;
@@ -22,6 +23,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class ApplicationConfiguration {
 
     private final UserRepository userRepository;
+
+    @Bean
+    public Faker faker(){return new Faker();}
 
     @Bean
     public PasswordEncoder passwordEncoder() {

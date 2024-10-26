@@ -41,7 +41,7 @@ public class BoardEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column()
+    @Column
     private int uniqueTicketCode;
 
     @OneToMany(mappedBy = "board")

@@ -7,17 +7,17 @@ import com.yurjinia.jobmanager.kafka.KafkaBrokerService;
 import com.yurjinia.jobmanager.kafka.constant.KafkaConstants;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class FillTestDataJob {
 
     private final JobService jobService;
     private final KafkaBrokerService kafkaBrokerService;
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(FillTestDataJob.class);
 
     @PostConstruct
     public void init() {
@@ -28,7 +28,7 @@ public class FillTestDataJob {
 
     @KafkaListener(topics = "yurjinia", groupId = "jobs")
     private void listenYurjinia(JobStatus status) {
-        if (status.equals(JobStatus.DONE)) {
+        if (JobStatus.DONE.equals(status)) {
             jobService.save(JobEntity.builder().jobName(FillTestDataJob.class.getSimpleName()).isDone(true).build());
         }
     }

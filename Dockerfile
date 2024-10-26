@@ -4,7 +4,7 @@ FROM openjdk:21
 
 WORKDIR /app
 
-COPY target/yurjinia-1.4.jar app.jar
+COPY target/yurjinia-1.5.jar app.jar
 
 EXPOSE 5440
 

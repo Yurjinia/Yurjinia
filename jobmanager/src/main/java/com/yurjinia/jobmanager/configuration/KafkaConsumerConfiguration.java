@@ -3,6 +3,7 @@ package com.yurjinia.jobmanager.configuration;
 import com.yurjinia.jobmanager.job.enums.JobStatus;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -16,16 +17,24 @@ import java.util.Map;
 @Configuration
 public class KafkaConsumerConfiguration {
 
+    @Value("${KAFKA.BOOTSTRAP.SERVER}")
+    public String bootstrapServers;
+
+    @Value("${KAFKA.GROUP.ID}")
+    public String groupId;
+
     @Bean
     public ConsumerFactory<String, JobStatus> consumerFactory() {
         Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:29092");
-        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "jobs");
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
 
         configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class.getName());
 
-        return new DefaultKafkaConsumerFactory<>(configProps, new StringDeserializer(), new JsonDeserializer<>(JobStatus.class, false));
+        StringDeserializer stringDeserializer = new StringDeserializer();
+        JsonDeserializer<JobStatus> jobStatusJsonDeserializer = new JsonDeserializer<>(JobStatus.class, false);
+        return new DefaultKafkaConsumerFactory<>(configProps, stringDeserializer, jobStatusJsonDeserializer);
     }
 
     @Bean

@@ -1,7 +1,6 @@
 package com.yurjinia.platform.migration.service;
 
 import com.yurjinia.platform.auth.controller.request.RegistrationRequest;
-import com.yurjinia.platform.common.content.ContentGeneratorService;
 import com.yurjinia.platform.common.kafka.KafkaBrokerService;
 import com.yurjinia.platform.common.kafka.constant.KafkaConstants;
 import com.yurjinia.platform.common.utils.PayloadUtils;
@@ -24,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +36,6 @@ public class MigrationService {
     private final ProjectService projectService;
     private final CommentService commentService;
     private final KafkaBrokerService kafkaBrokerService;
-    private final ContentGeneratorService contentGeneratorService;
 
     @KafkaListener(topics = "yurjinia", groupId = "jobs")
     public void createInitialData(JobStatus jobStatus) {
@@ -46,14 +45,31 @@ public class MigrationService {
         System.out.println("Message resive:jobStatus: " + jobStatus);
         List<String> users = new ArrayList<>();
 
-        for (int i = 1; i <= 100; i++) {
+        IntStream.range(1, 101).forEach(i -> {
             RegistrationRequest registrationRequest = PayloadUtils.createRegistrationRequest();
 
             userService.createUser(registrationRequest, "");
             users.add(registrationRequest.getEmail());
-        }
+        });
+        /*for (int i = 1; i <= 100; i++) {
+            RegistrationRequest registrationRequest = PayloadUtils.createRegistrationRequest();
 
-        for (int i = 1; i <= 10; i++) {
+            userService.createUser(registrationRequest, "");
+            users.add(registrationRequest.getEmail());
+        }*/
+        IntStream.range(1, 11).forEach(i -> {
+            String projectCode = createProject(i, users.get(i - 1));
+            IntStream.range(1, 3).forEach(j -> {
+                String boardCode = createBoard(j, projectCode);
+
+                String toDo = createColumn("ToDo", projectCode, boardCode);
+                String inProgress = createColumn("In Progress", projectCode, boardCode);
+                String done = createColumn("Done", projectCode, boardCode);
+
+                createTicketsWithComment(users.get(i - 1), projectCode, boardCode, List.of(toDo, inProgress, done));
+            });
+        });
+        /*for (int i = 1; i <= 10; i++) {
             String projectCode = createProject(i, users.get(i - 1));
 
             for (int j = 1; j <= 2; j++) {
@@ -63,10 +79,10 @@ public class MigrationService {
                 String inProgress = createColumn("In Progress", projectCode, boardCode);
                 String done = createColumn("Done", projectCode, boardCode);
 
-                createComments(users.get(i - 1), projectCode, boardCode, List.of(toDo, inProgress, done));
+                createTicketsWithComment(users.get(i - 1), projectCode, boardCode, List.of(toDo, inProgress, done));
 
             }
-        }
+        }*/
 
         kafkaBrokerService.send(KafkaConstants.TOPIC, JobStatus.DONE);
         System.out.println("Message send");
@@ -92,22 +108,24 @@ public class MigrationService {
         return columnName;
     }
 
-    private void createComments(String userEmail, String projectCode, String boardCode, List<String> columnName) {
-        createTickets(userEmail, projectCode, boardCode, columnName.getFirst());
-        createTickets(userEmail, projectCode, boardCode, columnName.getFirst());
-        createTickets(userEmail, projectCode, boardCode, columnName.get(1));
-        createTickets(userEmail, projectCode, boardCode, columnName.get(1));
-        createTickets(userEmail, projectCode, boardCode, columnName.get(2));
+    private void createTicketsWithComment(String userEmail, String projectCode, String boardCode, List<String> columnName) {
+        createTicketWithComment(userEmail, projectCode, boardCode, columnName.getFirst());
+        createTicketWithComment(userEmail, projectCode, boardCode, columnName.getFirst());
+        createTicketWithComment(userEmail, projectCode, boardCode, columnName.get(1));
+        createTicketWithComment(userEmail, projectCode, boardCode, columnName.get(1));
+        createTicketWithComment(userEmail, projectCode, boardCode, columnName.get(2));
     }
 
-    private void createTickets(String email, String projectCode, String boardCode, String columnName) {
-        CreateTicketRequest createTicketRequest = new CreateTicketRequest();
-        createTicketRequest.setTitle(contentGeneratorService.generateTitle());
+    private void createTicketWithComment(String email, String projectCode, String boardCode, String columnName) {
+        CreateTicketRequest createTicketRequest = PayloadUtils.createTicketRequest();
         ticketService.createTicket(email, projectCode, boardCode, columnName, createTicketRequest);
 
+        createComment(email, projectCode, boardCode);
+    }
+
+    private void createComment(String email, String projectCode, String boardCode) {
         BoardEntity board = boardService.getBoard(boardCode, projectCode);
-        CreateCommentRequest createCommentRequest = new CreateCommentRequest();
-        createCommentRequest.setText(contentGeneratorService.generateComment());
+        CreateCommentRequest createCommentRequest = PayloadUtils.createCommentRequest();
         commentService.createComment(email, projectCode, boardCode, (board.getCode() + "-" + board.getUniqueTicketCode()), createCommentRequest);
     }
 
