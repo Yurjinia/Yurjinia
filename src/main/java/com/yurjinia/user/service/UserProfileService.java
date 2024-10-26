@@ -101,9 +101,13 @@ public class UserProfileService {
     }
 
     private void changeUsername(String userEmail, String username) {
-        validateIfUsernameExists(username);
-
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
+
+        if (userProfileEntity.getUsername().equals(username)) {
+            return;
+        }
+
+        validateIfUsernameExists(username);
 
         userProfileEntity.setUsername(username);
         userProfileRepository.save(userProfileEntity);
