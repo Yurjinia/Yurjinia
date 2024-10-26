@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +34,7 @@ public class AuthController {
     @PostMapping(value = "/sign-up", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "New user registration",
             description = "This endpoint allows a user to register by passing registration details and an optional profile picture.")
-    public JwtAuthenticationResponse signUp(@RequestPart("registrationRequest") RegistrationRequest registrationRequest,
+    public JwtAuthenticationResponse signUp(@Valid @RequestPart("registrationRequest") RegistrationRequest registrationRequest,
                                             @RequestPart(value = "image", required = false) MultipartFile image) {
         return authService.signUp(registrationRequest, image);
     }
