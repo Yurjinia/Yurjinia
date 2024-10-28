@@ -108,6 +108,8 @@ public class UserProfileService {
      * it is not already used by another user. If the new name is unique, it is
      * is stored in the database.
      *
+     * If the user enters their own name, nothing happens.
+     *
      * @param userProfileEntity user profile object containing current data
      * @param username new username to be set
      */
