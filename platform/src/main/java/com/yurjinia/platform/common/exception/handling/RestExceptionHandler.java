@@ -18,7 +18,7 @@ public class RestExceptionHandler {
     @ExceptionHandler(CommonException.class)
     public ResponseEntity<ErrorResponse> handleBaseException(CommonException ex) {
         ErrorResponse body = ErrorResponse.builder()
-                .message(ex.getParams().toString())
+                .message(ex.getLocalizedMessage())
                 .errorCode(ex.getErrorCode())
                 .status(ex.getStatus())
                 .build();
