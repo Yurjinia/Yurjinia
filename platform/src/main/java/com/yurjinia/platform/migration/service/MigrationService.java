@@ -18,6 +18,7 @@ import com.yurjinia.platform.project_structure.ticket.dto.CreateTicketRequest;
 import com.yurjinia.platform.project_structure.ticket.service.TicketService;
 import com.yurjinia.platform.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MigrationService {
@@ -42,7 +44,7 @@ public class MigrationService {
         if (!jobStatus.equals(JobStatus.INIT)) {
             return;
         }
-        System.out.println("Message resive:jobStatus: " + jobStatus);
+        log.info("Message received: {}", jobStatus);
         List<String> users = new ArrayList<>();
 
         IntStream.range(1, 101).forEach(i -> {
@@ -66,7 +68,7 @@ public class MigrationService {
         });
 
         kafkaBrokerService.send(KafkaConstants.TOPIC, JobStatus.DONE);
-        System.out.println("Message send");
+        log.info("Message sent: {}", jobStatus);
     }
 
     private String createProject(int projectNumber, String userEmail) {
