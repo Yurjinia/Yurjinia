@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-//TODO: remove @Setter
 @Setter
 public class CreateTicketRequest {
 

@@ -51,12 +51,7 @@ public class MigrationService {
             userService.createUser(registrationRequest, "");
             users.add(registrationRequest.getEmail());
         });
-        /*for (int i = 1; i <= 100; i++) {
-            RegistrationRequest registrationRequest = PayloadUtils.createRegistrationRequest();
 
-            userService.createUser(registrationRequest, "");
-            users.add(registrationRequest.getEmail());
-        }*/
         IntStream.range(1, 11).forEach(i -> {
             String projectCode = createProject(i, users.get(i - 1));
             IntStream.range(1, 3).forEach(j -> {
@@ -69,20 +64,6 @@ public class MigrationService {
                 createTicketsWithComment(users.get(i - 1), projectCode, boardCode, List.of(toDo, inProgress, done));
             });
         });
-        /*for (int i = 1; i <= 10; i++) {
-            String projectCode = createProject(i, users.get(i - 1));
-
-            for (int j = 1; j <= 2; j++) {
-                String boardCode = createBoard(j, projectCode);
-
-                String toDo = createColumn("ToDo", projectCode, boardCode);
-                String inProgress = createColumn("In Progress", projectCode, boardCode);
-                String done = createColumn("Done", projectCode, boardCode);
-
-                createTicketsWithComment(users.get(i - 1), projectCode, boardCode, List.of(toDo, inProgress, done));
-
-            }
-        }*/
 
         kafkaBrokerService.send(KafkaConstants.TOPIC, JobStatus.DONE);
         System.out.println("Message send");

@@ -25,7 +25,9 @@ public class ApplicationConfiguration {
     private final UserRepository userRepository;
 
     @Bean
-    public Faker faker(){return new Faker();}
+    public Faker faker() {
+        return new Faker();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
