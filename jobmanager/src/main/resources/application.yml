@@ -1,0 +1,10 @@
+spring:
+  config:
+    import: credentials.yml
+  data:
+    mongodb:
+      uri: ${MONGODB.URI}
+  kafka:
+    bootstrap-servers: ${KAFKA.BOOTSTRAP.SERVER}
+    consumer:
+      group-id: ${KAFKA.GROUP.ID}
