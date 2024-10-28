@@ -13,7 +13,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,9 +32,7 @@ public @interface EmailValidate {
         @Override
         public boolean isValid(String email, ConstraintValidatorContext constraintValidatorContext) {
             if (StringUtils.isEmpty(email)) {
-                throw new CommonException(
-                        ErrorCode.INVALID_EMAIL, HttpStatus.BAD_REQUEST, List.of("Email address cannot be empty")
-                );
+                throw new CommonException(ErrorCode.INVALID_EMAIL, HttpStatus.BAD_REQUEST);
             }
 
             final String regularExpression
