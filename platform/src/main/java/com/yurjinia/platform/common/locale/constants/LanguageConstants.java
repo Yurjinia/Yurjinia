@@ -1,4 +1,4 @@
-package com.yurjinia.common.locale.constants;
+package com.yurjinia.platform.common.locale.constants;
 
 public class LanguageConstants {
     public static final String LANG_PARAM = "lang";

@@ -1,4 +1,4 @@
-package com.yurjinia.common.locale;
+package com.yurjinia.platform.common.locale;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

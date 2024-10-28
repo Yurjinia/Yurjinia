@@ -1,6 +1,6 @@
-package com.yurjinia.common.locale;
+package com.yurjinia.platform.common.locale;
 
-import com.yurjinia.common.locale.constants.LanguageConstants;
+import com.yurjinia.platform.common.locale.constants.LanguageConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;

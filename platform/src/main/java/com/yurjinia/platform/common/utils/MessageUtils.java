@@ -1,6 +1,7 @@
-package com.yurjinia.common.utils;
+package com.yurjinia.platform.common.utils;
 
-import com.yurjinia.common.locale.constants.LanguageConstants;
+
+import com.yurjinia.platform.common.locale.constants.LanguageConstants;
 import lombok.experimental.UtilityClass;
 
 import java.text.MessageFormat;

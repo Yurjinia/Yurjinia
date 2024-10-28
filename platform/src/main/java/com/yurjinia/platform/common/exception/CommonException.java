@@ -1,6 +1,7 @@
 package com.yurjinia.platform.common.exception;
 
-import com.yurjinia.common.utils.MessageUtils;
+
+import com.yurjinia.platform.common.utils.MessageUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.context.i18n.LocaleContextHolder;

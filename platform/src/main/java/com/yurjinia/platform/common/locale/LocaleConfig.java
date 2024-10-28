@@ -1,6 +1,7 @@
-package com.yurjinia.common.locale;
+package com.yurjinia.platform.common.locale;
 
-import com.yurjinia.common.locale.constants.LanguageConstants;
+
+import com.yurjinia.platform.common.locale.constants.LanguageConstants;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
