@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.yurjinia</groupId>
     <artifactId>platform</artifactId>
-    <version>1.5.0</version>
+    <version>1.5.1</version>
     <name>platform</name>
     <description>A Java project, clone of Jira</description>
     <url/>
