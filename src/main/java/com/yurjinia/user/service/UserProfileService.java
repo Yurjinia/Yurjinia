@@ -60,12 +60,11 @@ public class UserProfileService {
     public void deleteAvatar(String userEmail) {
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
 
+        validateIfUserHasAvatar(userProfileEntity);
+
         awss3Service.deleteImage(userProfileEntity.getAvatarId());
         userProfileEntity.setAvatarId(null);
-
         userProfileRepository.save(userProfileEntity);
-
-        userProfileMapper.toDto(userProfileEntity);
     }
 
     public UserProfileDTO updateUserProfile(String userEmail, MultipartFile image, UpdateUserProfileRequest updateUserProfileRequest) {
@@ -103,15 +102,15 @@ public class UserProfileService {
 
     /**
      * Changes the username in the profile if the new name is different from the current one.
-     *
+     * <p>
      * The method checks if the new username is different from the current one and
      * it is not already used by another user. If the new name is unique, it is
      * is stored in the database.
-     *
+     * <p>
      * If the user enters their own username, nothing happens.
      *
      * @param userProfileEntity user profile object containing current data
-     * @param username new username to be set
+     * @param username          new username to be set
      */
     private void changeUsername(UserProfileEntity userProfileEntity, String username) {
         if (userProfileEntity.getUsername().equals(username)) {
@@ -140,6 +139,12 @@ public class UserProfileService {
     private UserProfileEntity getUserProfileByEmail(String email) {
         return userProfileRepository.findByUserEmail(email)
                 .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
+    }
+
+    private void validateIfUserHasAvatar(UserProfileEntity userProfileEntity) {
+        if (userProfileEntity.getAvatarId() == null) {
+            throw new CommonException(ErrorCode.USER_AVATAR_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
     }
 
 }
