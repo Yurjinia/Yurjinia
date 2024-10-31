@@ -60,15 +60,11 @@ public class UserProfileService {
     public void deleteAvatar(String userEmail) {
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
 
-        if (userProfileEntity.getAvatarId() == null) {
-            throw new CommonException(ErrorCode.USER_NOT_HAVE_AN_AVATAR, HttpStatus.CONFLICT);
-        }
+        validateIfUserHasAvatar(userProfileEntity);
 
+        awss3Service.deleteImage(userProfileEntity.getAvatarId());
         userProfileEntity.setAvatarId(null);
-
         userProfileRepository.save(userProfileEntity);
-
-        userProfileMapper.toDto(userProfileEntity);
     }
 
     public UserProfileDTO updateUserProfile(String userEmail, MultipartFile image, UpdateUserProfileRequest updateUserProfileRequest) {
@@ -143,6 +139,12 @@ public class UserProfileService {
     private UserProfileEntity getUserProfileByEmail(String email) {
         return userProfileRepository.findByUserEmail(email)
                 .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
+    }
+
+    private void validateIfUserHasAvatar(UserProfileEntity userProfileEntity) {
+        if (userProfileEntity.getAvatarId() == null) {
+            throw new CommonException(ErrorCode.USER_AVATAR_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
     }
 
 }
