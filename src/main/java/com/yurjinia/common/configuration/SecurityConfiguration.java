@@ -4,7 +4,6 @@ import com.yurjinia.common.application.constants.RequestMatchersConstants;
 import com.yurjinia.common.handlers.LogoutHandler;
 import com.yurjinia.common.security.jwt.filters.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -26,9 +25,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
-    @Value("${APP.GOOGLE.LOGIN.URL}")
-    public String googleLoginUrl;
-
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final LogoutHandler logoutHandler;
     private final AuthenticationProvider authenticationProvider;
@@ -49,7 +45,6 @@ public class SecurityConfiguration {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
-                .oauth2Login(oauth2Login -> oauth2Login.defaultSuccessUrl(googleLoginUrl))
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/auth/logout")
                         .addLogoutHandler(logoutHandler::logout)

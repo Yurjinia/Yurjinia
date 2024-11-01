@@ -1,6 +1,6 @@
 package com.yurjinia.auth.service;
 
-import com.yurjinia.auth.constants.LoginConstants;
+import com.yurjinia.auth.controller.request.GoogleLogInRequest;
 import com.yurjinia.auth.controller.request.LoginRequest;
 import com.yurjinia.auth.controller.request.RegistrationRequest;
 import com.yurjinia.auth.dto.PasswordResetDTO;
@@ -21,7 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -82,25 +81,22 @@ public class AuthService {
         }
     }
 
-    public JwtAuthenticationResponse loginOAuth(LoginRequest request) {
+    public JwtAuthenticationResponse googleLogin(LoginRequest request) {
         final var jwt = jwtService.generateToken(request.getEmail());
         return new JwtAuthenticationResponse(jwt);
     }
 
-    public JwtAuthenticationResponse handleOAuthUser(OAuth2User oAuth2User) {
-        final String email = oAuth2User.getAttribute(LoginConstants.EMAIL);
-        final String firstname = oAuth2User.getAttribute(LoginConstants.GIVEN_NAME);
-        final String lastName = oAuth2User.getAttribute(LoginConstants.FAMILY_NAME);
-        final String avatarId = oAuth2User.getAttribute(LoginConstants.PICTURE);
+    public JwtAuthenticationResponse handleLoginGoogleUser(GoogleLogInRequest googleLogInRequest) {
+        final String email = googleLogInRequest.getEmail();
 
         if (userService.existsByEmail(email)) {
             LoginRequest loginRequest = LoginRequest.builder()
                     .email(email)
                     .build();
-            return loginOAuth(loginRequest);
+            return googleLogin(loginRequest);
         } else {
-            RegistrationRequest registrationRequest = payloadOAuthUser(email, firstname, lastName);
-            return signUp(registrationRequest, avatarId);
+            RegistrationRequest registrationRequest = payloadGoogleUser(email, googleLogInRequest.getFirstName(), googleLogInRequest.getLastName());
+            return signUp(registrationRequest, googleLogInRequest.getAvatarId());
         }
     }
 
@@ -132,7 +128,7 @@ public class AuthService {
         return new JwtAuthenticationResponse(jwt);
     }
 
-    private RegistrationRequest payloadOAuthUser(String email, String firstname, String lastName) {
+    private RegistrationRequest payloadGoogleUser(String email, String firstname, String lastName) {
         return RegistrationRequest.builder()
                 .firstName(firstname)
                 .lastName(lastName)

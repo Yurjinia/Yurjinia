@@ -61,7 +61,7 @@ public class UserService {
     public void createUser(RegistrationRequest registrationRequest, MultipartFile image) {
         validateIfEmailExists(registrationRequest.getEmail());
         if (userProfileService.isUsernameNotEmpty(registrationRequest.getUsername())) {
-            userProfileService.validateIfUsernameExists(registrationRequest.getUsername());
+            userProfileService.validateIfUsernameOccupied(registrationRequest.getUsername());
         }
 
         save(registrationRequest);

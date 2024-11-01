@@ -1,6 +1,5 @@
 package com.yurjinia.user.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
@@ -9,7 +8,6 @@ import org.hibernate.validator.constraints.Length;
 @Builder
 public class UpdateUserProfileRequest {
 
-    @NotBlank
     @Length(min = 4, max = 16)
     private String username;
 

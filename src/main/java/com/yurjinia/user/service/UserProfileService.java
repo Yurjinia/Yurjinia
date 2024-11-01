@@ -43,7 +43,7 @@ public class UserProfileService {
         return awss3Service.uploadImage(image, key);
     }
 
-    public void validateIfUsernameExists(String username) {
+    public void validateIfUsernameOccupied(String username) {
         if (userProfileRepository.existsByUsername(username)) {
             throw new CommonException(ErrorCode.USERNAME_ALREADY_EXISTS, HttpStatus.CONFLICT);
         }
@@ -60,18 +60,17 @@ public class UserProfileService {
     public void deleteAvatar(String userEmail) {
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
 
+        validateIfUserHasAvatar(userProfileEntity);
+
         awss3Service.deleteImage(userProfileEntity.getAvatarId());
         userProfileEntity.setAvatarId(null);
-
         userProfileRepository.save(userProfileEntity);
-
-        userProfileMapper.toDto(userProfileEntity);
     }
 
     public UserProfileDTO updateUserProfile(String userEmail, MultipartFile image, UpdateUserProfileRequest updateUserProfileRequest) {
         UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
 
-        updateProfileMetaData(userEmail, updateUserProfileRequest, userProfileEntity);
+        updateProfileMetaData(updateUserProfileRequest, userProfileEntity);
         updateProfileAvatar(userEmail, image);
 
         userProfileRepository.save(userProfileEntity);
@@ -86,11 +85,12 @@ public class UserProfileService {
         return userProfileMapper.toDto(userProfileEntity);
     }
 
-    private void updateProfileMetaData(String userEmail, UpdateUserProfileRequest updateUserProfileRequest, UserProfileEntity userProfileEntity) {
+    private void updateProfileMetaData(UpdateUserProfileRequest updateUserProfileRequest,
+                                       UserProfileEntity userProfileEntity) {
         if (updateUserProfileRequest != null) {
             updateMetaData(updateUserProfileRequest.getFirstName(), userProfileEntity::setFirstName);
             updateMetaData(updateUserProfileRequest.getLastName(), userProfileEntity::setLastName);
-            changeUsername(userEmail, updateUserProfileRequest.getUsername());
+            changeUsername(userProfileEntity, updateUserProfileRequest.getUsername());
         }
     }
 
@@ -100,14 +100,27 @@ public class UserProfileService {
         }
     }
 
-    private void changeUsername(String userEmail, String username) {
-        validateIfUsernameExists(username);
+    /**
+     * Changes the username in the profile if the new name is different from the current one.
+     * <p>
+     * The method checks if the new username is different from the current one and
+     * it is not already used by another user. If the new name is unique, it is
+     * is stored in the database.
+     * <p>
+     * If the user enters their own username, nothing happens.
+     *
+     * @param userProfileEntity user profile object containing current data
+     * @param username          new username to be set
+     */
+    private void changeUsername(UserProfileEntity userProfileEntity, String username) {
+        if (userProfileEntity.getUsername().equals(username)) {
+            return;
+        }
 
-        UserProfileEntity userProfileEntity = getUserProfileByEmail(userEmail);
+        validateIfUsernameOccupied(username);
 
         userProfileEntity.setUsername(username);
         userProfileRepository.save(userProfileEntity);
-        userProfileMapper.toDto(userProfileEntity);
     }
 
     private void updateAvatar(String userEmail, MultipartFile image) {
@@ -126,6 +139,12 @@ public class UserProfileService {
     private UserProfileEntity getUserProfileByEmail(String email) {
         return userProfileRepository.findByUserEmail(email)
                 .orElseThrow(() -> new CommonException(ErrorCode.USER_NOT_FOUND, HttpStatus.NOT_FOUND));
+    }
+
+    private void validateIfUserHasAvatar(UserProfileEntity userProfileEntity) {
+        if (userProfileEntity.getAvatarId() == null) {
+            throw new CommonException(ErrorCode.USER_AVATAR_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
     }
 
 }
