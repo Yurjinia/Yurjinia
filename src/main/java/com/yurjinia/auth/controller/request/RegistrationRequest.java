@@ -36,5 +36,8 @@ public class RegistrationRequest {
     private String confirmPassword;
 
     @NotBlank
+    private String timestamp;
+
+    @NotBlank
     private String timezone;
 }
