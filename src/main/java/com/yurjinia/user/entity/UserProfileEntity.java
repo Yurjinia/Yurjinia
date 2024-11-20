@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.ZoneId;
 
 @Getter
 @Setter
@@ -43,4 +44,6 @@ public class UserProfileEntity implements Serializable {
     @OneToOne(mappedBy = "userProfile")
     private UserEntity user;
 
+    @Column(nullable = false)
+    private String timezone;
 }
