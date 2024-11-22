@@ -43,7 +43,7 @@ public class TicketService {
         ColumnEntity columnEntity = columnService.getColumnByName(projectCode, boardCode, columnName);
         TicketEntity ticketEntity = MapperUtils.map(createTicketRequest, TicketEntity.class);
         UserEntity userEntity = userService.getUserByEmail(userEmail);
-        int uniqTicketCode = boardEntity.getUniqueTicketCode();
+        long uniqTicketCode = boardEntity.getUniqueTicketCode();
 
         ticketEntity.setCode(generateUniqueTaskCode(boardCode, uniqTicketCode));
         ticketEntity.setBoard(boardEntity);
@@ -120,7 +120,7 @@ public class TicketService {
                 .orElseThrow(() -> new CommonException(ErrorCode.TICKET_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
 
-    private String generateUniqueTaskCode(String boardCode, int uniqTicketCode) {
+    private String generateUniqueTaskCode(String boardCode, long uniqTicketCode) {
         return boardCode + "-" + (uniqTicketCode + 1);
     }
 
