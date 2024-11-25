@@ -16,15 +16,4 @@ public class MapperUtils {
         return modelMapper.map(source, targetClass);
     }
 
-    public static CommentDTO commentEntityToCommentDTO(CommentEntity entity, String timeZone) {
-        String format="d MMMM yyyy 'в' HH:mm";
-        CommentDTO dto = new CommentDTO();
-        dto.setId(entity.getId());
-        dto.setText(entity.getText());
-        dto.setCreated(TimeZoneUtils.formatDate(TimeZoneUtils.convertToLocalTime(entity.getCreated(), timeZone),format));
-        dto.setUpdated(TimeZoneUtils.formatDate(TimeZoneUtils.convertToLocalTime(entity.getUpdated(), timeZone),format));
-        dto.setAuthor(MapperUtils.map(entity.getAuthor(), UserDTO.class));
-        return dto;
-    }
-
 }
