@@ -9,6 +9,7 @@ import com.yurjinia.project_structure.comment.contreller.request.UpdateCommentRe
 import com.yurjinia.project_structure.comment.dto.CommentDTO;
 import com.yurjinia.project_structure.comment.entity.CommentEntity;
 import com.yurjinia.project_structure.comment.repository.CommentRepository;
+import com.yurjinia.project_structure.comment.utils.CommentMapper;
 import com.yurjinia.project_structure.ticket.service.TicketService;
 import com.yurjinia.user.entity.UserEntity;
 import com.yurjinia.user.service.UserService;
@@ -24,13 +25,13 @@ public class CommentService {
     private final TicketService ticketService;
     private final CommentRepository commentRepository;
 
-    public CommentDTO createComment(String userEmail, String projectCode, String boardCode, String ticketCode, CreateCommentRequest createCommentRequest) {
+    public CommentDTO createComment(String userEmail, String projectCode, String boardCode, String ticketCode, CreateCommentRequest createCommentRequest, String timeZone) {
         CommentEntity commentEntity = MapperUtils.map(createCommentRequest, CommentEntity.class);
         commentEntity.setAuthor(userService.getUserByEmail(userEmail));
         commentEntity.setTicket(ticketService.getTicketEntity(projectCode, boardCode, ticketCode));
 
         commentRepository.save(commentEntity);
-        return MapperUtils.map(commentEntity, CommentDTO.class);
+        return CommentMapper.commentEntityToCommentDTO(commentEntity,timeZone);
     }
 
     public CommentDTO updateComment(String commentId, String userEmail, UpdateCommentRequest updateCommentRequest) {

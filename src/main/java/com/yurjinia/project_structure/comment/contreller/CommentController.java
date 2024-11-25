@@ -14,10 +14,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/users/{userEmail}/projects/{projectCode}/boards/{boardCode}/tickets/{ticketCode}/comments")
+@RequestMapping("/api/v1/users/{userEmail}/projects/{projectCode}/boards/{boardCode}/tickets/{ticketCode}/timeZone/{timeZone}/comments")
 public class CommentController {
 
     private final CommentService commentService;
@@ -27,8 +28,9 @@ public class CommentController {
                                                     @PathVariable String projectCode,
                                                     @PathVariable String boardCode,
                                                     @PathVariable String ticketCode,
+                                                    @PathVariable String timeZone,
                                                     @Valid @RequestBody CreateCommentRequest createCommentRequest) {
-        CommentDTO comment = commentService.createComment(userEmail, projectCode, boardCode, ticketCode, createCommentRequest);
+        CommentDTO comment = commentService.createComment(userEmail, projectCode, boardCode, ticketCode, createCommentRequest, timeZone);
         return ResponseEntity.ok(comment);
     }
 
