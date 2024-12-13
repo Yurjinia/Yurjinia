@@ -22,16 +22,17 @@ import org.springframework.stereotype.Service;
 public class CommentService {
 
     private final UserService userService;
+    private final CommentMapper commentMapper;
     private final TicketService ticketService;
     private final CommentRepository commentRepository;
 
-    public CommentDTO createComment(String userEmail, String projectCode, String boardCode, String ticketCode, CreateCommentRequest createCommentRequest, String timeZone) {
+    public CommentDTO createComment(String userEmail, String projectCode, String boardCode, String ticketCode, CreateCommentRequest createCommentRequest) {
         CommentEntity commentEntity = MapperUtils.map(createCommentRequest, CommentEntity.class);
         commentEntity.setAuthor(userService.getUserByEmail(userEmail));
         commentEntity.setTicket(ticketService.getTicketEntity(projectCode, boardCode, ticketCode));
 
         commentRepository.save(commentEntity);
-        return CommentMapper.commentEntityToCommentDTO(commentEntity,timeZone);
+        return commentMapper.commentEntityToCommentDTO(commentEntity, createCommentRequest.getTimeZone());
     }
 
     public CommentDTO updateComment(String commentId, String userEmail, UpdateCommentRequest updateCommentRequest) {

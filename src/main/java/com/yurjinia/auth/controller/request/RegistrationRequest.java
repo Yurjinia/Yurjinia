@@ -34,10 +34,4 @@ public class RegistrationRequest {
 
     @NotBlank
     private String confirmPassword;
-
-    @NotBlank
-    private String timestamp;
-
-    @NotBlank
-    private String timezone;
 }

@@ -28,9 +28,9 @@ public class CommentController {
                                                     @PathVariable String projectCode,
                                                     @PathVariable String boardCode,
                                                     @PathVariable String ticketCode,
-                                                    @PathVariable String timeZone,
+//                                                    @PathVariable String timeZone,
                                                     @Valid @RequestBody CreateCommentRequest createCommentRequest) {
-        CommentDTO comment = commentService.createComment(userEmail, projectCode, boardCode, ticketCode, createCommentRequest, timeZone);
+        CommentDTO comment = commentService.createComment(userEmail, projectCode, boardCode, ticketCode, createCommentRequest);
         return ResponseEntity.ok(comment);
     }
 

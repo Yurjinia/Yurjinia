@@ -5,6 +5,10 @@ import com.yurjinia.user.dto.UserProfileDTO;
 import com.yurjinia.user.entity.UserProfileEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.Predicate;
+
 @Service
 public class UserProfileMapper {
 

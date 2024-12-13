@@ -7,4 +7,5 @@ import lombok.Getter;
 public class CreateCommentRequest {
     @Size(max = 1024)
     private String text;
+    private String timeZone;
 }
