@@ -1,4 +1,4 @@
-package com.yurjinia.project_structure.comment.contreller.request;
+package com.yurjinia.project_structure.comment.controller.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
