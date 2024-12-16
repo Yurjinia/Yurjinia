@@ -39,7 +39,7 @@ public class BoardController {
     }
 
     @PutMapping("/{boardCode}")
-        public ResponseEntity<BoardDTO> updateBoard(@PathVariable String projectCode,
+    public ResponseEntity<BoardDTO> updateBoard(@PathVariable String projectCode,
                                                 @PathVariable String boardCode,
                                                 @Valid @RequestBody UpdateBoardRequest updateBoardRequest) {
         BoardDTO boardDTO = boardService.updateBoard(updateBoardRequest, boardCode, projectCode);

@@ -30,7 +30,6 @@ public class BoardService {
         validateIfBoardNotExist(createBoardRequest.getName(), createBoardRequest.getCode(), projectCode);
         BoardEntity boardEntity = MapperUtils.map(createBoardRequest, BoardEntity.class);
         boardEntity.setProject(projectService.getProject(projectCode));
-        boardEntity.setUniqueTicketCode(0L);
         boardRepository.save(boardEntity);
     }
 
