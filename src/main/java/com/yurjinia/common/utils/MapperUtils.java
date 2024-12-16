@@ -1,9 +1,5 @@
 package com.yurjinia.common.utils;
 
-import com.yurjinia.project_structure.comment.dto.CommentDTO;
-import com.yurjinia.project_structure.comment.entity.CommentEntity;
-import com.yurjinia.user.dto.UserDTO;
-import com.yurjinia.user.utils.TimeZoneUtils;
 import lombok.experimental.UtilityClass;
 import org.modelmapper.ModelMapper;
 

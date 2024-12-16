@@ -18,7 +18,7 @@ import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/users/{userEmail}/projects/{projectCode}/boards/{boardCode}/tickets/{ticketCode}/timeZone/{timeZone}/comments")
+@RequestMapping("/api/v1/users/{userEmail}/projects/{projectCode}/boards/{boardCode}/tickets/{ticketCode}/comments")
 public class CommentController {
 
     private final CommentService commentService;
@@ -28,7 +28,6 @@ public class CommentController {
                                                     @PathVariable String projectCode,
                                                     @PathVariable String boardCode,
                                                     @PathVariable String ticketCode,
-//                                                    @PathVariable String timeZone,
                                                     @Valid @RequestBody CreateCommentRequest createCommentRequest) {
         CommentDTO comment = commentService.createComment(userEmail, projectCode, boardCode, ticketCode, createCommentRequest);
         return ResponseEntity.ok(comment);

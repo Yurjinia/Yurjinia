@@ -9,13 +9,17 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CommentMapper {
-    public CommentDTO commentEntityToCommentDTO(CommentEntity entity, String timeZone) {
+
+    public CommentDTO toDTO(CommentEntity entity, String timeZone) {
         CommentDTO dto = new CommentDTO();
+
         dto.setId(entity.getId());
         dto.setText(entity.getText());
         dto.setCreated(TimeZoneUtils.toLocalDateTime(entity.getCreated(), timeZone));
         dto.setUpdated(TimeZoneUtils.toLocalDateTime(entity.getUpdated(), timeZone));
         dto.setAuthor(MapperUtils.map(entity.getAuthor(), UserDTO.class));
+
         return dto;
     }
+
 }

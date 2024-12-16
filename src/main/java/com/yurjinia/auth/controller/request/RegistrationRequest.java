@@ -2,7 +2,6 @@ package com.yurjinia.auth.controller.request;
 
 import com.yurjinia.common.validator.EmailValidate;
 import com.yurjinia.common.validator.PasswordValidate;
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,8 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
-
-import java.time.ZoneId;
 
 @Getter
 @Setter
@@ -34,4 +31,5 @@ public class RegistrationRequest {
 
     @NotBlank
     private String confirmPassword;
+
 }

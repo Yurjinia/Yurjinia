@@ -32,7 +32,7 @@ public class CommentService {
         commentEntity.setTicket(ticketService.getTicketEntity(projectCode, boardCode, ticketCode));
 
         commentRepository.save(commentEntity);
-        return commentMapper.commentEntityToCommentDTO(commentEntity, createCommentRequest.getTimeZone());
+        return commentMapper.toDTO(commentEntity, createCommentRequest.getTimeZone());
     }
 
     public CommentDTO updateComment(String commentId, String userEmail, UpdateCommentRequest updateCommentRequest) {
