@@ -52,14 +52,15 @@ public class CommentService {
         commentRepository.delete(commentEntity);
     }
 
+    private CommentEntity getCommentById(String commentId) {
+        return commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommonException(ErrorCode.COMMENT_NOT_FOUND, HttpStatus.NOT_FOUND));
+    }
+
     private void validateAuthor(UserEntity author, String userEmail) {
         if (!author.getEmail().equals(userEmail)) {
             throw new CommonException(ErrorCode.USER_IS_NOT_AUTHOR, HttpStatus.FORBIDDEN);
         }
     }
 
-    private CommentEntity getCommentById(String commentId) {
-        return commentRepository.findById(commentId)
-                .orElseThrow(() -> new CommonException(ErrorCode.COMMENT_NOT_FOUND, HttpStatus.NOT_FOUND));
-    }
 }
