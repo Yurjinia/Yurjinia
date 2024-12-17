@@ -29,7 +29,7 @@ public class CommentService {
     public CommentDTO createComment(String userEmail, String projectCode, String boardCode, String ticketCode, CreateCommentRequest createCommentRequest) {
         CommentEntity commentEntity = MapperUtils.map(createCommentRequest, CommentEntity.class);
         commentEntity.setAuthor(userService.getUserByEmail(userEmail));
-        commentEntity.setTicket(ticketService.getTicketEntity(projectCode, boardCode, ticketCode));
+        commentEntity.setTicket(ticketService.getTicket(projectCode, boardCode, ticketCode));
 
         commentRepository.save(commentEntity);
         return commentMapper.toDTO(commentEntity, createCommentRequest.getTimeZone());
