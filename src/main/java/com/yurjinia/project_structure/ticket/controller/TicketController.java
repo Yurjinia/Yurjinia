@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -38,8 +39,9 @@ public class TicketController {
     public ResponseEntity<TicketDTO> getTicket(@PathVariable String userEmail,
                                                @PathVariable String projectCode,
                                                @PathVariable String boardCode,
-                                               @PathVariable String ticketCode) {
-        TicketDTO ticket = ticketService.getTicket(projectCode, boardCode, ticketCode);
+                                               @PathVariable String ticketCode,
+                                               @RequestParam String timeZone) {
+        TicketDTO ticket = ticketService.getTicket(projectCode, boardCode, ticketCode, timeZone);
         return ResponseEntity.ok(ticket);
     }
 

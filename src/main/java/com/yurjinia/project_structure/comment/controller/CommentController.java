@@ -1,7 +1,7 @@
-package com.yurjinia.project_structure.comment.contreller;
+package com.yurjinia.project_structure.comment.controller;
 
-import com.yurjinia.project_structure.comment.contreller.request.CreateCommentRequest;
-import com.yurjinia.project_structure.comment.contreller.request.UpdateCommentRequest;
+import com.yurjinia.project_structure.comment.controller.request.CreateCommentRequest;
+import com.yurjinia.project_structure.comment.controller.request.UpdateCommentRequest;
 import com.yurjinia.project_structure.comment.dto.CommentDTO;
 import com.yurjinia.project_structure.comment.service.CommentService;
 import jakarta.validation.Valid;
