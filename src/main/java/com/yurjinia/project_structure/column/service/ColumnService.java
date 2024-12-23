@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -82,10 +83,21 @@ public class ColumnService {
                 .toList();
     }
 
+    @Transactional
     public void deleteColumn(String projectCode, String boardCode, String columnName) {
         ColumnEntity columnEntity = getColumnByName(projectCode, boardCode, columnName);
 
+        List<ColumnEntity> columns = boardService.getBoard(boardCode, projectCode).getColumns()
+                .stream()
+                .filter(column -> !column.getId().equals(columnEntity.getId()))
+                .sorted(Comparator.comparing(ColumnEntity::getColumnPosition))
+                .toList();
+
         columnRepository.delete(columnEntity);
+
+        IntStream.range(0, columns.size()).forEach(i -> columns.get(i).setColumnPosition((long) i));
+
+        columnRepository.saveAll(columns);
     }
 
     public ColumnEntity getColumnByName(String projectCode, String boardCode, String columnName) {
