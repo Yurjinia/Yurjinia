@@ -8,6 +8,8 @@ import com.yurjinia.project_structure.board.entity.BoardEntity;
 import com.yurjinia.project_structure.board.service.BoardService;
 import com.yurjinia.project_structure.column.entity.ColumnEntity;
 import com.yurjinia.project_structure.column.service.ColumnService;
+import com.yurjinia.project_structure.comment.dto.CommentDTO;
+import com.yurjinia.project_structure.comment.utils.CommentMapper;
 import com.yurjinia.project_structure.ticket.dto.CreateTicketRequest;
 import com.yurjinia.project_structure.ticket.dto.TicketDTO;
 import com.yurjinia.project_structure.ticket.dto.UpdateTicketMetaDataRequest;
@@ -30,6 +32,7 @@ public class TicketService {
 
     private final UserService userService;
     private final BoardService boardService;
+    private final CommentMapper commentMapper;
     private final ColumnService columnService;
     private final TicketRepository ticketRepository;
 
@@ -57,10 +60,17 @@ public class TicketService {
         return MapperUtils.map(ticketEntity, TicketDTO.class);
     }
 
-    public TicketDTO getTicket(String projectCode, String boardCode, String ticketCode) {
-        TicketEntity ticketEntity = getTicketEntity(projectCode, boardCode, ticketCode);
+    public TicketDTO getTicket(String projectCode, String boardCode, String ticketCode, String timeZone) {
+        TicketEntity ticketEntity = getTicket(projectCode, boardCode, ticketCode);
+        List<CommentDTO> commentDTOList = ticketEntity.getComments()
+                .stream()
+                .map(commentEntity -> commentMapper.toDTO(commentEntity, timeZone))
+                .toList();
 
-        return MapperUtils.map(ticketEntity, TicketDTO.class);
+        TicketDTO ticketDTO = MapperUtils.map(ticketEntity, TicketDTO.class);
+        ticketDTO.setComments(commentDTOList);
+
+        return ticketDTO;
     }
 
     @Transactional
@@ -85,7 +95,7 @@ public class TicketService {
 
     @Transactional
     public TicketDTO updateTicketMetaData(String projectCode, String boardCode, String ticketCode, UpdateTicketMetaDataRequest updateTicketMetaDataRequest) {
-        TicketEntity ticketEntity = getTicketEntity(projectCode, boardCode, ticketCode);
+        TicketEntity ticketEntity = getTicket(projectCode, boardCode, ticketCode);
 
 
         MetadataUtils.updateMetadata(updateTicketMetaDataRequest.getDescription(), ticketEntity::setDescription);
@@ -101,7 +111,7 @@ public class TicketService {
     @Transactional
     public void deleteTicket(String projectCode, String boardCode, String ticketCode, String columnName) {
         ColumnEntity columnEntity = columnService.getColumnByName(projectCode, boardCode, columnName);
-        TicketEntity ticketEntity = getTicketEntity(projectCode, boardCode, ticketCode);
+        TicketEntity ticketEntity = getTicket(projectCode, boardCode, ticketCode);
         List<TicketEntity> tickets = columnEntity.getTickets();
 
         tickets.remove(ticketEntity);
@@ -113,7 +123,7 @@ public class TicketService {
         ticketRepository.delete(ticketEntity);
     }
 
-    public TicketEntity getTicketEntity(String projectCode, String boardCode, String ticketCode) {
+    public TicketEntity getTicket(String projectCode, String boardCode, String ticketCode) {
         BoardEntity boardEntity = boardService.getBoard(boardCode, projectCode);
 
         return ticketRepository.findByCodeAndBoard(ticketCode, boardEntity)
